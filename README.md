@@ -4,7 +4,7 @@ This is a client for downloading your config files from http://configtool.vpuniv
 
 ## Setup
 
-You need to install PHP on your system. For Windows have a look at http://php.net/manual/en/install.windows.php
+You need to install PHP on your system. For Windows have a look at https://windows.php.net/download/ or http://php.net/manual/en/install.windows.php
 
 Download the DOF Configtool Client from https://github.com/mkalkbrenner/dof_configtool_client
 
