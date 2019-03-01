@@ -44,7 +44,7 @@ Rename or copy `tweaks.ini.example` to `tweaks.ini` and adjust the file to your 
    This setting is useful for heavy contactors/solenoids that need a longer tigger to fire correctly.
 
  * to be continued ...
- 
+  
 ### Complete `tweaks.ini` example
 
 ```
@@ -74,5 +74,13 @@ php.exe tweak.php
 
 ## Notes
 
-The client is written in PHP because of the fact that the configtool itself is written in PHP.
+This client won't replace the awesome DOF Configtool!
+But whenever you need to make an individual adjustment for ALL tables for a specific port of an output controller, this tool might become useful﻿ 😉
+
+In addition to the available tweaks above you can think of various other tweaks,
+for example inverting an effect or anything else described at http://directoutput.github.io/DirectOutput/inifiles.html
+Just open an issue if yopu have an idea or require something special.
+
+BTW the client is written in PHP because of the fact that the configtool itself is written in PHP.
 And I want to ease an adoption of features by the configtool itself.
+
