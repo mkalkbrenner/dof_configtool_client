@@ -1,0 +1,7 @@
+[download]
+
+; Your_API_KeY for http://configtool.vpuniverse.com
+LCP_APIKEY = YOURAPIKEY
+
+; The path where the config files should be stored
+DOF_CONFIG_PATH = C:\DirectOutput\config

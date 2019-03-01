@@ -1,0 +1,5 @@
+; Optional tweaks per config file
+[directoutputconfig99.ini]
+; Set an effect duration of 100ms on device #51 port #23
+effect_duration[23] = 100
+effect_duration[26] = 100
