@@ -1,5 +1,15 @@
 ; Optional tweaks per config file
 [directoutputconfig99.ini]
-; Set an effect duration of 100ms on device #99 port #23
-effect_duration[23] = 100
-effect_duration[26] = 100
+
+; Set an effect duration of 100ms on device #99 port #23 if no individual settings are applied already.
+default_effect_duration[23] = 100
+default_effect_duration[26] = 100
+
+; Turn off an output port for a specific games.
+; Turn off red beacon for High Speed.
+turn_off[18] = hs
+; Turn off orange beacon for F14 and ST.
+turn_off[19] = f14,st_162
+; Turn off blue beacon for High Speed.
+turn_off[20] = hs
+
