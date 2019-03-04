@@ -96,7 +96,7 @@ Using this tweak you can now turn them of individually.
  
 ### Complete `tweaks.ini` example
 
-```
+```INI
 [directoutputconfig40.ini]
 ; Set an effect duration of 100ms on device #40 ports #23 and #26
 effect_duration[23] = 100
@@ -105,13 +105,12 @@ effect_duration[26] = 100
 [directoutputconfig51.ini]
 ; Set an inverted effect duration of 500ms on device #51 port #11
 effect_duration[11] = 500
-; Turn off red beacon for High Speed.
+; Turn off red beacon on device #51 port #18 for High Speed.
 turn_off[18] = hs
-; Turn off orange beacon for F14 and ST.
+; Turn off orange beacon on device #51 port #19 for F14 and ST.
 turn_off[19] = f14,st_162
-; Turn off blue beacon for High Speed.
+; Turn off blue beacon on device #51 port #20 for High Speed.
 turn_off[20] = hs
-
 ```
 
 ### Usage

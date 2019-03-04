@@ -6,10 +6,9 @@ default_effect_duration[23] = 100
 default_effect_duration[26] = 100
 
 ; Turn off an output port for a specific games.
-; Turn off red beacon for High Speed.
+; Turn off red beacon at port #18 for High Speed.
 turn_off[18] = hs
-; Turn off orange beacon for F14 and ST.
+; Turn off orange beacon at port #19 for F14 and ST.
 turn_off[19] = f14,st_162
-; Turn off blue beacon for High Speed.
+; Turn off blue beacon at port #20 for High Speed.
 turn_off[20] = hs
-
