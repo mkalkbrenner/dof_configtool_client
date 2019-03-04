@@ -96,7 +96,7 @@ Using this tweak you can now turn them of individually.
  
 ### Complete `tweaks.ini` example
 
-```
+```INI
 [directoutputconfig40.ini]
 ; Set an effect duration of 100ms on device #40 ports #23 and #26
 effect_duration[23] = 100
