@@ -27,7 +27,13 @@ The client is written in PHP because of the fact that the configtool itself is w
 That will hopefully ease an adoption of (some) features by the DOF configtool itself in the future.
 Due to the fact that PHP is uncommon for most Windows users, the client doesn't use any PHP frameworks or libraries but plain PHP to keep the setup as simple as possible. 
 
-## Download your configs
+## Disclaimer
+
+There's **no warrenty!**
+
+If you use this software, you do it **on your own risk!**
+
+## 1. Download your configs
 
 ### Setup
 
@@ -55,7 +61,7 @@ php.exe download.php
 
 **_Warning:_** Existing files will be overwritten.
  
-## Apply tweaks
+## 2. Apply tweaks
 
 ### Setup
 
