@@ -1,14 +1,21 @@
 ; Optional tweaks per config file
 [directoutputconfig99.ini]
 
-; Set an effect duration of 100ms on device #99 port #23 if no individual settings are applied already.
+; Set an effect duration of 100ms on device #99 port #23 if no individual
+; settings are applied already.
 default_effect_duration[23] = 100
 default_effect_duration[26] = 100
 
-; Turn off an output port for a specific games.
-; Turn off red beacon at port #18 for High Speed.
-turn_off[18] = hs
-; Turn off orange beacon at port #19 for F14 and ST.
-turn_off[19] = f14,st_162
-; Turn off blue beacon at port #20 for High Speed.
-turn_off[20] = hs
+
+; Turn off an output port for specific games or turn on an output port *only*
+; for specific games.
+; turn_off and turn_on are kind of alternative approaches. Depending on your
+; setup, one or the other might lead to fewer entries. In most cases they should
+; be combined.
+
+; Turn off red beacon at port #18 for Road Show.
+turn_off[18] = rs
+; Turn on orange beacon at port #19 only for F14 and Road Show.
+turn_on[19] = f14,rs
+; Turn off blue beacon at port #20 for Road Show.
+turn_off[20] = rs

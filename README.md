@@ -82,7 +82,7 @@ Using this tweak you can limit the modification to the ports where you need it.
 #### turn_off
 
 This tweak allows you to turn off specific ports of your output controller for specific games.
-So `turn_off[18] = hs,` turns off the port 18 for the game named _hs_.
+So `turn_off[18] = hs` turns off the port 18 for the game named _hs_.
 
 ##### Use-cases
 
@@ -94,6 +94,15 @@ The DOF Configtool only handles one _Beacon_. But a common setup is to have thre
 It makes no sense to run them all in parallel for any game. Therefore you should attach them to three different ports of your output controller and assign _Beacon_ to all of them in the DOF Configtool.
 Using this tweak you can now turn them of individually. 
  
+#### turn_on
+
+This tweak allows you to turn on specific ports of your output controller **only** for specific games. It is the complement to `turn_off`.
+So `turn_on[19] = f14,rs` turns on the port 19 **only** for the games named _f14_ and _rs_.
+
+##### Use-cases
+
+See the use-case for `turn_off`. In most cases these two tweaks need to be combined.
+
 ### Complete `tweaks.ini` example
 
 ```INI
@@ -105,12 +114,13 @@ effect_duration[26] = 100
 [directoutputconfig51.ini]
 ; Set an inverted effect duration of 500ms on device #51 port #11
 effect_duration[11] = 500
-; Turn off red beacon on device #51 port #18 for High Speed.
-turn_off[18] = hs
-; Turn off orange beacon on device #51 port #19 for F14 and ST.
-turn_off[19] = f14,st_162
-; Turn off blue beacon on device #51 port #20 for High Speed.
-turn_off[20] = hs
+; Turn off red beacon on device #51 port #18 for Road Show.
+turn_off[18] = rs
+; Turn on orange beacon on device #51 port #19 only for F14 and Road Show. (That
+; implicitly disables the orange beacon for other games like High Speed.)
+turn_on[19] = f14,rs
+; Turn off blue beacon on device #51 port #20 for Road Show.
+turn_off[20] = rs
 ```
 
 ### Usage

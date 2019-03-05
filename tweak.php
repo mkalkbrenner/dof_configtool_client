@@ -47,6 +47,19 @@ foreach ($tweaks as $config_file => $adjustments) {
               }
             }
             break;
+
+            case 'turn_on':
+            foreach ($settings as $port => $game_names) {
+              if (!empty($game[$port])) {
+                $game_names_array = explode(',', $game_names);
+                array_walk($game_names_array, 'trim');
+                if (!in_array($game[0], $game_names_array)) {
+                  $modifications[$file][$game[0]][] = '"turn_on[' . $port . '] = ' . $game_names . '": '. $game[$port] . ' => ' . 0;
+                  $game[$port] = 0;
+                }
+              }
+            }
+            break;
         }
       }
       $games[] = implode(',', $game);
