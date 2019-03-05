@@ -19,3 +19,6 @@ turn_off[18] = rs
 turn_on[19] = f14,rs
 ; Turn off blue beacon at port #20 for Road Show.
 turn_off[20] = rs
+
+; Boost the intensity of the shaker motor on device #51 port #28 by 1.5.
+adjust_intensity[28] = 1.5

@@ -60,6 +60,31 @@ foreach ($tweaks as $config_file => $adjustments) {
               }
             }
             break;
+
+          case 'adjust_intensity':
+            foreach ($settings as $port => $factor) {
+              if (isset($game[$port])) {
+                $triggers = explode('/', $game[$port]);
+                foreach ($triggers as &$trigger) {
+                  if (preg_match('/[I](\d+)/', $trigger, $matches)) {
+                    $intensity = (int) (((int) $matches[1]) * ((float) $factor));
+                    if ($intensity < 1) {
+                      $intensity = 1;
+                    }
+                    if ($intensity > 48) {
+                      $intensity = 48;
+                    }
+                    $trigger = preg_replace('/[I]\d+/', 'I' . $intensity, $trigger);
+                  }
+                }
+                $new = implode('/', $triggers);
+                if ($new != $game[$port]) {
+                  $modifications[$file][$game[0]][] = '"adjust_intensity[' . $port . '] = ' . $duration . '": '. $game[$port] . ' => ' . $new;
+                  $game[$port] = $new;
+                }
+              }
+            }
+            break;
         }
       }
       $games[] = implode(',', $game);

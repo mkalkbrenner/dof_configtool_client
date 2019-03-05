@@ -109,16 +109,29 @@ So `turn_on[19] = f14,rs` turns on the port 19 **only** for the games named _f14
 
 See the use-case for `turn_off`. In most cases these two tweaks need to be combined.
 
+#### adjust_intensity
+
+This tweak allows you to boost or reduce the intensity off an effect by a given factor on specific ports of your output controller.
+So `adjust_intensity[28] = 1.2` will boost all existing intensities by _1.2_. For example an instensity of _32_ will become _41_.
+This tweak internally ensures that the intesity will not exceed the DOF maximum of 48.
+In case of reducing the intensity by using a factor like _0.3_ the tweak will not reduce the intensity lower than _1_.
+
+##### Use-cases
+
+Maybe for safety reasons the maximum intensity for a shaker set be the DOF Configtool is _32_ of _48_.
+In case you have a small shaker motor you might want to reach the maximum by boosting the default by _1.5_.
+Since you have different effect levels within the same game, `adjust_intensity` uses a factor instead of absolute numbers to keep these intensity ratio.
+
 ### Complete `tweaks.ini` example
 
 ```INI
 [directoutputconfig40.ini]
-; Set an effect duration of 100ms on device #40 ports #23 and #26
+; Set an effect duration of 100ms on device #40 ports #23 and #26.
 effect_duration[23] = 100
 effect_duration[26] = 100
 
 [directoutputconfig51.ini]
-; Set an inverted effect duration of 500ms on device #51 port #11
+; Set an inverted effect duration of 500ms on device #51 port #11.
 effect_duration[11] = 500
 ; Turn off red beacon on device #51 port #18 for Road Show.
 turn_off[18] = rs
@@ -127,6 +140,8 @@ turn_off[18] = rs
 turn_on[19] = f14,rs
 ; Turn off blue beacon on device #51 port #20 for Road Show.
 turn_off[20] = rs
+; Boost the intensity of the shaker motor on device #51 port #28 by 1.5.
+adjust_intensity[28] = 1.5
 ```
 
 ### Usage
