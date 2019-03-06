@@ -194,4 +194,4 @@ php.exe tweak.php
 
 **_Warning:_** The script doesn't detect if a config file has been _tweaked_ already. So running the script twice might have unwanted effects if you don't replace the config files by a fresh download first.
 While absolute value tweaks like `effect_duration` should be kind of safe, multiplications like `adjust_intensity` will be applied again on top of the previous tweak.
-I suggest to use a tool like _git_ to track your config files and their tweaks, but maybe that might be "too much" ;-)
+I suggest to use a tool like _git_ to track your config files and their tweaks, but maybe that might be "too much" 😉
