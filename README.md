@@ -76,7 +76,7 @@ The standard DOF configs define global and individual effect durations. Individu
 Using the DOF configtool it's impossible to set a different default duration then the global one on a specific port. You would have to do that for all tables.
 
 Using this option you can set such an per port default duration for all games at once. But this will only happen if there's not yet set an individual duration.
-So `effect_duration[23] = 100` sets the duration to _100ms_ for all triggers on output _23_ of a given output controller if an individual setting doesn't exist already.
+So `default_effect_duration[23] = 100` sets the duration to _100ms_ for all triggers on output _23_ of a given output controller if an individual setting doesn't exist already.
 
 ##### Use-cases
 
