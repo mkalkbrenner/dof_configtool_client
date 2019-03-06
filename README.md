@@ -5,7 +5,7 @@ This is a client for downloading your config files from http://configtool.vpuniv
 ## Motivation
 
 The DOF Configtool is a great tool that covers most of the use-cases for the majority of it's users.
-But DOF itself is more powerful. If you want to achieve special things, you can to that using the DOF Configtool by adjusting the indiviual table settings.
+But DOF itself is more powerful. If you want to achieve special things, you can to that using the DOF Configtool by adjusting the individual table settings.
 But doing so has to downsides:
 * you might have to repeat such an adjustment for a lot or all games
 * as soon as you have done that, you're decoupled from the upstream (the centralized table database) and you need to track changes manually
@@ -65,7 +65,35 @@ php.exe download.php
 
 ### Setup
 
-Rename or copy `tweaks.ini.example` to `tweaks.ini` and adjust the file to your needs. See the next section for the available tweaks.
+Rename or copy `tweaks.ini.example` to `tweaks.ini` and adjust the file to your needs. See the next sections for the available tweaks and how they are applied.
+
+### Scopes
+
+Tweaks could be applied globally per output controller per port or individually per output controller per game per port.
+In case that a global setting exists and an individual one for a specific game, the individual one wins for that game while the global one gets applied for all the other games.
+
+Example:
+```INI
+[directoutputconfig40.ini]
+; Global settings for output controller #40.
+effect_duration[23] = 100
+effect_duration[26] = 100
+[abv106]
+; Individual settings for game *abv106* for output controller #40.
+effect_duration[23] = 230
+
+[directoutputconfig51.ini]
+; Global settings for output controller #51.
+effect_duration[11] = 60
+[abv106]
+; Individual settings for game *abv106* for output controller #51.
+effect_duration[13] = 120
+```
+
+* The effect duration for port _**26**_ on output controller _**40**_ will be set to _**100**ms_ for all games.
+* The effect duration for port _**23**_ on output controller _**40**_ will be set to _**100**ms_ for all games except for game _**abv106**_ where the individual overwrite sets it to _**230**ms_.
+* The effect duration for port _**11**_ on output controller _**51**_ will be set to _**60**ms_ for all games.
+* The effect duration for port _**13**_ on output controller _**51**_ will be set to _**120**ms_ only for game _**abv106**_.
 
 ### Available tweaks
 
@@ -73,7 +101,7 @@ Rename or copy `tweaks.ini.example` to `tweaks.ini` and adjust the file to your 
 
 The standard DOF configs define global and individual effect durations. Individual durations need to be set per game per output controller port per trigger.
 
-Using the DOF configtool it's impossible to set a different default duration then the global one on a specific port. You would have to do that for all tables.
+Using the DOF configtool it's impossible to set a different default duration other then the global one on a specific port. You would have to do that for all tables.
 
 Using this option you can set such an per port default duration for all games at once. But this will only happen if there's not yet set an individual duration.
 So `default_effect_duration[23] = 100` sets the duration to _100ms_ for all triggers on output _23_ of a given output controller if an individual setting doesn't exist already.
@@ -140,8 +168,12 @@ turn_off[18] = rs
 turn_on[19] = f14,rs
 ; Turn off blue beacon on device #51 port #20 for Road Show.
 turn_off[20] = rs
-; Boost the intensity of the shaker motor on device #51 port #28 by 1.5.
+; Boost the intensity of the shaker motor on device #51 port #28 by factor 1.5.
 adjust_intensity[28] = 1.5
+[taf]
+; Reduce the intensity of the shaker motor on device #51 port #28 by factor 0.7
+; only for taf.
+adjust_intensity[28] = 0.7
 ```
 
 ### Usage

@@ -5,107 +5,123 @@ $config_path = trim($download['download']['DOF_CONFIG_PATH'], DIRECTORY_SEPARATO
 
 $tweaks = parse_ini_file(__DIR__ . '/tweaks.ini', TRUE);
 
-$modifications = [];
+$mods = [];
+$mods_applied = [];
+$file = '';
 
-foreach ($tweaks as $config_file => $adjustments) {
-  $file = $config_path . DIRECTORY_SEPARATOR . $config_file;
-  $modifications[$file] = [];
-  if ($contents = file_get_contents($file)) {
-    list($head, $config) = explode('[Config DOF]', $contents);
-    $games = [];
-    foreach (explode("\n", $config) as $game_row) {
-      $game = str_getcsv($game_row);
-      $modifications[$file][$game[0]] = [];
-      foreach ($adjustments as $name => $settings) {
-        switch ($name) {
-
-          case 'default_effect_duration':
-            foreach ($settings as $port => $duration) {
-              if (isset($game[$port])) {
-                $triggers = explode('/', $game[$port]);
-                foreach ($triggers as &$trigger) {
-                  $trigger = preg_replace('/([SWE]\d+$)/', '$1 ' . $duration, $trigger);
-                }
-                $new = implode('/', $triggers);
-                if ($new != $game[$port]) {
-                  $modifications[$file][$game[0]][] = '"default_effect_duration[' . $port . '] = ' . $duration . '": '. $game[$port] . ' => ' . $new;
-                  $game[$port] = $new;
-                }
-              }
-            }
-            break;
-
-          case 'turn_off':
-            foreach ($settings as $port => $game_names) {
-              if (!empty($game[$port])) {
-                $game_names_array = explode(',', $game_names);
-                array_walk($game_names_array, 'trim');
-                if (in_array($game[0], $game_names_array)) {
-                  $modifications[$file][$game[0]][] = '"turn_off[' . $port . '] = ' . $game_names . '": '. $game[$port] . ' => ' . 0;
-                  $game[$port] = 0;
-                }
-              }
-            }
-            break;
-
-            case 'turn_on':
-            foreach ($settings as $port => $game_names) {
-              if (!empty($game[$port])) {
-                $game_names_array = explode(',', $game_names);
-                array_walk($game_names_array, 'trim');
-                if (!in_array($game[0], $game_names_array)) {
-                  $modifications[$file][$game[0]][] = '"turn_on[' . $port . '] = ' . $game_names . '": '. $game[$port] . ' => ' . 0;
-                  $game[$port] = 0;
-                }
-              }
-            }
-            break;
-
-          case 'adjust_intensity':
-            foreach ($settings as $port => $factor) {
-              if (isset($game[$port])) {
-                $triggers = explode('/', $game[$port]);
-                foreach ($triggers as &$trigger) {
-                  if (preg_match('/[I](\d+)/', $trigger, $matches)) {
-                    $intensity = (int) (((int) $matches[1]) * ((float) $factor));
-                    if ($intensity < 1) {
-                      $intensity = 1;
-                    }
-                    if ($intensity > 48) {
-                      $intensity = 48;
-                    }
-                    $trigger = preg_replace('/[I]\d+/', 'I' . $intensity, $trigger);
-                  }
-                }
-                $new = implode('/', $triggers);
-                if ($new != $game[$port]) {
-                  $modifications[$file][$game[0]][] = '"adjust_intensity[' . $port . '] = ' . $duration . '": '. $game[$port] . ' => ' . $new;
-                  $game[$port] = $new;
-                }
-              }
-            }
-            break;
-        }
-      }
-      $games[] = implode(',', $game);
+foreach ($tweaks as $section => $adjustments) {
+  if (strpos($section, '.ini')) {
+    $file = $config_path . DIRECTORY_SEPARATOR . $section;
+    if (file_exists($file)) {
+      $mods[$file] = [0 => $adjustments];
+      $mods_applied[$file] = [];
     }
-    file_put_contents($file, $head . '[Config DOF]' . implode("\n", $games));
+    else {
+      $file = '';
+    }
+  }
+  elseif ($file) {
+    $mods[$file][$section] = $adjustments;
   }
 }
 
-foreach ($modifications as $file => $game) {
-  print $file . "\n";
+foreach ($mods as $file => $per_game_mods) {
+  if ($contents = file_get_contents($file)) {
+    list($head, $config) = explode('[Config DOF]', $contents);
+    foreach (explode("\r\n", $config) as $game_row) {
+      if ($game_row = trim($game_row)) {
+        $game = str_getcsv($game_row);
+        $mods_applied[$file][$game[0]] = [];
+        foreach ($per_game_mods as $game_name => $adjustments) {
+          foreach ($adjustments as $name => $settings) {
+            foreach ($settings as $port => $setting) {
+              // Skip global setting when a game-specific setting exists.
+              if ($game_name === $game[0] || (!$game_name && (!isset($per_game_mods[$game[0]]) || !isset($per_game_mods[$game[0]][$name]) || !isset($per_game_mods[$game[0]][$name][$port])))) {
+                if (isset($game[$port])) {
+
+                  switch ($name) {
+
+                    case 'default_effect_duration':
+                      $triggers = explode('/', $game[$port]);
+                      foreach ($triggers as &$trigger) {
+                        $trigger = preg_replace('/([SWE]\d+$)/', '$1 ' . $setting, $trigger);
+                      }
+                      $new = implode('/', $triggers);
+                      if ($new != $game[$port]) {
+                        $mods_applied[$file][$game[0]][] = '"default_effect_duration[' . $port . '] = ' . $setting . '": ' . $game[$port] . ' => ' . $new;
+                        $game[$port] = $new;
+                      }
+                      break;
+
+                    case 'turn_off':
+                      $game_names = explode(',', $setting);
+                      array_walk($game_names, 'trim');
+                      if (in_array($game[0], $game_names)) {
+                        $mods_applied[$file][$game[0]][] = '"turn_off[' . $port . '] = ' . $setting . '": ' . $game[$port] . ' => ' . 0;
+                        $game[$port] = 0;
+                      }
+                      break;
+
+                    case 'turn_on':
+                      $game_names = explode(',', $setting);
+                      array_walk($game_names, 'trim');
+                      if (!in_array($game[0], $game_names)) {
+                        $mods_applied[$file][$game[0]][] = '"turn_on[' . $port . '] = ' . $setting . '": ' . $game[$port] . ' => ' . 0;
+                        $game[$port] = 0;
+                      }
+                      break;
+
+                    case 'adjust_intensity':
+                      $triggers = explode('/', $game[$port]);
+                      foreach ($triggers as &$trigger) {
+                        if (preg_match('/[I](\d+)/', $trigger, $matches)) {
+                          $intensity = (int) (((int) $matches[1]) * ((float) $setting));
+                          if ($intensity < 1) {
+                            $intensity = 1;
+                          }
+                          if ($intensity > 48) {
+                            $intensity = 48;
+                          }
+                          $trigger = preg_replace('/[I]\d+/', 'I' . $intensity, $trigger);
+                        }
+                      }
+                      $new = implode('/', $triggers);
+                      if ($new != $game[$port]) {
+                        $mods_applied[$file][$game[0]][] = '"adjust_intensity[' . $port . '] = ' . $setting . '": ' . $game[$port] . ' => ' . $new;
+                        $game[$port] = $new;
+                      }
+                      break;
+                  }
+
+                }
+              }
+            }
+          }
+        }
+        $games[] = implode(',', $game);
+      }
+      else {
+        $games[] = '';
+      }
+    }
+    file_put_contents($file, $head . '[Config DOF]' . implode("\r\n", $games));
+  }
+}
+
+foreach ($mods_applied as $file => $games) {
+  ksort($games,  SORT_STRING | SORT_FLAG_CASE);
+  print $file . "\r\n";
   $changes = FALSE;
-  foreach ($game as $name => $mods) {
+  foreach ($games as $name => $mods) {
     if ($mods) {
-      print "\t" . $name . "\n";
+      print "\t" . $name . "\r\n";
       foreach ($mods as $mod) {
-        print "\t\t" . $mod . "\n";
+        print "\t\t" . $mod . "\r\n";
       }
       $changes = TRUE;
     }
   }
   if (!$changes) {
-    print "\t No changes.\n";
+    print "\t No changes.\r\n";
   }
 }

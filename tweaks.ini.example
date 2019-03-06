@@ -20,5 +20,12 @@ turn_on[19] = f14,rs
 ; Turn off blue beacon at port #20 for Road Show.
 turn_off[20] = rs
 
-; Boost the intensity of the shaker motor on device #51 port #28 by 1.5.
+; Boost the intensity of the shaker motor on device #51 port #28 by factor 1.5.
 adjust_intensity[28] = 1.5
+
+; Optional tweaks for specific games in current config file
+; (directoutputconfig99.ini). These overwrite the global ones per config file.
+[taf]
+; Reduce the intensity of the shaker motor on device #51 port #28 by factor 0.6.
+adjust_intensity[28] = 0.6
+
