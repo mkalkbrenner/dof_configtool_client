@@ -69,7 +69,7 @@ Rename or copy `tweaks.ini.example` to `tweaks.ini` and adjust the file to your 
 
 ### Available tweaks
 
-#### default_effect_duration
+#### `default_effect_duration`
 
 The standard DOF configs define global and individual effect durations. Individual durations need to be set per game per output controller port per trigger.
 
@@ -85,7 +85,7 @@ it makes no sense to adjust the global effect duration for **all** effects just 
 Your setup will become more _sluggish_.
 Using this tweak you can limit the modification to the ports where you need it.
 
-#### turn_off
+#### `turn_off`
 
 This tweak allows you to turn off specific ports of your output controller for specific games.
 So `turn_off[18] = hs` turns off the port 18 for the game named _hs_.
@@ -100,7 +100,7 @@ The DOF Configtool only handles one _Beacon_. But a common setup is to have thre
 It makes no sense to run them all in parallel for any game. Therefore you should attach them to three different ports of your output controller and assign _Beacon_ to all of them in the DOF Configtool.
 Using this tweak you can now turn them of individually. 
  
-#### turn_on
+#### `turn_on`
 
 This tweak allows you to turn on specific ports of your output controller **only** for specific games. It is the complement to `turn_off`.
 So `turn_on[19] = f14,rs` turns on the port 19 **only** for the games named _f14_ and _rs_.
@@ -109,7 +109,7 @@ So `turn_on[19] = f14,rs` turns on the port 19 **only** for the games named _f14
 
 See the use-case for `turn_off`. In most cases these two tweaks need to be combined.
 
-#### adjust_intensity
+#### `adjust_intensity`
 
 This tweak allows you to boost or reduce the intensity off an effect by a given factor on specific ports of your output controller.
 So `adjust_intensity[28] = 1.2` will boost all existing intensities by _1.2_. For example an instensity of _32_ will become _41_.
