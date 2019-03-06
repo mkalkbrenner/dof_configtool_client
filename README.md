@@ -67,6 +67,8 @@ php.exe download.php
 
 Rename or copy `tweaks.ini.example` to `tweaks.ini` and adjust the file to your needs. See the next sections for the available tweaks and how they are applied.
 
+**Note:** the tweaks will be applied to the files located at `DOF_CONFIG_PATH`. Therefore the `download.ini` has to be properly configured, no matter if you really download the files before tweaking them.
+
 ### Scopes
 
 Tweaks could be applied globally per output controller per port or individually per output controller per game per port.
@@ -178,7 +180,7 @@ adjust_intensity[28] = 0.7
 
 ### Usage
 
-Just execute the DOF Configtool Client `tweak.php` script. It will download your individual config files and extract them to the directory as configured in `tweak.ini`.
+Just execute the DOF Configtool Client `tweak.php` script. It will apply all your tweaks to your config files located in the directory as configured in `download.ini`.
 
 Linux / macOS:
 ```
@@ -190,3 +192,6 @@ Windows
 php.exe tweak.php
 ```
 
+**_Warning:_** The script doesn't detect if a config file has been _tweaked_ already. So running the script twice might have unwanted effects if you don't replace the config files by a fresh download first.
+While absolute value tweaks like `effect_duration` should be kind of safe, multiplications like `adjust_intensity` will be applied again on top of the previous tweak.
+I suggest to use a tool like _git_ to track your config files and their tweaks, but maybe that might be "too much" ;-)
