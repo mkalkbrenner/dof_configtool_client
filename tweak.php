@@ -56,7 +56,7 @@ foreach ($mods as $file => $per_game_mods) {
                     case 'turn_off':
                       $game_names = explode(',', $setting);
                       array_walk($game_names, 'trim');
-                      if (in_array($game[0], $game_names)) {
+                      if (in_array($game[0], $game_names) && 0 != $game[$port]) {
                         $mods_applied[$file][$game[0]][] = '"turn_off[' . $port . '] = ' . $setting . '": ' . $game[$port] . ' => ' . 0;
                         $game[$port] = 0;
                       }
@@ -65,7 +65,7 @@ foreach ($mods as $file => $per_game_mods) {
                     case 'turn_on':
                       $game_names = explode(',', $setting);
                       array_walk($game_names, 'trim');
-                      if (!in_array($game[0], $game_names)) {
+                      if (!in_array($game[0], $game_names) && 0 != $game[$port]) {
                         $mods_applied[$file][$game[0]][] = '"turn_on[' . $port . '] = ' . $setting . '": ' . $game[$port] . ' => ' . 0;
                         $game[$port] = 0;
                       }
@@ -104,24 +104,30 @@ foreach ($mods as $file => $per_game_mods) {
         $games[] = '';
       }
     }
-    file_put_contents($file, $head . '[Config DOF]' . implode("\r\n", $games));
-  }
-}
 
-foreach ($mods_applied as $file => $games) {
-  ksort($games,  SORT_STRING | SORT_FLAG_CASE);
-  print $file . "\r\n";
-  $changes = FALSE;
-  foreach ($games as $name => $mods) {
-    if ($mods) {
-      print "\t" . $name . "\r\n";
-      foreach ($mods as $mod) {
-        print "\t\t" . $mod . "\r\n";
+    print 'List of pending modifications for ' . $file . "\r\n";
+    $changes = FALSE;
+    foreach ($mods_applied[$file] as $name => $mods) {
+      if ($mods) {
+        print "\t" . $name . "\r\n";
+        foreach ($mods as $mod) {
+          print "\t\t" . $mod . "\r\n";
+        }
+        $changes = TRUE;
       }
-      $changes = TRUE;
     }
-  }
-  if (!$changes) {
-    print "\t No changes.\r\n";
+
+    if (!$changes) {
+      print "\t No changes.\r\n";
+    }
+    else {
+      $line = readline('Write changes to ' . $file . ' [yes|no] (yes)? ');
+      if ('yes' == strtolower($line) || empty($line)) {
+        file_put_contents($file, $head . '[Config DOF]' . implode("\r\n", $games));
+      }
+      else {
+        print "Modifications skipped.\r\n\r\n";
+      }
+    }
   }
 }

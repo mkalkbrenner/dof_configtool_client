@@ -192,6 +192,9 @@ Windows
 php.exe tweak.php
 ```
 
+Before any modification are written to a config file you'll see a list of pending modifications. You'll by asked before the changes get written to the file. Type `no` if you want to skip that file
+or simply hit ENTER to update the config file.
+
 **_Warning:_** The script doesn't detect if a config file has been _tweaked_ already. So running the script twice might have unwanted effects if you don't replace the config files by a fresh download first.
 While absolute value tweaks like `effect_duration` should be kind of safe, multiplications like `adjust_intensity` will be applied again on top of the previous tweak.
 I suggest to use a tool like _git_ to track your config files and their tweaks, but maybe that might be "too much" 😉
