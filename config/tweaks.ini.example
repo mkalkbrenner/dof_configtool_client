@@ -1,5 +1,5 @@
 ; Optional tweaks per config file
-[directoutputconfig99.ini]
+[directoutputconfig999.ini]
 
 ; Set an effect duration of 100ms on device #99 port #23 if no individual
 ; settings are applied already.
@@ -24,7 +24,7 @@ turn_off[20] = rs
 adjust_intensity[28] = 1.5
 
 ; Optional tweaks for specific games in current config file
-; (directoutputconfig99.ini). These overwrite the global ones per config file.
+; (directoutputconfig1000.ini). These overwrite the global ones per config file.
 [taf]
 ; Reduce the intensity of the shaker motor on device #51 port #28 by factor 0.6.
 adjust_intensity[28] = 0.6
