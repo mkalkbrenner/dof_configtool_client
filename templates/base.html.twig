@@ -1,12 +1,66 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
     <head>
+        <!-- Required meta tags -->
         <meta charset="UTF-8">
-        <title>{% block title %}Welcome!{% endblock %}</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <meta name="description" content="DOF Configtool Client">
+        <meta name="author" content="mk47">
+
+        <title>{% block title %}DOF Configtool Client 0.1.0 by mk47{% endblock %}</title>
+
+        <!-- Bootstrap CSS -->
+        <link rel="stylesheet" href="{{ asset('css/bootstrap.min.css') }}">
+
+        <style>
+            .bd-placeholder-img {
+                font-size: 1.125rem;
+                text-anchor: middle;
+                -webkit-user-select: none;
+                -moz-user-select: none;
+                -ms-user-select: none;
+                user-select: none;
+            }
+
+            @media (min-width: 768px) {
+                .bd-placeholder-img-lg {
+                    font-size: 3.5rem;
+                }
+            }
+        </style>
+
         {% block stylesheets %}{% endblock %}
     </head>
-    <body>
-        {% block body %}{% endblock %}
+    <body class="bg-light">
+        <nav class="navbar navbar-expand-md navbar-dark bg-dark mb-4">
+            <a class="navbar-brand" href="#">DOF Configtool Client</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarCollapse">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('welcome') }}">Welcome</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('dof_configtool_downloader') }}">Download</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('tweak') }}">Tweak</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('tweak') }}">RegEdit</a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <main role="main" class="container main">
+            {% include 'flash_messages.html.twig' %}
+
+            {% block body %}{% endblock %}
+        </main>
+
         {% block javascripts %}{% endblock %}
     </body>
 </html>

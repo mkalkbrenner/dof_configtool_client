@@ -1,0 +1,11 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Tweak DOF Configs{% endblock %}
+
+{% block body %}
+    <h2>Tweak DOF Configs</h2>
+    {{ form_start(tweak_form) }}
+    {{ form_errors(tweak_form) }}
+    {{ form_widget(tweak_form) }}
+    {{ form_end(tweak_form) }}
+{% endblock %}

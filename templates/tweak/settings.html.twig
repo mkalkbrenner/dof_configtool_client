@@ -1,0 +1,12 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Tweak Settings{% endblock %}
+
+{% block body %}
+    <h2>Tweak Settings</h2>
+    <p>Manage your tweaks.</p>
+    {{ form_start(settings_form) }}
+    {{ form_errors(settings_form) }}
+    {{ form_widget(settings_form) }}
+    {{ form_end(settings_form) }}
+{% endblock %}

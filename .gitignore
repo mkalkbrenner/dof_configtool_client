@@ -5,7 +5,6 @@ tweaks.ini
 /directoutputconfig*.ini
 /DirectOutputShapes.xml
 /tablemappings.xml
-/vendor/
 /System Volume Information/
 
 ###> symfony/framework-bundle ###
