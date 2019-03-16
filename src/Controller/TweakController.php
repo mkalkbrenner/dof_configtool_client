@@ -261,10 +261,12 @@ class TweakController extends AbstractController
             }
         }
 
-        $form = $this->createFormBuilder()
-            ->add('cancel', SubmitType::class, ['label' => 'Cancel'])
-            ->add('save', SubmitType::class, ['label' => 'Save'])
-            ->add('files', HiddenType::class, ['data' => base64_encode(serialize($modded_files))])
+        $formBuilder = $this->createFormBuilder()
+            ->add('cancel', SubmitType::class, ['label' => 'Cancel']);
+        if ($diffs) {
+            $formBuilder->add('save', SubmitType::class, ['label' => 'Save']);
+        }
+        $form = $formBuilder->add('files', HiddenType::class, ['data' => base64_encode(serialize($modded_files))])
             ->setAction($this->generateUrl('tweak_do'))
             ->getForm();
 
@@ -279,24 +281,25 @@ class TweakController extends AbstractController
      */
     public function tweak(Request $request)
     {
-        $tweaks = new Tweaks();
-        $tweaks->load();
-
         $form = $this->createFormBuilder()
             ->add('cancel', TextareaType::class, ['label' => 'Cancel'])
             ->add('save', SubmitType::class, ['label' => 'Save'])
-            ->add('files', HiddenType::class, ['value' => '']);
+            ->add('files', HiddenType::class, ['data' => ''])
+            ->getForm();
 
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            /** @var Tweaks $tweaks */
-            $tweaks = $form->getData();
-
             try {
-                $tweaks->persist();
-                $this->addFlash('success', 'Saved settings to tweaks.ini.');
-                return $this->redirectToRoute('tweak');
+                $files = unserialize(base64_decode($form->getData()['files']));
+                foreach ($files as $file => $content) {
+                    if (file_put_contents($file, $content)) {
+                        $this->addFlash('success', 'Saved tweaked version of ' . $file . '.');
+                    }
+                    else {
+                        $this->addFlash('danger', 'Failed to save tweaked version of' . $file . '.');
+                    }
+                }
             } catch (\Exception $e) {
                 $this->addFlash('warning', $e->getMessage());
             }
