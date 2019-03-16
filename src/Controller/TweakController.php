@@ -93,6 +93,7 @@ class TweakController extends AbstractController
         $mods = [];
         $modded_files = [];
         $files = [];
+        $rgb_ports = [];
 
         $file = '';
         foreach ($tweaks->getSettingsParsed() as $section => $adjustments) {
@@ -112,14 +113,49 @@ class TweakController extends AbstractController
             if ($contents = file_get_contents($file)) {
                 $files[$file] = $contents;
                 list($head, $config) = explode('[Config DOF]', $contents);
+                $colors = [];
+                $color_section = FALSE;
+                foreach (explode("\r\n", $head) as $line) {
+                    if (strpos($line, '[Colors DOF]') === 0) {
+                        $color_section = TRUE;
+                        continue;
+                    }
+                    if ($color_section) {
+                        if (strpos($line,'[') === 0) {
+                            break;
+                        }
+                        if (strpos($line, '=#')) {
+                            list($colors[],) = explode('=', $line);
+                        }
+                    }
+                }
                 foreach (explode("\r\n", $config) as $game_row) {
                     if ($game_row = trim($game_row)) {
-                        $game = str_getcsv($game_row);
-                        foreach ($per_game_mods as $game_name => $adjustments) {
+                        $game_row_elements = str_getcsv($game_row);
+                        $game_name = $game_row_elements[0];
+                        $game = [];
+                        $rgb_ports[$game_name] = [];
+                        $real_port = 0;
+                        foreach ($game_row_elements as $port => $game_row_element) {
+                            $game[$real_port] = $game_row_element;
+                            if ($real_port) { // Skip Rom name on port 0.
+                                foreach ($colors as $color) {
+                                    if (strpos($game_row_element, $color) !== FALSE) {
+                                        $game[++$real_port] = 0;
+                                        $rgb_ports[$game_name][] = $real_port;
+                                        $game[++$real_port] = 0;
+                                        $rgb_ports[$game_name][] = $real_port;
+                                        break;
+                                    }
+                                }
+                            }
+                            ++$real_port;
+                        }
+                        foreach ($per_game_mods as $per_game_name => $adjustments) {
                             foreach ($adjustments as $name => $settings) {
                                 foreach ($settings as $port => $setting) {
                                     // Skip global setting when a game-specific setting exists.
-                                    if ($game_name === $game[0] || (!$game_name && (!isset($per_game_mods[$game[0]]) || !isset($per_game_mods[$game[0]][$name]) || !isset($per_game_mods[$game[0]][$name][$port])))) {
+                                    if ($per_game_name === $game[0] || (!$per_game_name && (!isset($per_game_mods[$game[0]]) || !isset($per_game_mods[$game[0]][$name]) || !isset($per_game_mods[$game[0]][$name][$port])))) {
                                         if (isset($game[$port])) {
 
                                             switch ($name) {
@@ -177,6 +213,9 @@ class TweakController extends AbstractController
                                 }
                             }
                         }
+                        foreach ($rgb_ports[$game_name] as $rgb_port) {
+                            unset($game[$rgb_port]);
+                        }
                         $games[] = implode(',', $game);
                     } else {
                         $games[] = '';
@@ -196,12 +235,23 @@ class TweakController extends AbstractController
                     $diff_cells = explode(',', $diff->render($line, $new_lines[$number]));
                     $header = '';
                     $data = '';
+                    $game_name = $diff_cells[0];
+                    $real_port = 0;
                     foreach ($diff_cells as $port => $dof_string) {
                         $dof_string = str_replace('<ins>', '<ins class="bg-success">', $dof_string);
                         $dof_string = str_replace('<del>', '<del class="bg-danger">', $dof_string);
-                        $header .= '<th scope="col">' . ($port ?: '') . '</th>';
+
+                        $header .= '<th scope="col"' . (in_array($real_port + 1, $rgb_ports[$game_name]) ? ' bgcolor="red">' : '>') . ($real_port ?: '');
+                        ++$real_port;
+                        $colspan = 1;
+                        while (in_array($real_port, $rgb_ports[$game_name])) {
+                            ++$colspan;
+                            $header .= '</th><th scope="col" bgcolor="' . (2 == $colspan ? 'green' : 'blue') . '">' .  $real_port++;
+                        }
+                        $header .= '</th>';
+
                         if ($port) {
-                            $data .= '<td>' . $dof_string . '</td>';
+                            $data .= '<td' . ($colspan > 1 ? ' colspan="' . $colspan . '"' : ''). '>' . $dof_string . '</td>';
                         } else {
                             $data .= '<th scope="row">' . $dof_string . '</th>';
                         }
