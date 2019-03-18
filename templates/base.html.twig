@@ -49,7 +49,7 @@
                         <a class="nav-link" href="{{ path('tweak') }}">Tweak</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ path('tweak') }}">RegEdit</a>
+                        <a class="nav-link" href="{{ path('reg_edit') }}">RegEdit</a>
                     </li>
                 </ul>
             </div>
@@ -61,6 +61,9 @@
             {% block body %}{% endblock %}
         </main>
 
+        <script src="{{ asset('js/jquery-3.3.1.slim.min.js') }}"></script>
+        <script src="{{ asset('js/popper.min.js') }}"></script>
+        <script src="{{ asset('js/bootstrap.min.js') }}"></script>
         {% block javascripts %}{% endblock %}
     </body>
 </html>

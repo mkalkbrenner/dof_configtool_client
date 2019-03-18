@@ -12,8 +12,10 @@ class WelcomeController extends AbstractController
      */
     public function index()
     {
+        $parsedown = new \Parsedown();
+
         return $this->render('welcome/index.html.twig', [
-            'controller_name' => 'WelcomeController',
+            'readme' => $parsedown->parse(file_get_contents(__DIR__. '/../../README.md')),
         ]);
     }
 }

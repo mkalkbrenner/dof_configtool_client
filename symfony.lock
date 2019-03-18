@@ -1,4 +1,7 @@
 {
+    "coderstephen/windows-registry": {
+        "version": "v0.9.1"
+    },
     "doctrine/annotations": {
         "version": "1.0",
         "recipe": {
@@ -92,6 +95,9 @@
     },
     "egulias/email-validator": {
         "version": "2.1.7"
+    },
+    "erusev/parsedown": {
+        "version": "v1.7.2"
     },
     "facebook/webdriver": {
         "version": "1.6.0"

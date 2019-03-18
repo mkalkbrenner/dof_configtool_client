@@ -1,0 +1,17 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}RegEdit{% endblock %}
+
+{% block body %}
+    <h2>RegEdit</h2>
+    <p>RegEdit</p>
+    {{ form_start(reg_edit_form) }}
+    {{ form_errors(reg_edit_form) }}
+    <table class="table table-striped">
+        {% for entry in reg_edit_form.entries %}
+            <tr><td>{{ form_label(entry) }}{{ form_widget(entry.rom) }}</td><td>{{ form_widget(entry.cabinet_mode) }}</td><td>{{ form_widget(entry.ignore_rom_crc) }}</td><td>{{ form_widget(entry.ddraw) }}</td></tr>
+        {% endfor %}
+    </table>
+    {{ form_widget(reg_edit_form.save) }}
+    {{ form_end(reg_edit_form) }}
+{% endblock %}
