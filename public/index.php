@@ -6,6 +6,11 @@ use Symfony\Component\HttpFoundation\Request;
 
 require dirname(__DIR__).'/config/bootstrap.php';
 
+if (isset($_SERVER['PHPDESKTOP_VERSION'])) {
+    $_SERVER['APP_DEBUG'] = FALSE;
+    $_SERVER['APP_ENV'] = 'prod';
+}
+
 if ($_SERVER['APP_DEBUG']) {
     umask(0000);
 
