@@ -1,31 +1,39 @@
 # DOF Configtool Client
 
-This is a client for downloading your config files from http://configtool.vpuniverse.com and for applying additional tweaks to them.
+This is a client for downloading your config files from [http://configtool.vpuniverse.com] and for applying additional
+tweaks to them and the Visual Pinball system itself.
 
 ## Motivation
 
 The DOF Configtool is a great tool that covers most of the use-cases for the majority of it's users.
-But DOF itself is more powerful. If you want to achieve special things, you can to that using the DOF Configtool by adjusting the individual table settings.
-But doing so has to downsides:
+But DOF itself is more powerful. If you want to achieve special things, you can to that using the DOF Configtool by
+adjusting the individual table settings. But doing so has to downsides:
 * you might have to repeat such an adjustment for a lot or all games
-* as soon as you have done that, you're decoupled from the upstream (the centralized table database) and you need to track changes manually
+* as soon as you have done that, you're decoupled from the upstream (the centralized table database) and you need to
+  track changes manually
 
-Both downsides could be avoided if we add more layers of configuration to the DOF Configtool, for example per port or per toy.  
-Since it's currently not possible to contribute to the DOF Configtool directly this client aims to add this missing layers by introducing a new `tweaks.ini`
-config file and a client that downloads your pre-configured configuration files from the DOF Configtool and tweaks them accordingly.
+Both downsides could be avoided if we add more layers of configuration to the DOF Configtool, for example per port or
+per toy. Since it's currently not possible to contribute to the DOF Configtool directly this client aims to add this
+missing layers by introducing a kind of rule-set config file and a client that downloads your pre-configured
+configuration files from the DOF Configtool and tweaks them accordingly.
 
 ### Notes
 
 This client will never replace the awesome DOF Configtool!
-But whenever you need to make an individual adjustment for _all_ tables for a specific port of an output controller, this tool might become useful﻿ 😉
+But whenever you need to make an individual adjustment for _all_ tables for a specific port of an output controller,
+this tool might become useful﻿ 😉
 
 In addition to the available tweaks described below you can think of various other tweaks,
-for example inverting an effect or anything else described at http://directoutput.github.io/DirectOutput/inifiles.html
-Just open an issue if you have an idea or require something special.
+for example inverting an effect or anything else described at
+[http://directoutput.github.io/DirectOutput/inifiles.html].
+Just open an issue at [https://github.com/mkalkbrenner/dof_configtool_client/issues] if you have an idea or require
+something special.
 
 The client is written in PHP because of the fact that the configtool itself is written in PHP.
 That will hopefully ease an adoption of (some) features by the DOF configtool itself in the future.
-Due to the fact that PHP is uncommon for most Windows users, the client doesn't use any PHP frameworks or libraries but plain PHP to keep the setup as simple as possible. 
+The client itself very light wight. But due to the fact that PHP is uncommon for most Windows users, there two variants
+to install the client: As a light wight PHP application as usual requiring a working PHP installation or as an
+all-in-one package based on [https://github.com/cztomczak/phpdesktop](php-desktop).
 
 ## Disclaimer
 
@@ -33,48 +41,70 @@ There's **no warrenty!**
 
 If you use this software, you do it **on your own risk!**
 
-## 1. Download your configs
+## Installation
 
-### Setup
+As mentioned above the client itself very light wight. But due to the fact that PHP is uncommon for most Windows users,
+there two variants to install the client.
 
-You need to install PHP on your system. For Windows have a look at https://windows.php.net/download/ or http://php.net/manual/en/install.windows.php
+### Variant 1: Using a Windows Installer (mainly for users)
 
-Download the DOF Configtool Client from https://github.com/mkalkbrenner/dof_configtool_client
+For every Release of the client there will be an all-in-one package based on
+[https://github.com/cztomczak/phpdesktop] that could be installed on windows just like any windows
+software.
 
-Rename or copy `download.ini.example` to `download.ini` and adjust the file to your needs:
- * Add your API Key which you obtain from the DOF Configtool Account Settings as `LCP_APIKEY`
- * Adjust `DOF_CONFIG_PATH` to your needs. The downloaded config files will be extracted into this directory.
+### Variant 2: Regular PHP Stack (mainly for developers)
+
+* Install PHP on your system. For Windows have a look at [https://windows.php.net/download/] or
+  [http://php.net/manual/en/install.windows.php].
+* Install composer on your system. Have a look at [https://getcomposer.org].
+* Download the DOF Configtool Client from [https://github.com/mkalkbrenner/dof_configtool_client].
+* Run `composer install` within the dof_configtool_client directory.
+* Start the simple PHP web server within the dof_configtool_client directory: `php bin/console server:start`
+* Open [http://localhost:8000] using your favorite browser.
+
+## Usage
+
+### 1. Download your configs
+
+* Select `Download` from the top menu.
+* Complete your `Settings`:
+  * You'll find your `LCP_APIKEY` on the start page after login into [http://configtool.vpuniverse.com]
+
+  * As `DOF_CONFIG_PATH` you have to provide the directory where the downloaded configs should be stored. In most cases
+    this should be `C:\DirectOutput\config`.
+* Download your configs using the corresponding button. (Note: Sometimes the configtool is slow. So the download could
+  take some time.)
+
+  **_Warning:_** Existing files will be overwritten.
  
-### Usage
+### 2. Apply tweaks
 
-Just execute the DOF Configtool Client `download.php` script. It will download your individual config files and extract them to the directory as configured in `download.ini`.
+**_Note:_** The tweaks will be applied to the files located in `DOF_CONFIG_PATH`. Therefore the download settings have
+to be properly configured as mentioned above, no matter if you really download the files before tweaking them.
 
-Linux / macOS:
-```
-php download.php
-```
+Select `Tweak` form the top menu. First of all you have to define your tweaks. To do so select `Edit tweak settings`and
+continue as decribed in the next sections.
 
-Windows
-```
-php.exe download.php
-```
+To apply your tweaks hit the corresponding button. That will tweak your existing configs according to your settings.
+But before the tweaked configs will be finally saved you'll see a confirmation screen that indicates the resulting
+changes. There you'll have to hit _Save_ to finally persist this changes.
 
-**_Warning:_** Existing files will be overwritten.
- 
-## 2. Apply tweaks
+**_Warning:_** The client doesn't detect if a config file has been _tweaked_ already. So executing the tweaks twice
+without downloading the original configs before might have unwanted effects. You shoul always replace the config files
+by a fresh download first, before applying new tweaks.
+While absolute value tweaks like `effect_duration` should be kind of safe, multiplications like `adjust_intensity` will
+be applied again on top of the previous tweak if you apply the tweaks twice.
 
-### Setup
+**In general I suggest to use a tool like _git_ to track your config files and their tweaks, but maybe that might be
+"too much" for the standard user** 😉
 
-Rename or copy `tweaks.ini.example` to `tweaks.ini` and adjust the file to your needs. See the next sections for the available tweaks and how they are applied.
-
-**Note:** the tweaks will be applied to the files located at `DOF_CONFIG_PATH`. Therefore the `download.ini` has to be properly configured, no matter if you really download the files before tweaking them.
-
-### Scopes
+#### Scopes
 
 Tweaks could be applied globally per output controller per port or individually per output controller per game per port.
-In case that a global setting exists and an individual one for a specific game, the individual one wins for that game while the global one gets applied for all the other games.
+In case that both - a global setting and an individual one for a specific game - exist, the individual one wins for that
+game while the global one gets applied for all the other games.
 
-Example:
+##### Example:
 ```INI
 [directoutputconfig40.ini]
 ; Global settings for output controller #40.
@@ -93,66 +123,89 @@ effect_duration[13] = 120
 ```
 
 * The effect duration for port _**26**_ on output controller _**40**_ will be set to _**100**ms_ for all games.
-* The effect duration for port _**23**_ on output controller _**40**_ will be set to _**100**ms_ for all games except for game _**abv106**_ where the individual overwrite sets it to _**230**ms_.
+* The effect duration for port _**23**_ on output controller _**40**_ will be set to _**100**ms_ for all games except
+  for game _**abv106**_ where the individual overwrite sets it to _**230**ms_.
 * The effect duration for port _**11**_ on output controller _**51**_ will be set to _**60**ms_ for all games.
-* The effect duration for port _**13**_ on output controller _**51**_ will be set to _**120**ms_ only for game _**abv106**_.
+* The effect duration for port _**13**_ on output controller _**51**_ will be set to _**120**ms_ only for game
+  _**abv106**_.
 
-### Available tweaks
+#### Available tweaks
 
-#### `default_effect_duration`
+##### `default_effect_duration`
 
-The standard DOF configs define global and individual effect durations. Individual durations need to be set per game per output controller port per trigger.
+The standard DOF configs define global and individual effect durations. Individual durations need to be set per game per
+output controller port per trigger.
 
-Using the DOF configtool it's impossible to set a different default duration other then the global one on a specific port. You would have to do that for all tables.
+Using the DOF configtool it's impossible to set a different default duration other then the global one on a specific
+port. You would have to do that for all tables.
 
-Using this option you can set such an per port default duration for all games at once. But this will only happen if there's not yet set an individual duration.
-So `default_effect_duration[23] = 100` sets the duration to _100ms_ for all triggers on output _23_ of a given output controller if an individual setting doesn't exist already.
+Using this option you can set such a per port default duration for all games at once. But this will only happen if
+there's not yet set an individual duration.
 
-##### Use-cases
+So `default_effect_duration[23] = 100` sets the duration to _100ms_ for all triggers on output _23_ of a given output
+controller if an individual setting doesn't exist already.
 
-If you got a mix of different contactors or solenoids in your case, for example some smaller quick ones and some really heavy ones which need a longer tigger to fire correctly,
-it makes no sense to adjust the global effect duration for **all** effects just to satisfy these heavy contactors because that will have a negative effect on your force feedback toys in general
-Your setup will become more _sluggish_.
+###### Use-cases
+
+If you got a mix of different contactors or solenoids in your cabinet, for example some smaller quick ones and some
+really heavy ones which need a longer trigger to fire correctly, it makes no sense to adjust the global effect duration
+for **all** effects just to satisfy these heavy contactors because that will have a negative effect on your force
+feedback toys in general. Your setup will become more _sluggish_.
 Using this tweak you can limit the modification to the ports where you need it.
 
-#### `turn_off`
+##### `turn_off` / `turn_on`
 
-This tweak allows you to turn off specific ports of your output controller for specific games.
+The `turn_off` tweak allows you to turn off specific ports of your output controller for specific games.
 So `turn_off[18] = hs` turns off the port 18 for the game named _hs_.
 
-##### Use-cases
+The `turn_on` tweak allows you to turn on specific ports of your output controller **only** for specific games. It is
+the complement to `turn_off`. So `turn_on[19] = f14,rs` turns on the port 19 **only** for the games named _f14_ and
+_rs_.
+
+In most cases these two tweaks will be combined to keep the number of tweaks small.
+
+###### Use-cases
 
 The DOF Configtool only handles one _Beacon_. But a common setup is to have three of them with different colors:
 * red
 * orange/yellow
 * blue
 
-It makes no sense to run them all in parallel for any game. Therefore you should attach them to three different ports of your output controller and assign _Beacon_ to all of them in the DOF Configtool.
-Using this tweak you can now turn them of individually. 
+It most cases you won't run them all in parallel for any game. Therefore you should attach them to three different ports
+of your output controller and assign _Beacon_ to all of them in the DOF Configtool.
+Using this tweak you can now turn them of individually.
+
+Given the three beacons example you now have the choice to configure _High Speed_ using the red beacon like used on the
+original machine. Or create a nice police effect by turning on the blue and the red one but turn off the yellow one in
+the middle.
+But for _Road Show_ you might want to have the orange beacon to be the only one turned on.
+For _F14 Tomcat_ you would keep all three active.
+
+Another use-case is the handling of the heavy contactors we already covered in `default_effect_duration`. While these
+are great for simulating bumbers their noice might be too much for other effects, for example the moving head on the
+top left in _Monster Bash_. But instead of turning off that contactor entirely for that table you can mount small
+contactors "in parallel" in your cabinet but attaching them to separate outputs. Now you can decide to use the heavy or
+the small one depeneding on your game.
  
-#### `turn_on`
+##### `adjust_intensity`
 
-This tweak allows you to turn on specific ports of your output controller **only** for specific games. It is the complement to `turn_off`.
-So `turn_on[19] = f14,rs` turns on the port 19 **only** for the games named _f14_ and _rs_.
+This tweak allows you to boost or reduce the intensity off an effect by a given factor on specific ports of your output
+controller. So `adjust_intensity[28] = 1.2` will boost all existing intensities by _1.2_. For example an instensity of
+_32_ will become _41_.
 
-##### Use-cases
-
-See the use-case for `turn_off`. In most cases these two tweaks need to be combined.
-
-#### `adjust_intensity`
-
-This tweak allows you to boost or reduce the intensity off an effect by a given factor on specific ports of your output controller.
-So `adjust_intensity[28] = 1.2` will boost all existing intensities by _1.2_. For example an instensity of _32_ will become _41_.
 This tweak internally ensures that the intesity will not exceed the DOF maximum of 48.
+
 In case of reducing the intensity by using a factor like _0.3_ the tweak will not reduce the intensity lower than _1_.
 
-##### Use-cases
+###### Use-cases
 
 Maybe for safety reasons the maximum intensity for a shaker set be the DOF Configtool is _32_ of _48_.
 In case you have a small shaker motor you might want to reach the maximum by boosting the default by _1.5_.
-Since you have different effect levels within the same game, `adjust_intensity` uses a factor instead of absolute numbers to keep these intensity ratio.
 
-### Complete `tweaks.ini` example
+Since you have different effect levels within the same game, `adjust_intensity` uses a factor instead of absolute
+numbers to keep these intensity ratio.
+
+#### Complete `tweaks.ini` example
 
 ```INI
 [directoutputconfig40.ini]
@@ -178,23 +231,26 @@ adjust_intensity[28] = 1.5
 adjust_intensity[28] = 0.7
 ```
 
-### Usage
+### 3. RegEdit
 
-Just execute the DOF Configtool Client `tweak.php` script. It will apply all your tweaks to your config files located in the directory as configured in `download.ini`.
+The RegEdit feature isn't directly related to DOF config files. But VPinMame will store it's configurations in the
+Windows Registry. If you ever ran into the situation that you have to change such a setting for all your games, you
+might know uncomfortable that task is. 😉
 
-Linux / macOS:
-```
-php tweak.php
-```
+* Select `RegEdit` from the top menu.
+* Adjust the settings for all games at once.
+* At the moment the moment the adjustable settings are limited for good reasons to ...
+  * cabinet_mode
+  * ignore_rom_crc
+  * ddraw
 
-Windows
-```
-php.exe tweak.php
-```
+### Leveraged components and their licences
 
-Before any modification are written to a config file you'll see a list of pending modifications. You'll by asked before the changes get written to the file. Type `no` if you want to skip that file
-or simply hit ENTER to update the config file.
-
-**_Warning:_** The script doesn't detect if a config file has been _tweaked_ already. So running the script twice might have unwanted effects if you don't replace the config files by a fresh download first.
-While absolute value tweaks like `effect_duration` should be kind of safe, multiplications like `adjust_intensity` will be applied again on top of the previous tweak.
-I suggest to use a tool like _git_ to track your config files and their tweaks, but maybe that might be "too much" 😉
+* [https://symfony.com] MIT
+* [https://github.com/sagebind/windows-registry] Apache 2.0
+* [https://github.com/erusev/parsedown] MIT
+* [https://github.com/iphis/fine-diff] MIT
+* [https://getbootstrap.com] MIT
+* [https://jquery.com] MIT
+* [https://popper.js.org/] MIT
+* [https://github.com/cztomczak/phpdesktop] BSD 3-clause license
