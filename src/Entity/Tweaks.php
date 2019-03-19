@@ -12,7 +12,7 @@ class Tweaks
      * @Assert\NotBlank()
      * @var string
      */
-    private $settings;
+    private $settings = '';
 
     public function getSettings(): ?string
     {
