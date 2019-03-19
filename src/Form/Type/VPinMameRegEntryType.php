@@ -14,9 +14,9 @@ class VPinMameRegEntryType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder->add('rom', HiddenType::class)
-            ->add('cabinet_mode', CheckboxType::class, ['label' => 'cabinet_mode'])
-            ->add('ignore_rom_crc', CheckboxType::class, ['label' => 'ignore_rom_crc'])
-            ->add('ddraw', CheckboxType::class, ['label' => 'ddraw']);
+            ->add('cabinet_mode', CheckboxType::class, ['label' => 'cabinet_mode', 'required' => FALSE])
+            ->add('ignore_rom_crc', CheckboxType::class, ['label' => 'ignore_rom_crc', 'required' => FALSE])
+            ->add('ddraw', CheckboxType::class, ['label' => 'ddraw', 'required' => FALSE]);
     }
 
     public function configureOptions(OptionsResolver $resolver)

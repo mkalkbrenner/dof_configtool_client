@@ -2,7 +2,7 @@
 
 namespace App\Entity;
 
-class VPinMameRegEntries
+class VPinMameRegEntries implements \IteratorAggregate
 {
     private $entries = [];
 
@@ -24,4 +24,8 @@ class VPinMameRegEntries
         return $this;
     }
 
+    public function getIterator()
+    {
+        return new \ArrayIterator($this->entries);
+    }
 }

@@ -29,7 +29,9 @@ class RegEditController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // todo
+            foreach ($regEntries as $regEntry) {
+                $regEntry->persist();
+            }
         }
 
         return $this->render('reg_edit/index.html.twig', [

@@ -114,7 +114,17 @@ class VPinMameRegEntry
     public function persist(): self
     {
         if (!$this->trackChanges || $this->hasChanges) {
-            // @todo
+            $key = $this->hkcu->getSubKey("Software\\Freeware\\Visual PinMame\\" . $this->rom);
+            if (!is_null($this->ignore_rom_crc)) {
+                $key->setValue('ignore_rom_crc', $this->ignore_rom_crc, RegistryKey::TYPE_DWORD);
+            }
+            if (!is_null($this->cabinet_mode)) {
+                $key->setValue('cabinet_mode', $this->cabinet_mode, RegistryKey::TYPE_DWORD);
+            }
+            if (!is_null($this->ddraw)) {
+                $key->setValue('ddraw', $this->ddraw, RegistryKey::TYPE_DWORD);
+            }
+            $this->hasChanges = FALSE;
         }
 
         return $this;
@@ -156,7 +166,8 @@ class VPinMameRegEntry
 
 class RegistryKeyDummy
 {
-    public function getSubKey($name) {
+    public function getSubKey($name)
+    {
         return $this;
     }
 
@@ -177,10 +188,15 @@ class RegistryKeyDummy
     public function getValueIterator()
     {
         return [
-            'cabinet_mode' => (bool) random_int(0, 1),
-            'ignore_rom_crc' => (bool) random_int(0, 1),
-            'ddraw' => (bool) random_int(0, 1),
-            'dummy' => (bool) random_int(0, 1),
+            'cabinet_mode' => (bool)random_int(0, 1),
+            'ignore_rom_crc' => (bool)random_int(0, 1),
+            'ddraw' => (bool)random_int(0, 1),
+            'dummy' => (bool)random_int(0, 1),
         ];
+    }
+
+    public function setValue($name, $value, $type)
+    {
+        // nop
     }
 }
