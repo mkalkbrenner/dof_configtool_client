@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c793a47b9c6d218b02a2271175ef9399",
+    "content-hash": "5b8f7466f2e438d8efc5eb40c8f6d7f2",
     "packages": [
         {
             "name": "coderstephen/windows-registry",
-            "version": "v0.9.1",
+            "version": "dev-master",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sagebind/windows-registry.git",
-                "reference": "e8970551ebc4b097f6b2f7316e61c53c87c0d472"
+                "reference": "4d055dcd1099ee4714246dcc00df1175e949df3d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sagebind/windows-registry/zipball/e8970551ebc4b097f6b2f7316e61c53c87c0d472",
-                "reference": "e8970551ebc4b097f6b2f7316e61c53c87c0d472",
+                "url": "https://api.github.com/repos/sagebind/windows-registry/zipball/4d055dcd1099ee4714246dcc00df1175e949df3d",
+                "reference": "4d055dcd1099ee4714246dcc00df1175e949df3d",
                 "shasum": ""
             },
             "require": {
@@ -25,6 +25,7 @@
                 "php": ">=5.3"
             },
             "require-dev": {
+                "apigen/apigen": "^4.1",
                 "phpunit/phpunit": "~4.0"
             },
             "type": "library",
@@ -51,7 +52,7 @@
                 "win32",
                 "windows"
             ],
-            "time": "2015-05-16T03:34:19+00:00"
+            "time": "2018-01-11T18:47:42+00:00"
         },
         {
             "name": "doctrine/annotations",
@@ -1629,16 +1630,16 @@
         },
         {
             "name": "ocramius/proxy-manager",
-            "version": "2.3.0",
+            "version": "2.3.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Ocramius/ProxyManager.git",
-                "reference": "10e0eb0d78f485f349243044fcc8a8ddc52801c7"
+                "reference": "3be07227a0a67232a44852f6ebbb1745bc4d3bb8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Ocramius/ProxyManager/zipball/10e0eb0d78f485f349243044fcc8a8ddc52801c7",
-                "reference": "10e0eb0d78f485f349243044fcc8a8ddc52801c7",
+                "url": "https://api.github.com/repos/Ocramius/ProxyManager/zipball/3be07227a0a67232a44852f6ebbb1745bc4d3bb8",
+                "reference": "3be07227a0a67232a44852f6ebbb1745bc4d3bb8",
                 "shasum": ""
             },
             "require": {
@@ -1700,7 +1701,7 @@
                 "proxy pattern",
                 "service proxies"
             ],
-            "time": "2019-03-16T20:18:37+00:00"
+            "time": "2019-03-19T09:57:01+00:00"
         },
         {
             "name": "phpdocumentor/reflection-common",
@@ -6551,7 +6552,9 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {
+        "coderstephen/windows-registry": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
