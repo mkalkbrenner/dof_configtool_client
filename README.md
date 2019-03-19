@@ -254,3 +254,5 @@ might know uncomfortable that task is. 😉
 * [https://jquery.com] MIT
 * [https://popper.js.org/] MIT
 * [https://github.com/cztomczak/phpdesktop] BSD 3-clause license
+
+The _DOF Configtool Client_ source code is licenced under GPLv3.
