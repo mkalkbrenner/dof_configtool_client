@@ -35,7 +35,7 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 
 [Files]
 Source: "C:\Users\mkalkbrenner\Documents\DOFConfigtoolClient\DOFConfigtoolClient.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\mkalkbrenner\Documents\DOFConfigtoolClient\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: ".git,.gitignore,.idea,www\ini\*.ini,www\System*,www\build,www\var,phpunit,tests,webcache\*,\debug,*.log"
+Source: "C:\Users\mkalkbrenner\Documents\DOFConfigtoolClient\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: ".git,.gitignore,.idea,www\ini\*.ini,www\System*,www\build,www\var,phpunit,tests,webcache\*,\debug,*.log,directoutputconfig*,DirectOutputShapes*,tablemappings*"
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
