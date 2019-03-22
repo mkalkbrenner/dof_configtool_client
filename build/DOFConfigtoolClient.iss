@@ -23,7 +23,7 @@ DefaultDirName={pf}\DOFConfigtoolClient
 DisableDirPage=yes
 DisableProgramGroupPage=yes
 LicenseFile=C:\Users\mkalkbrenner\Documents\DOFConfigtoolClient\www\LICENSE
-OutputBaseFilename=DOFConfigtoolClientSetup
+OutputBaseFilename=DOFConfigtoolClient-{#MyAppVersion}-Setup
 Compression=lzma
 SolidCompression=yes
 
@@ -35,7 +35,7 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 
 [Files]
 Source: "C:\Users\mkalkbrenner\Documents\DOFConfigtoolClient\DOFConfigtoolClient.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\mkalkbrenner\Documents\DOFConfigtoolClient\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: ".git,.gitignore,.idea,*.ini,\System*,www\build,www\var\log,www\var\cache\dev,phpunit,tests,webcache\*,\debug"
+Source: "C:\Users\mkalkbrenner\Documents\DOFConfigtoolClient\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: ".git,.gitignore,.idea,www\ini\*.ini,www\System*,www\build,www\var,phpunit,tests,webcache\*,\debug,*.log"
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]

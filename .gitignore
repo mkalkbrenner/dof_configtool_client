@@ -28,3 +28,4 @@ tweaks.ini
 /public/tablemappings.xml
 /public/DirectOutputShapes.*
 *:Zone.Identifier:$DATA
+/build/Output/

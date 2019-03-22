@@ -9,10 +9,10 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
-class DofConfigtoolDownloaderController extends AbstractController
+class DownloaderController extends AbstractController
 {
     /**
-     * @Route("/dof-configtool-downloader", name="dof_configtool_downloader")
+     * @Route("/download", name="download")
      */
     public function index(Request $request)
     {
@@ -52,6 +52,7 @@ class DofConfigtoolDownloaderController extends AbstractController
                     } else {
                         $this->addFlash('warning', 'Download failed!');
                     }
+                    @unlink($zip_file);
 
                 // no break;
 
@@ -63,14 +64,14 @@ class DofConfigtoolDownloaderController extends AbstractController
                         break;
                     }
 
-                    if ('save' == $name) {
+                    if ('save' === $name) {
                         $this->addFlash('success', 'Saved settings to download.ini.');
                     }
                     break;
             }
         }
 
-        return $this->render('dof_configtool_downloader/index.html.twig', [
+        return $this->render('download/index.html.twig', [
             'download_form' => $form->createView(),
         ]);
     }
