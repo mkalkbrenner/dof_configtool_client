@@ -9,7 +9,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
-class DownloaderController extends AbstractController
+class DownloadController extends AbstractController
 {
     /**
      * @Route("/download", name="download")
