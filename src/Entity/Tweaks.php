@@ -19,6 +19,14 @@ class Tweaks
         $this->ini = ($_SERVER['PROGRAM_DATA'] ?? (__DIR__ . '/../../ini/')) . 'tweaks.ini';
     }
 
+    /**
+     * @return string
+     */
+    public function getIni(): string
+    {
+        return $this->ini;
+    }
+
     public function getSettings(): ?string
     {
         return $this->settings;

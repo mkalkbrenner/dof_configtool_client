@@ -65,7 +65,7 @@ class DownloadController extends AbstractController
                     }
 
                     if ('save' === $name) {
-                        $this->addFlash('success', 'Saved settings to download.ini.');
+                        $this->addFlash('success', 'Saved settings to '.$dofConfigtoolDownload->getIni().'.');
                     }
                     break;
             }

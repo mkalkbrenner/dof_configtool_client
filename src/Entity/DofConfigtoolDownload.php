@@ -25,6 +25,14 @@ class DofConfigtoolDownload
         $this->ini = ($_SERVER['PROGRAM_DATA'] ?? (__DIR__ . '/../../ini/')) . 'download.ini';
     }
 
+    /**
+     * @return string
+     */
+    public function getIni(): string
+    {
+        return $this->ini;
+    }
+
     public function getLcpApiKey(): ?string
     {
         return $this->lcpApiKey;

@@ -65,7 +65,7 @@ class TweakController extends AbstractController
 
             try {
                 $tweaks->persist();
-                $this->addFlash('success', 'Saved settings to tweaks.ini.');
+                $this->addFlash('success', 'Saved settings to '.$tweaks->getIni().'.');
                 return $this->redirectToRoute('tweak');
             } catch (\Exception $e) {
                 $this->addFlash('warning', $e->getMessage());
