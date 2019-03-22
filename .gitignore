@@ -24,9 +24,7 @@ tweaks.ini
 ###> symfony/web-server-bundle ###
 /.web-server-pid
 ###< symfony/web-server-bundle ###
-/public/directoutputconfig30.ini
+/public/directoutputconfig*
 /public/tablemappings.xml
-/public/directoutputconfig51.ini
-/public/DirectOutputShapes.png
-/public/DirectOutputShapes.xml
-/public/directoutputconfig40.ini
+/public/DirectOutputShapes.*
+*:Zone.Identifier:$DATA
