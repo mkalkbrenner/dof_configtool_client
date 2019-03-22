@@ -22,7 +22,7 @@ class DofConfigtoolDownload
 
     public function __construct()
     {
-        $this->ini = ($_SERVER['PROGRAM_DATA'] ?? (__DIR__ . '/../../ini/')) . 'download.ini';
+        $this->ini = ($_SERVER['PROGRAM_DATA'] ?? (__DIR__ . '/../../ini')) . '/download.ini';
     }
 
     /**

@@ -4,7 +4,6 @@ namespace App\Controller;
 
 use App\Entity\DofConfigtoolDownload;
 use App\Entity\Tweaks;
-use GorHill\FineDiff\FineDiff;
 use iphis\FineDiff\Diff;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
@@ -111,6 +110,8 @@ class TweakController extends AbstractController
 
         foreach ($mods as $file => $per_game_mods) {
             if ($contents = file_get_contents($file)) {
+                // Normalize line endings.
+                $contents = preg_replace('/\R/', "\r\n", $contents);
                 $files[$file] = $contents;
                 list($head, $config) = explode('[Config DOF]', $contents);
                 $colors = [];
@@ -129,6 +130,7 @@ class TweakController extends AbstractController
                         }
                     }
                 }
+                $games = [];
                 foreach (explode("\r\n", $config) as $game_row) {
                     if ($game_row = trim($game_row)) {
                         $game_row_elements = str_getcsv($game_row);
@@ -165,6 +167,7 @@ class TweakController extends AbstractController
                                                     foreach ($triggers as &$trigger) {
                                                         $trigger = preg_replace('/([SWE]\d+$)/', '$1 ' . $setting, $trigger);
                                                     }
+                                                    unset($trigger);
                                                     $new = implode('/', $triggers);
                                                     if ($new != $game[$port]) {
                                                         $game[$port] = $new;
@@ -201,6 +204,7 @@ class TweakController extends AbstractController
                                                             $trigger = preg_replace('/[I]\d+/', 'I' . $intensity, $trigger);
                                                         }
                                                     }
+                                                    unset($trigger);
                                                     $new = implode('/', $triggers);
                                                     if ($new != $game[$port]) {
                                                         $game[$port] = $new;
@@ -238,8 +242,7 @@ class TweakController extends AbstractController
                     $game_name = $diff_cells[0];
                     $real_port = 0;
                     foreach ($diff_cells as $port => $dof_string) {
-                        $dof_string = str_replace('<ins>', '<ins class="bg-success">', $dof_string);
-                        $dof_string = str_replace('<del>', '<del class="bg-danger">', $dof_string);
+                        $dof_string = str_replace(['<ins>', '<del>'], ['<ins class="bg-success">', '<del class="bg-danger">'], $dof_string);
 
                         $header .= '<th scope="col"' . (in_array($real_port + 1, $rgb_ports[$game_name]) ? ' bgcolor="red">' : '>') . ($real_port ?: '');
                         ++$real_port;
@@ -291,7 +294,7 @@ class TweakController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             try {
-                $files = unserialize(base64_decode($form->getData()['files']));
+                $files = unserialize(base64_decode($form->getData()['files']), false);
                 foreach ($files as $file => $content) {
                     if (file_put_contents($file, $content)) {
                         $this->addFlash('success', 'Saved tweaked version of ' . $file . '.');

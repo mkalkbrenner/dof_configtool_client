@@ -16,7 +16,7 @@ class Tweaks
 
     public function __construct()
     {
-        $this->ini = ($_SERVER['PROGRAM_DATA'] ?? (__DIR__ . '/../../ini/')) . 'tweaks.ini';
+        $this->ini = ($_SERVER['PROGRAM_DATA'] ?? (__DIR__ . '/../../ini')) . '/tweaks.ini';
     }
 
     /**
