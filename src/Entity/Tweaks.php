@@ -6,13 +6,18 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 class Tweaks
 {
-    const TWEAKS_INI = __DIR__ . '/../../ini/tweaks.ini';
-
     /**
      * @Assert\NotBlank()
      * @var string
      */
     private $settings = '';
+
+    private $ini;
+
+    public function __construct()
+    {
+        $this->ini = ($_SERVER['PROGRAM_DATA'] ?? (__DIR__ . '/../../ini/')) . 'tweaks.ini';
+    }
 
     public function getSettings(): ?string
     {
@@ -33,8 +38,8 @@ class Tweaks
 
     public function load() : self
     {
-        if (file_exists(self::TWEAKS_INI)) {
-            $this->settings = file_get_contents(self::TWEAKS_INI);
+        if (file_exists($this->ini)) {
+            $this->settings = file_get_contents($this->ini);
         }
 
         return $this;
@@ -42,8 +47,8 @@ class Tweaks
 
     public function persist() : self
     {
-        if (!file_put_contents(self::TWEAKS_INI, $this->settings)) {
-            throw new \RuntimeException('Could not write file ' . self::TWEAKS_INI);
+        if (!file_put_contents($this->ini, $this->settings)) {
+            throw new \RuntimeException('Could not write file ' . $this->ini);
         }
 
         return $this;

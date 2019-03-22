@@ -6,8 +6,6 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 class DofConfigtoolDownload
 {
-    const DOWNLOAD_INI = __DIR__ . '/../../ini/download.ini';
-
     /**
      * @Assert\NotBlank()
      * @var string
@@ -19,6 +17,13 @@ class DofConfigtoolDownload
      * @var string
      */
     private $dofConfigPath = '';
+
+    private $ini;
+
+    public function __construct()
+    {
+        $this->ini = ($_SERVER['PROGRAM_DATA'] ?? (__DIR__ . '/../../ini/')) . 'download.ini';
+    }
 
     public function getLcpApiKey(): ?string
     {
@@ -46,8 +51,8 @@ class DofConfigtoolDownload
 
     public function load() : self
     {
-        if (file_exists(self::DOWNLOAD_INI)) {
-            $download = parse_ini_file(self::DOWNLOAD_INI, TRUE);
+        if (file_exists($this->ini)) {
+            $download = parse_ini_file($this->ini, TRUE);
             $this->setLcpApiKey($download['download']['LCP_APIKEY']);
             $this->setDofConfigPath($download['download']['DOF_CONFIG_PATH']);
         }
@@ -57,10 +62,10 @@ class DofConfigtoolDownload
 
     public function persist() : self
     {
-        if (!file_put_contents(self::DOWNLOAD_INI,
+        if (!file_put_contents($this->ini,
             "[download]\r\nLCP_APIKEY = " . $this->getLcpApiKey() . "\r\nDOF_CONFIG_PATH = " . $this->getDofConfigPath() . "\r\n")
         ) {
-            throw new \RuntimeException('Could not write file ' . self::DOWNLOAD_INI);
+            throw new \RuntimeException('Could not write file ' . $this->ini);
         }
 
         return $this;

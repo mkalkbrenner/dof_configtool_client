@@ -9,6 +9,7 @@ require dirname(__DIR__).'/config/bootstrap.php';
 if (isset($_SERVER['PHPDESKTOP_VERSION'])) {
     $_SERVER['APP_DEBUG'] = FALSE;
     $_SERVER['APP_ENV'] = 'prod';
+    $_SERVER['PROGRAM_DATA'] = trim(str_replace('sess', '', ini_get('session.save_path')), '/\\');
 }
 
 if ($_SERVER['APP_DEBUG']) {

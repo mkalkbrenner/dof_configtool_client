@@ -51,8 +51,8 @@ class Kernel extends BaseKernel
      */
     public function getCacheDir()
     {
-        if (isset($_SERVER['PHPDESKTOP_VERSION'])) {
-            return trim(str_replace('sess','', ini_get('session.save_path')), '/\\').'/cache/'.$this->environment;
+        if (isset($_SERVER['PROGRAM_DATA'])) {
+            return $_SERVER['PROGRAM_DATA'].'/cache/'.$this->environment;
         }
         return parent::getCacheDir();
     }
@@ -62,8 +62,8 @@ class Kernel extends BaseKernel
      */
     public function getLogDir()
     {
-        if (isset($_SERVER['PHPDESKTOP_VERSION'])) {
-            return trim(str_replace('sess','', ini_get('session.save_path')), '/\\').'/log';
+        if (isset($_SERVER['PROGRAM_DATA'])) {
+            return $_SERVER['PROGRAM_DATA'].'/log';
         }
         return parent::getLogDir();
     }
