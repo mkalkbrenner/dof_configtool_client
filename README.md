@@ -35,6 +35,9 @@ The client itself very light wight. But due to the fact that PHP is uncommon for
 to install the client: As a light wight PHP application as usual requiring a working PHP installation or as an
 all-in-one package based on [https://github.com/cztomczak/phpdesktop](php-desktop).
 
+Another advantage of this PHP based wev application approach is that you can use the tool remotely, for example using
+your laptop and your preferred browser.
+
 ## Disclaimer
 
 There's **no warrenty!**
@@ -71,7 +74,8 @@ software.
   * You'll find your `LCP_APIKEY` on the start page after login into [http://configtool.vpuniverse.com]
 
   * As `DOF_CONFIG_PATH` you have to provide the directory where the downloaded configs should be stored. In most cases
-    this should be `C:\DirectOutput\config`.
+    this should be `C:\DirectOutput\config`. **_Note:_** you have to ensure that this directory is writable. In case you
+    get an error right click on the directory in Explorer in check this setting.
 * Download your configs using the corresponding button. (Note: Sometimes the configtool is slow. So the download could
   take some time.)
 

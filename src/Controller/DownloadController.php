@@ -44,7 +44,7 @@ class DownloadController extends AbstractController
                             if ($zip->open($zip_file) && $zip->extractTo($dofConfigtoolDownload->getDofConfigPath())) {
                                 $this->addFlash('success', 'Successfully downloaded and extracted configuration files to ' . $dofConfigtoolDownload->getDofConfigPath() . '.');
                             } else {
-                                $this->addFlash('warning', 'Failed to extract downloaded files!');
+                                $this->addFlash('warning', 'Failed to extract downloaded files! Please verify that the target directory is writable.');
                             }
                         } catch (\Exception $e) {
                             $this->addFlash('warning', file_get_contents($zip_file));
