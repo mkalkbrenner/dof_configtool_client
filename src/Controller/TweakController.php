@@ -285,7 +285,7 @@ class TweakController extends AbstractController
     public function tweak(Request $request)
     {
         $form = $this->createFormBuilder()
-            ->add('cancel', TextareaType::class, ['label' => 'Cancel'])
+            ->add('cancel', SubmitType::class, ['label' => 'Cancel'])
             ->add('save', SubmitType::class, ['label' => 'Save'])
             ->add('files', HiddenType::class, ['data' => ''])
             ->getForm();
@@ -293,18 +293,23 @@ class TweakController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            try {
-                $files = unserialize(base64_decode($form->getData()['files']), false);
-                foreach ($files as $file => $content) {
-                    if (file_put_contents($file, $content)) {
-                        $this->addFlash('success', 'Saved tweaked version of ' . $file . '.');
+            /** @var \Symfony\Component\Form\Form $form */
+            $name = $form->getClickedButton()->getConfig()->getName();
+            switch ($name) {
+                case 'save':
+                    try {
+                        $files = unserialize(base64_decode($form->getData()['files']), [false]);
+                        foreach ($files as $file => $content) {
+                            if (file_put_contents($file, $content)) {
+                                $this->addFlash('success', 'Saved tweaked version of ' . $file . '.');
+                            } else {
+                                $this->addFlash('danger', 'Failed to save tweaked version of' . $file . '.');
+                            }
+                        }
+                    } catch (\Exception $e) {
+                        $this->addFlash('warning', $e->getMessage());
                     }
-                    else {
-                        $this->addFlash('danger', 'Failed to save tweaked version of' . $file . '.');
-                    }
-                }
-            } catch (\Exception $e) {
-                $this->addFlash('warning', $e->getMessage());
+                    break;
             }
         }
 

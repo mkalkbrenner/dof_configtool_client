@@ -108,18 +108,18 @@ game while the global one gets applied for all the other games.
 ```INI
 [directoutputconfig40.ini]
 ; Global settings for output controller #40.
-effect_duration[23] = 100
-effect_duration[26] = 100
+default_effect_duration[23] = 100
+default_effect_duration[26] = 100
 [abv106]
 ; Individual settings for game *abv106* for output controller #40.
-effect_duration[23] = 230
+default_effect_duration[23] = 230
 
 [directoutputconfig51.ini]
 ; Global settings for output controller #51.
-effect_duration[11] = 60
+default_effect_duration[11] = 60
 [abv106]
 ; Individual settings for game *abv106* for output controller #51.
-effect_duration[13] = 120
+default_effect_duration[13] = 120
 ```
 
 * The effect duration for port _**26**_ on output controller _**40**_ will be set to _**100**ms_ for all games.
@@ -210,8 +210,8 @@ numbers to keep these intensity ratio.
 ```INI
 [directoutputconfig40.ini]
 ; Set an effect duration of 100ms on device #40 ports #23 and #26.
-effect_duration[23] = 100
-effect_duration[26] = 100
+default_effect_duration[23] = 100
+default_effect_duration[26] = 100
 
 [directoutputconfig51.ini]
 ; Set an inverted effect duration of 500ms on device #51 port #11.
