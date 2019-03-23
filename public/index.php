@@ -4,6 +4,8 @@ use App\Kernel;
 use Symfony\Component\Debug\Debug;
 use Symfony\Component\HttpFoundation\Request;
 
+define('DOFCTC_VERSION', '0.1.1');
+
 require dirname(__DIR__).'/config/bootstrap.php';
 
 if (isset($_SERVER['PHPDESKTOP_VERSION'])) {
