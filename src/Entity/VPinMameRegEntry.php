@@ -9,11 +9,13 @@ class VPinMameRegEntry
 {
     private $rom;
 
-    private $cabinet_mode = NULL;
+    private $cabinet_mode;
 
-    private $ignore_rom_crc = NULL;
+    private $ignore_rom_crc;
 
-    private $ddraw = NULL;
+    private $ddraw;
+
+    private $dmd_colorize;
 
     private $trackChanges = FALSE;
 
@@ -31,10 +33,9 @@ class VPinMameRegEntry
         if (extension_loaded('com_dotnet')) {
             return Registry::connect()->getCurrentUser();
         }
-        else {
-            // Useful for development on unix-like systems.
-            return new RegistryKeyDummy();
-        }
+
+        // Useful for development on unix-like systems.
+        return new RegistryKeyDummy();
     }
 
     public function getRom(): ?string
@@ -94,6 +95,21 @@ class VPinMameRegEntry
         return $this;
     }
 
+    public function getDmdColorize(): ?bool
+    {
+        return $this->dmd_colorize;
+    }
+
+    public function setDmdColorize(bool $dmd_colorize): self
+    {
+        if ($this->trackChanges && $this->dmd_colorize != $dmd_colorize) {
+            $this->hasChanges = TRUE;
+        }
+        $this->dmd_colorize = $dmd_colorize;
+
+        return $this;
+    }
+
     public function trackChanges(bool $track = TRUE): self
     {
         $this->trackChanges = $track;
@@ -115,14 +131,17 @@ class VPinMameRegEntry
     {
         if (!$this->trackChanges || $this->hasChanges) {
             $key = $this->hkcu->getSubKey("Software\\Freeware\\Visual PinMame\\" . $this->rom);
-            if (!is_null($this->ignore_rom_crc)) {
+            if (null !== $this->ignore_rom_crc) {
                 $key->setValue('ignore_rom_crc', $this->ignore_rom_crc, RegistryKey::TYPE_DWORD);
             }
-            if (!is_null($this->cabinet_mode)) {
+            if (null !== $this->cabinet_mode) {
                 $key->setValue('cabinet_mode', $this->cabinet_mode, RegistryKey::TYPE_DWORD);
             }
-            if (!is_null($this->ddraw)) {
+            if (null !== $this->ddraw) {
                 $key->setValue('ddraw', $this->ddraw, RegistryKey::TYPE_DWORD);
+            }
+            if (null !== $this->dmd_colorize) {
+                $key->setValue('dmd_colorize', $this->ddraw, RegistryKey::TYPE_DWORD);
             }
             $this->hasChanges = FALSE;
         }
@@ -150,13 +169,16 @@ class VPinMameRegEntry
         foreach ($key->getValueIterator() as $valueName => $value) {
             switch ($valueName) {
                 case 'cabinet_mode':
-                    $entry->setCabinetMode((bool)$value);
+                    $entry->setCabinetMode((bool) $value);
                     break;
                 case 'ignore_rom_crc':
-                    $entry->setIgnoreRomCrc((bool)$value);
+                    $entry->setIgnoreRomCrc((bool) $value);
                     break;
                 case 'ddraw':
-                    $entry->setDdraw((bool)$value);
+                    $entry->setDdraw((bool) $value);
+                    break;
+                case 'dmd_colorize':
+                    $entry->setDmdColorize((bool) $value);
                     break;
             }
         }
@@ -191,6 +213,7 @@ class RegistryKeyDummy
             'cabinet_mode' => (bool)random_int(0, 1),
             'ignore_rom_crc' => (bool)random_int(0, 1),
             'ddraw' => (bool)random_int(0, 1),
+            'dmd_colorize' => (bool)random_int(0, 1),
             'dummy' => (bool)random_int(0, 1),
         ];
     }

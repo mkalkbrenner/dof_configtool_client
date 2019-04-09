@@ -23,9 +23,8 @@ This client will never replace the awesome DOF Configtool!
 But whenever you need to make an individual adjustment for _all_ tables for a specific port of an output controller,
 this tool might become useful﻿ 😉
 
-In addition to the available tweaks described below you can think of various other tweaks,
-for example inverting an effect or anything else described at
-[http://directoutput.github.io/DirectOutput/inifiles.html].
+In addition to the available tweaks described below you can think of various other tweaks, for example inverting an
+effect or anything else described at [http://directoutput.github.io/DirectOutput/inifiles.html].
 Just open an issue at [https://github.com/mkalkbrenner/dof_configtool_client/issues] if you have an idea or require
 something special.
 
@@ -67,15 +66,25 @@ software.
 
 ## Usage
 
-### 1. Download your configs
+### 1. Configure
 
-* Select `Download` from the top menu.
+* Select `Settings` from the top menu.
+
 * Complete your `Settings`:
   * You'll find your `LCP_APIKEY` on the start page after login into [http://configtool.vpuniverse.com]
 
-  * As `DOF_CONFIG_PATH` you have to provide the directory where the downloaded configs should be stored. In most cases
-    this should be `C:\DirectOutput\config`. **_Note:_** you have to ensure that this directory is writable. In case you
-    get an error right click on the directory in Explorer in check this setting.
+  * As `DOF path` you have to provide the directory where DOF is installed. In most cases this should be
+    `C:\DirectOutput\config`. **_Note:_** you have to ensure that this directory is writable. In case you get an error
+    right click on the directory in Explorer in check this setting.
+
+  * As `Visual Pinball path` you have to provide the directory where Visual Pinball is installed. In most cases this
+    should be `C:\VisualPinball`. **_Note:_** you have to ensure that this directory is writable. In case you get an
+    error right click on the directory in Explorer in check this setting.
+
+### 1. Download your configs
+
+* Select `Download` from the top menu.
+
 * Download your configs using the corresponding button. (Note: Sometimes the configtool is slow. So the download could
   take some time.)
 
@@ -209,6 +218,49 @@ In case you have a small shaker motor you might want to reach the maximum by boo
 Since you have different effect levels within the same game, `adjust_intensity` uses a factor instead of absolute
 numbers to keep these intensity ratio.
 
+##### `merge`
+
+This tweak merges two ports. In fact it appends the entire content of the second port to the first port. So
+`merge[7] = 14` will append the entire configuration of port _14_ to port _7_. `merge[7] = 14,16` will append the entire
+configurations of port _14_ and port _16_ to port _7_
+
+###### Use-cases
+
+In some way this tweak is comparable to _combos_ in the DOF Configtool. But beside the fact that a `merge` could be
+applied to a specific game only, the main difference is, that `merge` is a kind of _inverted combo_. Instead of
+combining two toys as one in general, you can replicate one toy on another toys and both are triggerd.
+
+For example you might wish to turn on your beacon in addition when the fire button or the start button gets illuminated.
+Or you would turn on the fan in addition to the shaker.
+
+##### `merge_and_turn_off`
+
+`merge_and_turn_off` basically works exactly like `merge` in `turn_off` in combination. so `merge_and_turn_off[7] = 14`
+will append the entire configuration of port _14_ to port _7_ and then turn off port _7_ in general or a given game.
+
+###### Use-cases
+
+Similar to `merge` you can turn on a beacon but now _instead of_ the fire button or the start button.
+
+##### `replace`
+
+This tweak works like `merge` as it merges all given ports. But instead of appending their content to a port's
+configuration they replace it. So `replace[7] = 14,16` will merge the configurations of port _14_ and _16_ and replace
+port _7_ by it.
+
+###### Use-cases
+
+For example you can turn off the standard beacon effects by replacing them by the fire button. So the beacon will only
+be turned on when the fire button gets illuminated.
+
+##### `swap`
+
+This tweak swaps to ports. So `swap[7] = 14` will assign the configuration of port _14_ to _7_ and vice versa.
+
+###### Use-cases
+
+Maybe you want to swap the gear and the shaker motor for a specific game, who knows? 😉
+
 #### Complete `tweaks.ini` example
 
 ```INI
@@ -247,6 +299,7 @@ might know uncomfortable that task is. 😉
   * cabinet_mode
   * ignore_rom_crc
   * ddraw
+  * dmd_colorize
 
 ### Leveraged components and their licences
 
@@ -258,5 +311,6 @@ might know uncomfortable that task is. 😉
 * [https://jquery.com] MIT
 * [https://popper.js.org/] MIT
 * [https://github.com/cztomczak/phpdesktop] BSD 3-clause license
+* [http://www.daemonology.net/bsdiff/] BSD Protection License
 
 The _DOF Configtool Client_ source code is licenced under GPLv3.

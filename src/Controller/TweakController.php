@@ -2,7 +2,7 @@
 
 namespace App\Controller;
 
-use App\Entity\DofConfigtoolDownload;
+use App\Entity\Settings;
 use App\Entity\Tweaks;
 use iphis\FineDiff\Diff;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -83,7 +83,7 @@ class TweakController extends AbstractController
     {
         ini_set('set_time_limit', 0);
 
-        $dofConfigtoolDownload = new DofConfigtoolDownload();
+        $dofConfigtoolDownload = new Settings();
         $dofConfigtoolDownload->load();
 
         $tweaks = new Tweaks();
@@ -161,6 +161,57 @@ class TweakController extends AbstractController
                                         if (isset($game[$port])) {
 
                                             switch ($name) {
+
+                                                // merge port 13 and 21 and save the result on port 13.
+                                                // merge[17] = 21
+                                                case 'merge':
+                                                    $ports_to_merge = explode(',', $setting);
+                                                    foreach ($ports_to_merge as $port_to_merge) {
+                                                        $port_to_merge = trim($port_to_merge);
+                                                        if ($game[$port_to_merge]) {
+                                                            if ($game[$port]) {
+                                                                $game[$port] .= '/' . $game[$port_to_merge];
+                                                            } else {
+                                                                $game[$port] = $game[$port_to_merge];
+                                                            }
+                                                        }
+                                                    }
+                                                    break;
+
+                                                case 'merge_and_turn_off':
+                                                    $ports_to_merge = explode(',', $setting);
+                                                    foreach ($ports_to_merge as $port_to_merge) {
+                                                        $port_to_merge = trim($port_to_merge);
+                                                        if ($game[$port_to_merge]) {
+                                                            if ($game[$port]) {
+                                                                $game[$port] .= '/' . $game[$port_to_merge];
+                                                            } else {
+                                                                $game[$port] = $game[$port_to_merge];
+                                                            }
+                                                            $game[$port_to_merge] = 0;
+                                                        }
+                                                    }
+                                                    break;
+
+                                                case 'replace':
+                                                    $ports_to_merge = explode(',', $setting);
+                                                    $replacements = [];
+                                                    foreach ($ports_to_merge as $port_to_merge) {
+                                                        $port_to_merge = trim($port_to_merge);
+                                                        if ($game[$port_to_merge]) {
+                                                            $replacements[] = $game[$port_to_merge];
+                                                        }
+                                                    }
+                                                    $replacement = implode('/', $replacements);
+                                                    $game[$port] = $replacement ?: '0';
+                                                    break;
+
+                                                case 'swap':
+                                                    $setting = trim($setting);
+                                                    $tmp = $game[$port];
+                                                    $game[$port] = $game[$setting];
+                                                    $game[$setting] = $tmp;
+                                                    break;
 
                                                 case 'default_effect_duration':
                                                     $triggers = explode('/', $game[$port]);

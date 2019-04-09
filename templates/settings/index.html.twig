@@ -1,0 +1,11 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Settings{% endblock %}
+
+{% block body %}
+    <h2>Settings</h2>
+    {{ form_start(settings_form) }}
+    {{ form_errors(settings_form) }}
+    {{ form_widget(settings_form) }}
+    {{ form_end(settings_form) }}
+{% endblock %}

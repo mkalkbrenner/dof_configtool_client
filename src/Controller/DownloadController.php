@@ -2,7 +2,7 @@
 
 namespace App\Controller;
 
-use App\Entity\DofConfigtoolDownload;
+use App\Entity\Settings;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -16,33 +16,32 @@ class DownloadController extends AbstractController
      */
     public function index(Request $request)
     {
-        $dofConfigtoolDownload = new DofConfigtoolDownload();
-        $dofConfigtoolDownload->load();
-
-        $form = $this->createFormBuilder($dofConfigtoolDownload)
-            ->add('lcpApiKey', TextType::class, ['label' => 'LCP_APIKEY'])
-            ->add('dofConfigPath', TextType::class, ['label' => 'DOF_CONFIG_PATH'])
-            ->add('save', SubmitType::class, ['label' => 'Save settings'])
+        $form = $this->createFormBuilder()
             ->add('download', SubmitType::class, ['label' => 'Download config files'])
             ->getForm();
 
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            /** @var DofConfigtoolDownload $dofConfigtoolDownload */
-            $dofConfigtoolDownload = $form->getData();
-
             /** @var \Symfony\Component\Form\Form $form */
             $name = $form->getClickedButton()->getConfig()->getName();
             switch ($name) {
                 case 'download':
                     ini_set('set_time_limit', 0);
+
+                    $dofConfigtoolDownload = new Settings();
+                    $dofConfigtoolDownload->load();
+
                     $zip_file = tempnam(sys_get_temp_dir(), 'dof_config');
                     if (copy('http://configtool.vpuniverse.com/api.php?query=getconfig&apikey=' . $dofConfigtoolDownload->getLcpApiKey(), $zip_file) && filesize($zip_file)) {
                         try {
+                            $config_path = $dofConfigtoolDownload->getDofConfigPath();
+                            if (!is_dir($config_path)) {
+                                mkdir($config_path);
+                            }
                             $zip = new \ZipArchive();
-                            if ($zip->open($zip_file) && $zip->extractTo($dofConfigtoolDownload->getDofConfigPath())) {
-                                $this->addFlash('success', 'Successfully downloaded and extracted configuration files to ' . $dofConfigtoolDownload->getDofConfigPath() . '.');
+                            if ($zip->open($zip_file) && $zip->extractTo($config_path)) {
+                                $this->addFlash('success', 'Successfully downloaded and extracted configuration files to ' . $config_path . '.');
                             } else {
                                 $this->addFlash('warning', 'Failed to extract downloaded files! Please verify that the target directory is writable.');
                             }
@@ -53,20 +52,6 @@ class DownloadController extends AbstractController
                         $this->addFlash('warning', 'Download failed!');
                     }
                     @unlink($zip_file);
-
-                    // no break;
-
-                case 'save':
-                    try {
-                        $dofConfigtoolDownload->persist();
-                    } catch (\Exception $e) {
-                        $this->addFlash('warning', $e->getMessage());
-                        break;
-                    }
-
-                    if ('save' === $name) {
-                        $this->addFlash('success', 'Saved settings to '.$dofConfigtoolDownload->getIni().'.');
-                    }
                     break;
             }
         }
