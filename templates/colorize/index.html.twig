@@ -9,3 +9,11 @@
     {{ form_widget(colorize_form) }}
     {{ form_end(colorize_form) }}
 {% endblock %}
+
+{% block javascripts %}
+    <script lang="js">
+        $(document).ready(function () {
+            bsCustomFileInput.init()
+        })
+    </script>
+{% endblock %}

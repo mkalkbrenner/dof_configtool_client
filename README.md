@@ -310,6 +310,7 @@ might know uncomfortable that task is. 😉
 * [https://getbootstrap.com] MIT
 * [https://jquery.com] MIT
 * [https://popper.js.org/] MIT
+* [https://www.npmjs.com/package/bs-custom-file-input] MIT
 * [https://github.com/cztomczak/phpdesktop] BSD 3-clause license
 * [http://www.daemonology.net/bsdiff/] BSD Protection License
 
