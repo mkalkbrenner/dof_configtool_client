@@ -1,0 +1,19 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Assign Backglasses{% endblock %}
+
+{% block body %}
+    <h2>Assign Backglasses</h2>
+    {{ form_start(backglasses_form) }}
+    {{ form_errors(backglasses_form) }}
+    {{ form_widget(backglasses_form) }}
+    {{ form_end(backglasses_form) }}
+{% endblock %}
+
+{% block javascripts %}
+    <script lang="js">
+        $(document).ready(function () {
+            bsCustomFileInput.init()
+        })
+    </script>
+{% endblock %}

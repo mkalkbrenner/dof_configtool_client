@@ -81,7 +81,7 @@ class Settings
 
     public function getVPinMamePath(): ?string
     {
-        return $this->getVisualPinballPath() . DIRECTORY_SEPARATOR . 'VPinMame';
+        return $this->getVisualPinballPath() . DIRECTORY_SEPARATOR . 'VPinMAME';
     }
 
     public function getRomsPath(): ?string
@@ -109,7 +109,7 @@ class Settings
 
     public function getTablesPath(): ?string
     {
-        return $this->getVisualPinballPath() . DIRECTORY_SEPARATOR . 'tables';
+        return $this->getVisualPinballPath() . DIRECTORY_SEPARATOR . 'Tables';
     }
 
     public function setVisualPinballPath(string $visualPinballPath): self
