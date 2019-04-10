@@ -6,6 +6,7 @@ use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
 use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\Config\Resource\FileResource;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpKernel\Kernel as BaseKernel;
 use Symfony\Component\Routing\RouteCollectionBuilder;
 
@@ -52,7 +53,18 @@ class Kernel extends BaseKernel
     public function getCacheDir()
     {
         if (isset($_SERVER['PROGRAM_DATA'])) {
-            return $_SERVER['PROGRAM_DATA'].'/cache/'.$this->environment;
+            $cache_dir = $_SERVER['PROGRAM_DATA'].DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.$this->environment;
+            $filesystem = new Filesystem();
+            $version = '';
+            $version_txt = $_SERVER['PROGRAM_DATA'].DIRECTORY_SEPARATOR.'version.txt';
+            if ($filesystem->exists($version_txt)) {
+                $version = file_get_contents($version_txt);
+            }
+            if (DOFCTC_VERSION !== $version) {
+                $filesystem->remove($cache_dir);
+                $filesystem->dumpFile($version_txt, DOFCTC_VERSION);
+            }
+            return $cache_dir;
         }
         return parent::getCacheDir();
     }
@@ -63,7 +75,7 @@ class Kernel extends BaseKernel
     public function getLogDir()
     {
         if (isset($_SERVER['PROGRAM_DATA'])) {
-            return $_SERVER['PROGRAM_DATA'].'/log';
+            return $_SERVER['PROGRAM_DATA'].DIRECTORY_SEPARATOR.'log';
         }
         return parent::getLogDir();
     }

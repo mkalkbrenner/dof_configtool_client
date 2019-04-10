@@ -4,9 +4,9 @@ namespace App\Controller;
 
 use App\Entity\Settings;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -38,6 +38,7 @@ class BackglassesController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $filesystem = new Filesystem();
             $settings = $this->getSettings();
             $table_path = $settings->getTablesPath() . DIRECTORY_SEPARATOR;
             $data = $form->getData();
@@ -45,21 +46,27 @@ class BackglassesController extends AbstractController
             foreach ($data as $key => $backglass_file) {
                 $target_backglass_file = $table_path . $tables[$key] . '.directb2s';
                 if ('_' !== $backglass_file) {
-                    if (!file_exists($target_backglass_file)) {
+                    if (!$filesystem->exists($target_backglass_file)) {
                         if ($count[$backglass_file] > 1) {
-                            if (copy( $table_path . $backglass_file, $target_backglass_file)) {
+                            try {
+                                $filesystem->copy( $table_path . $backglass_file, $target_backglass_file, true);
                                 $this->addFlash('success', 'Copied ' . $backglass_file . ' to ' . $tables[$key] . '.directb2s');
+                            } catch (\Exception $e) {
                             }
                         } else {
-                            if (rename( $table_path . $backglass_file, $target_backglass_file)) {
+                            try {
+                                $filesystem->rename($table_path . $backglass_file, $target_backglass_file, true);
                                 $this->addFlash('success', 'Renamed ' . $backglass_file . ' to ' . $tables[$key] . '.directb2s');
+                            } catch (\Exception $e) {
                             }
                         }
                     }
                 } else {
-                    if (file_exists($target_backglass_file)) {
-                        if (rename( $target_backglass_file, $table_path . '_' . $tables[$key] . '.directb2s')) {
+                    if ($filesystem->exists($target_backglass_file)) {
+                        try {
+                            $filesystem->rename( $target_backglass_file, $table_path . '_' . $tables[$key] . '.directb2s', true);
                             $this->addFlash('success', 'Renamed ' . $tables[$key] . '.directb2s to _' . $tables[$key] . '.directb2s');
+                        } catch (\Exception $e) {
                         }
                     }
                 }
@@ -75,16 +82,23 @@ class BackglassesController extends AbstractController
 
     private function getExistingTablesAndBackglassChoices(): array
     {
-        foreach (scandir($this->getSettings()->getTablesPath()) as $filename) {
-            $basename = preg_replace('/\.vpx/i', '', $filename);
-            if ($basename !== $filename) {
-                $tables[md5($filename)] = $basename;
-                continue;
+        $tables = [];
+        $backglasses = [];
+        $tables_path = $this->getSettings()->getTablesPath();
+        if (is_writable($tables_path)) {
+            foreach (scandir($tables_path) as $filename) {
+                $basename = preg_replace('/\.vpx/i', '', $filename);
+                if ($basename !== $filename) {
+                    $tables[md5($filename)] = $basename;
+                    continue;
+                }
+                $basename = preg_replace('/\.directb2s/i', '', $filename);
+                if ($basename !== $filename) {
+                    $backglasses[$basename] = $filename;
+                }
             }
-            $basename = preg_replace('/\.directb2s/i', '', $filename);
-            if ($basename !== $filename) {
-                $backglasses[$basename] = $filename;
-            }
+        } else {
+            $this->addFlash('error', 'Directory ' . $tables_path . ' is not writable!');
         }
         return [$tables, $backglasses];
     }
