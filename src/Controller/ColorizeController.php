@@ -90,7 +90,8 @@ class ColorizeController extends AbstractSettingsController
                 }
 
                 $colorized_rom = $files['dir'] . DIRECTORY_SEPARATOR . $name . '.bin';
-                if (false !== system($bspatch . ' ' . $files['dir'] . DIRECTORY_SEPARATOR . $files['bin'] . ' ' . $colorized_rom . ' ' . $files['dir'] . DIRECTORY_SEPARATOR . $files['diff']) && $this->filesystem->exists($colorized_rom)) {
+                $command = $bspatch . ' ' . $files['dir'] . DIRECTORY_SEPARATOR . $files['bin'] . ' ' . $colorized_rom . ' ' . $files['dir'] . DIRECTORY_SEPARATOR . $files['diff'];
+                if (false !== system($command) && $this->filesystem->exists($colorized_rom)) {
 
                     $colorized_rom_zip = new \ZipArchive();
                     $colorized_rom_zip_file = $this->settings->getRomsPath() . DIRECTORY_SEPARATOR . $name . '.zip';
@@ -107,7 +108,7 @@ class ColorizeController extends AbstractSettingsController
                         $this->addFlash('warning', 'Failed to open ' . $colorized_rom_zip_file . '.');
                     }
                 } else {
-                    $this->addFlash('warning', 'Failed to patch the ROM.');
+                    $this->addFlash('warning', 'Failed to execute ' . $command);
                 }
 
                 $this->filesystem->remove($files['dir']);
