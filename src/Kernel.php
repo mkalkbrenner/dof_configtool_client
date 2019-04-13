@@ -64,6 +64,12 @@ class Kernel extends BaseKernel
                 $filesystem->remove($cache_dir);
                 $filesystem->dumpFile($version_txt, DOFCTC_VERSION);
             }
+            if (!$filesystem->exists(ini_get('session.save_path'))) {
+                $filesystem->mkdir(ini_get('session.save_path'));
+            }
+            if (!$filesystem->exists($_SERVER['PROGRAM_DATA'].DIRECTORY_SEPARATOR.'tmp')) {
+                $filesystem->mkdir($_SERVER['PROGRAM_DATA'].DIRECTORY_SEPARATOR.'tmp');
+            }
             return $cache_dir;
         }
         return parent::getCacheDir();
@@ -79,5 +85,4 @@ class Kernel extends BaseKernel
         }
         return parent::getLogDir();
     }
-
 }

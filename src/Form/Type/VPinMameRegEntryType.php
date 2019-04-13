@@ -16,8 +16,12 @@ class VPinMameRegEntryType extends AbstractType
         $builder->add('rom', HiddenType::class)
             ->add('cabinet_mode', CheckboxType::class, ['label' => 'cabinet_mode', 'required' => FALSE])
             ->add('ignore_rom_crc', CheckboxType::class, ['label' => 'ignore_rom_crc', 'required' => FALSE])
+            ->add('sound', CheckboxType::class, ['label' => 'sound', 'required' => FALSE])
+            ->add('samples', CheckboxType::class, ['label' => 'samples', 'required' => FALSE])
             ->add('ddraw', CheckboxType::class, ['label' => 'ddraw', 'required' => FALSE])
-            ->add('dmd_colorize', CheckboxType::class, ['label' => 'dmd_colorize', 'required' => FALSE]);
+            ->add('dmd_colorize', CheckboxType::class, ['label' => 'dmd_colorize', 'required' => FALSE])
+            ->add('showpindmd', CheckboxType::class, ['label' => 'showpindmd', 'required' => FALSE])
+            ->add('showwindmd', CheckboxType::class, ['label' => 'showwindmd', 'required' => FALSE]);
     }
 
     public function configureOptions(OptionsResolver $resolver)

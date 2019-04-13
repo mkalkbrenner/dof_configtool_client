@@ -2,16 +2,19 @@
 
 namespace App\Controller;
 
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 
-class WelcomeController extends AbstractController
+class WelcomeController extends AbstractSettingsController
 {
     /**
      * @Route("/welcome", name="welcome")
      */
     public function index()
     {
+        if (isset($_SERVER['PROGRAM_DATA'])) {
+            $this->filesystem->remove($this->filesystem->getTempDir());
+        }
+
         $parsedown = new \Parsedown();
 
         return $this->render('welcome/index.html.twig', [

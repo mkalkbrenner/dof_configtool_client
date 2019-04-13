@@ -15,7 +15,15 @@ class VPinMameRegEntry
 
     private $ddraw;
 
+    private $sound;
+
+    private $samples;
+
     private $dmd_colorize;
+
+    private $showpindmd;
+
+    private $showwindmd;
 
     private $trackChanges = FALSE;
 
@@ -95,6 +103,36 @@ class VPinMameRegEntry
         return $this;
     }
 
+    public function getSound(): ?bool
+    {
+        return $this->sound;
+    }
+
+    public function setSound(bool $sound): self
+    {
+        if ($this->trackChanges && $this->sound != $sound) {
+            $this->hasChanges = TRUE;
+        }
+        $this->sound = $sound;
+
+        return $this;
+    }
+
+    public function getSamples(): ?bool
+    {
+        return $this->samples;
+    }
+
+    public function setSamples(bool $samples): self
+    {
+        if ($this->trackChanges && $this->samples != $samples) {
+            $this->hasChanges = TRUE;
+        }
+        $this->samples = $samples;
+
+        return $this;
+    }
+
     public function getDmdColorize(): ?bool
     {
         return $this->dmd_colorize;
@@ -109,6 +147,37 @@ class VPinMameRegEntry
 
         return $this;
     }
+
+    public function getShowpindmd(): ?bool
+    {
+        return $this->showpindmd;
+    }
+
+    public function setShowpindmd(bool $showpindmd): self
+    {
+        if ($this->trackChanges && $this->sound != $showpindmd) {
+            $this->hasChanges = TRUE;
+        }
+        $this->showpindmd = $showpindmd;
+
+        return $this;
+    }
+
+    public function getShowwindmd(): ?bool
+    {
+        return $this->showwindmd;
+    }
+
+    public function setShowwindmd(bool $showwindmd): self
+    {
+        if ($this->trackChanges && $this->sound != $showwindmd) {
+            $this->hasChanges = TRUE;
+        }
+        $this->showwindmd = $showwindmd;
+
+        return $this;
+    }
+
 
     public function trackChanges(bool $track = TRUE): self
     {
@@ -137,11 +206,23 @@ class VPinMameRegEntry
             if (null !== $this->cabinet_mode) {
                 $key->setValue('cabinet_mode', $this->cabinet_mode, RegistryKey::TYPE_DWORD);
             }
+            if (null !== $this->sound) {
+                $key->setValue('sound', $this->sound, RegistryKey::TYPE_DWORD);
+            }
+            if (null !== $this->samples) {
+                $key->setValue('samples', $this->samples, RegistryKey::TYPE_DWORD);
+            }
             if (null !== $this->ddraw) {
                 $key->setValue('ddraw', $this->ddraw, RegistryKey::TYPE_DWORD);
             }
             if (null !== $this->dmd_colorize) {
-                $key->setValue('dmd_colorize', $this->ddraw, RegistryKey::TYPE_DWORD);
+                $key->setValue('dmd_colorize', $this->dmd_colorize, RegistryKey::TYPE_DWORD);
+            }
+            if (null !== $this->showpindmd) {
+                $key->setValue('showpindmd', $this->showpindmd, RegistryKey::TYPE_DWORD);
+            }
+            if (null !== $this->showwindmd) {
+                $key->setValue('showwindmd', $this->showwindmd, RegistryKey::TYPE_DWORD);
             }
             $this->hasChanges = FALSE;
         }
@@ -174,11 +255,23 @@ class VPinMameRegEntry
                 case 'ignore_rom_crc':
                     $entry->setIgnoreRomCrc((bool) $value);
                     break;
+                case 'sound':
+                    $entry->setSound((bool) $value);
+                    break;
+                case 'samples':
+                    $entry->setSamples((bool) $value);
+                    break;
                 case 'ddraw':
                     $entry->setDdraw((bool) $value);
                     break;
                 case 'dmd_colorize':
                     $entry->setDmdColorize((bool) $value);
+                    break;
+                case 'showpindmd':
+                    $entry->setShowpindmd((bool) $value);
+                    break;
+                case 'showwindmd':
+                    $entry->setShowwindmd((bool) $value);
                     break;
             }
         }
@@ -212,9 +305,12 @@ class RegistryKeyDummy
         return [
             'cabinet_mode' => (bool)random_int(0, 1),
             'ignore_rom_crc' => (bool)random_int(0, 1),
+            'sound' => (bool)random_int(0, 1),
+            'samples' => (bool)random_int(0, 1),
             'ddraw' => (bool)random_int(0, 1),
             'dmd_colorize' => (bool)random_int(0, 1),
-            'dummy' => (bool)random_int(0, 1),
+            'showpindmd' => (bool)random_int(0, 1),
+            'showwindmd' => (bool)random_int(0, 1),
         ];
     }
 

@@ -9,9 +9,11 @@ define('DOFCTC_VERSION', '0.2.0');
 require dirname(__DIR__).'/config/bootstrap.php';
 
 if (isset($_SERVER['PHPDESKTOP_VERSION'])) {
-    $_SERVER['APP_DEBUG'] = FALSE;
-    $_SERVER['APP_ENV'] = 'prod';
     $_SERVER['PROGRAM_DATA'] = trim(str_replace('sess', '', ini_get('session.save_path')), '/\\');
+    if (!file_exists(__DIR__ . DIRECTORY_SEPARATOR . 'dev.txt')) {
+        $_SERVER['APP_DEBUG'] = false;
+        $_SERVER['APP_ENV'] = 'prod';
+    }
 }
 
 if ($_SERVER['APP_DEBUG']) {

@@ -2,8 +2,6 @@
 
 namespace App\Controller;
 
-use App\Entity\Settings;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
@@ -12,13 +10,8 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
-class ColorizeController extends AbstractController
+class ColorizeController extends AbstractSettingsController
 {
-    /**
-     * @var Settings
-     */
-    private $settings;
-
     /**
      * @Route("/colorize", name="colorize")
      */
@@ -36,7 +29,7 @@ class ColorizeController extends AbstractController
 
             /** @var UploadedFile $patch */
             $patch = $data['patch'];
-            $files = $this->getPatchFiles($patch->getRealPath());
+            $files = $this->getPatchFiles($patch->getPathname());
 
             if (!empty($files['txt'])) {
                 $this->addFlash('info', nl2br($files['txt']));
@@ -44,7 +37,8 @@ class ColorizeController extends AbstractController
             if (isset($files['diff'])) {
                 $this->addFlash('success', 'Detected patch.');
                 return $this->redirectToRoute('colorize_patch', ['patch_path' => $files['dir']]);
-            } elseif (isset($files['vni'])) {
+            }
+            if (isset($files['vni'])) {
                 $this->addFlash('success', 'Detected vni file.');
                 return $this->redirectToRoute('colorize_extract', ['patch_path' => $files['dir']]);
             }
@@ -61,10 +55,12 @@ class ColorizeController extends AbstractController
      */
     public function patch(Request $request)
     {
+        $patch_path = $request->get('patch_path');
+
         $form = $this->createFormBuilder()
             ->add('rom', FileType::class, ['label' => 'ROM file to patch (zip or bin)', 'required' => false])
             ->add('existing_rom', ChoiceType::class, ['label' => 'ROM file to patch', 'choices' => $this->getExistingRomFileChoices(), 'required' => false])
-            ->add('name', TextType::class, ['label' => 'Colorized ROM file name'])
+            ->add('name', TextType::class, ['label' => 'Desired file name for the colorized ROM'])
             ->add('colorize', SubmitType::class, ['label' => 'Colorize ROM'])
             ->getForm();
 
@@ -72,63 +68,57 @@ class ColorizeController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $data = $form->getData();
-            $name = $data['name'];
-            $settings = $this->getSettings();
-            $files = $this->scanPatchDir($request->get('patch_path'));
-            $rom_realpath = '';
+            $name = basename(basename($data['name'], '.bin'), '.zip');
 
             if (!empty($data['rom'])) {
                 /** @var UploadedFile $rom */
                 $rom = $data['rom'];
-                switch (strtolower($rom->getClientOriginalExtension())) {
-                    case 'ZIP':
-                    case 'zip':
-                        $rom_file = $this->getRomFile($rom_realpath);
-                        $rom_realpath = $rom_file['rom'];
-                        break;
-
-                    default:
-                        $rom_realpath = $rom->getRealPath();
-                }
+                $rom->move($patch_path, $rom->getClientOriginalName());
             } elseif (!empty($data['existing_rom'])) {
-                $rom_realpath = $data['existing_rom'];
+                $this->filesystem->copy($this->settings->getRomsPath() . DIRECTORY_SEPARATOR . $data['existing_rom'], $patch_path . DIRECTORY_SEPARATOR . $data['existing_rom']);
             } else {
                 $this->addFlash('warning', 'Failed to open ROM.');
             }
 
-            if ($rom_realpath) {
+            $files = $this->scanPatchDir($request->get('patch_path'));
+
+            if (!empty($files['bin'])) {
+
                 $bspatch = 'bspatch'; // Unix
                 if (extension_loaded('com_dotnet')) {
-                    $bspatch = dirname(__DIR__) . DIRECTORY_SEPARATOR . 'bin' . DIRECTORY_SEPARATOR . 'bsdiff_win_exe' . DIRECTORY_SEPARATOR . 'bspatch.exe';
+                    $bspatch = dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'bin' . DIRECTORY_SEPARATOR . 'bsdiff_win_exe' . DIRECTORY_SEPARATOR . 'bspatch.exe';
                 }
 
                 $colorized_rom = $files['dir'] . DIRECTORY_SEPARATOR . $name . '.bin';
-                system($bspatch . ' ' . $rom_realpath . ' ' . $colorized_rom . ' ' . $files['dir'] . DIRECTORY_SEPARATOR . $files['diff']);
-                $colorized_rom_zip = new \ZipArchive();
-                $colorized_rom_zip_file = $settings->getRomsPath() . DIRECTORY_SEPARATOR . $name . '.zip';
-                if (true === $colorized_rom_zip->open($colorized_rom_zip_file, \ZipArchive::CREATE)) {
-                    $colorized_rom_zip->addFile($colorized_rom);
-                    if ($colorized_rom_zip->close()) {
-                        $this->addFlash('success', 'Saved colorized ROM as ' . $colorized_rom_zip_file . '.');
-                        $this->copyPin2DmdFiles($files, $name);
-                    } else {
+                if (false !== system($bspatch . ' ' . $files['dir'] . DIRECTORY_SEPARATOR . $files['bin'] . ' ' . $colorized_rom . ' ' . $files['dir'] . DIRECTORY_SEPARATOR . $files['diff']) && $this->filesystem->exists($colorized_rom)) {
+
+                    $colorized_rom_zip = new \ZipArchive();
+                    $colorized_rom_zip_file = $this->settings->getRomsPath() . DIRECTORY_SEPARATOR . $name . '.zip';
+                    if (true === $colorized_rom_zip->open($colorized_rom_zip_file, \ZipArchive::CREATE)) {
+                        $colorized_rom_zip->addFile($colorized_rom, $name . '.bin');
+                        if ($colorized_rom_zip->close()) {
+                            $this->addFlash('success', 'Saved colorized ROM as ' . $colorized_rom_zip_file . '.');
+                            $this->copyPin2DmdFiles($files, $name);
+                            $this->filesystem->remove($files['dir']);
+                            return $this->redirectToRoute('colorize');
+                        }
                         $this->addFlash('warning', 'Failed to save ' . $colorized_rom_zip_file . '.');
+                    } else {
+                        $this->addFlash('warning', 'Failed to open ' . $colorized_rom_zip_file . '.');
                     }
                 } else {
-                    $this->addFlash('warning', 'Failed to open ' . $colorized_rom_zip_file . '.');
+                    $this->addFlash('warning', 'Failed to patch the ROM.');
                 }
 
-                foreach (scandir($files['dir']) as $filename) {
-                    if (!preg_match('/^\.+$/', $filename)) {
-                        @unlink($filename);
-                    }
-                }
-                @rmdir($files['dir']);
+                $this->filesystem->remove($files['dir']);
+            } else {
+                $this->addFlash('warning', 'Failed to patch the ROM.');
             }
         }
 
-        return $this->render('colorize/index.html.twig', [
+        return $this->render('colorize/patch.html.twig', [
             'colorize_form' => $form->createView(),
+            'patch_path' => $patch_path,
         ]);
     }
 
@@ -159,21 +149,18 @@ class ColorizeController extends AbstractController
     private function getPatchFiles(string $patch_path): array
     {
         $files = [
-            'dir' => tempnam(sys_get_temp_dir(), 'color_patch')
+            'dir' => $this->filesystem->tempdir($this->filesystem->getTempDir(), 'color_patch_'),
         ];
         $patch_zip = new \ZipArchive();
-        unlink($files['dir']);
-        if (mkdir($files['dir']) && is_dir($files['dir'])) {
-            if (true === $patch_zip->open($patch_path)) {
-                if ($patch_zip->extractTo($files['dir'])) {
-                    $files += $this->scanPatchDir($files['dir']);
-                } else {
-                    $this->addFlash('warning', 'Failed to extract patch zip.');
-                }
-                $patch_zip->close();
+        if (true === $patch_zip->open($patch_path)) {
+            if ($patch_zip->extractTo($files['dir'])) {
+                $files += $this->scanPatchDir($files['dir']);
             } else {
-                $this->addFlash('warning', 'Failed to open color patch zip.');
+                $this->addFlash('warning', 'Failed to extract patch zip.');
             }
+            $patch_zip->close();
+        } else {
+            $this->addFlash('warning', 'Failed to open color patch zip.');
         }
         return $files;
     }
@@ -194,73 +181,58 @@ class ColorizeController extends AbstractController
                 $files['vni'] = $filename;
             } elseif (preg_match('/\.txt$/i', $filename)) {
                 $files['txt'] .= file_get_contents($files['dir'] . DIRECTORY_SEPARATOR . $filename);
+            } elseif (preg_match('/\.zip$/i', $filename)) {
+                $this->extractRomFile($filename, $files);
+            } elseif (preg_match('/\.bin$/i', $filename)) {
+                $files['bin'] = $filename;
             }
         }
 
         return $files;
+    }
+
+    private function extractRomFile(string $rom_filename, array &$files): void
+    {
+        $patch_zip = new \ZipArchive();
+        if (true === $patch_zip->open($files['dir'] . DIRECTORY_SEPARATOR . $rom_filename) && $patch_zip->extractTo($files['dir'])) {
+            foreach (scandir($files['dir']) as $filename) {
+                if (preg_match('/\.bin$/i', $filename)) {
+                    $files['bin'] = $filename;
+                    break;
+                }
+            }
+            $patch_zip->close();
+        }
     }
 
     private function copyPin2DmdFiles(array $files, string $rom_name): void {
-        $settings = $this->getSettings();
-        $altcolor_dir = $settings->getAltcolorPath();
+        $altcolor_dir = $this->settings->getAltcolorPath();
         $rom_dir = $altcolor_dir . DIRECTORY_SEPARATOR . $rom_name;
-        if (!is_dir($rom_dir)) {
-            mkdir($rom_dir);
-        }
-        if (!empty($files['pal'])) {
-            $pal = $rom_dir . DIRECTORY_SEPARATOR . 'pin2dmd.pal';
-            if (copy($files['dir'] . DIRECTORY_SEPARATOR . $files['pal'], $pal)) {
+        try {
+            $this->filesystem->mkdir($rom_dir);
+            if (!empty($files['pal'])) {
+                $pal = $rom_dir . DIRECTORY_SEPARATOR . 'pin2dmd.pal';
+                $this->filesystem->copy($files['dir'] . DIRECTORY_SEPARATOR . $files['pal'], $pal);
                 $this->addFlash('success', 'Saved ' . $pal . '.');
-            } else {
-                $this->addFlash('warning', 'Failed to write ' . $pal . '.');
             }
-        }
-        if (!empty($files['vni'])) {
-            $vni = $rom_dir . DIRECTORY_SEPARATOR . 'pin2dmd.vni';
-            if (copy($files['dir'] . DIRECTORY_SEPARATOR . $files['vni'], $vni)) {
+            if (!empty($files['vni'])) {
+                $vni = $rom_dir . DIRECTORY_SEPARATOR . 'pin2dmd.vni';
+                $this->filesystem->copy($files['dir'] . DIRECTORY_SEPARATOR . $files['vni'], $vni);
                 $this->addFlash('success', 'Saved ' . $vni . '.');
-            } else {
-                $this->addFlash('warning', 'Failed to write ' . $vni . '.');
             }
+        } catch(\Exception $e) {
+            $this->addFlash('warning', $e->getMessage());
         }
-    }
-
-    private function getRomFile(string $rom_path): array
-    {
-        $files = [
-            'dir' => tempnam(sys_get_temp_dir(), 'rom'),
-        ];
-        $patch_zip = new \ZipArchive();
-        unlink($files['dir']);
-        if (mkdir($files['dir']) && is_dir($files['dir'])) {
-            if ($patch_zip->open($rom_path) && $patch_zip->extractTo($files['dir'])) {
-                foreach (scandir($files['dir']) as $filename) {
-                    if (preg_match('/\.bin/i', $filename)) {
-                        $files['bin'] = $filename;
-                    }
-                }
-                $patch_zip->close();
-            }
-        }
-        return $files;
     }
 
     private function getExistingRomFileChoices(): array
     {
         $choices = [];
-        foreach (scandir($this->getSettings()->getRomsPath()) as $filename) {
-            if (preg_match('/\.zip/i', $filename)) {
+        foreach (scandir($this->settings->getRomsPath()) as $filename) {
+            if (preg_match('/\.zip$/i', $filename)) {
                 $choices[$filename] = $filename;
             }
         }
         return $choices;
-    }
-
-    private function getSettings(): Settings {
-        if (!$this->settings) {
-            $this->settings = new Settings();
-            $this->settings->load();
-        }
-        return $this->settings;
     }
 }

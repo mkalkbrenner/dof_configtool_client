@@ -32,8 +32,8 @@
         {% block stylesheets %}{% endblock %}
     </head>
     <body class="bg-light">
-        <nav class="navbar navbar-expand-md navbar-dark bg-dark mb-4">
-            <a class="navbar-brand" href="#">DOF Configtool Client {{ constant('DOFCTC_VERSION') }}</a>
+        <nav class="navbar fixed-top navbar-expand-md navbar-dark bg-dark">
+            <a class="navbar-brand" href="#"><img src="{{ asset('images/mk47.png') }}" width="30" height="30" alt=""> {{ constant('DOFCTC_VERSION') }}</a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -64,9 +64,8 @@
             </div>
         </nav>
 
-        <main role="main" class="container main">
+        <main role="main" class="jumbotron">
             {% include 'flash_messages.html.twig' %}
-
             {% block body %}{% endblock %}
         </main>
 

@@ -30,3 +30,4 @@ settings.ini
 /public/DirectOutputShapes.*
 *:Zone.Identifier:$DATA
 /build/Output/
+/public/dev.txt

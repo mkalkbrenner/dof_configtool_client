@@ -1,0 +1,24 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Colorize ROM{% endblock %}
+
+{% block body %}
+    <h2>Colorize ROM</h2>
+    {{ form_start(colorize_form) }}
+    {{ form_errors(colorize_form) }}
+    <table width="100%">
+        <tr><td>open ROM to be patched from disk</td><td rowspan="2" align="center"><strong>OR</strong></td><td>select an already installed ROM to be patched</td></tr>
+        <tr><td>{{ form_widget(colorize_form.rom) }}</td><td>{{ form_widget(colorize_form.existing_rom) }}</td></tr>
+    </table>
+    <hr>
+    {{ form_widget(colorize_form) }}
+    {{ form_end(colorize_form) }}
+{% endblock %}
+
+{% block javascripts %}
+    <script lang="js">
+        $(document).ready(function () {
+            bsCustomFileInput.init()
+        })
+    </script>
+{% endblock %}

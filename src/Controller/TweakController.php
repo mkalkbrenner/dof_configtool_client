@@ -2,17 +2,15 @@
 
 namespace App\Controller;
 
-use App\Entity\Settings;
 use App\Entity\Tweaks;
 use iphis\FineDiff\Diff;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
-class TweakController extends AbstractController
+class TweakController extends AbstractSettingsController
 {
     /**
      * @Route("/tweak", name="tweak")
@@ -52,7 +50,7 @@ class TweakController extends AbstractController
         $tweaks->load();
 
         $form = $this->createFormBuilder($tweaks)
-            ->add('settings', TextareaType::class, ['label' => 'Settings'])
+            ->add('settings', TextareaType::class, ['label' => 'Settings', 'attr' => ['rows' => 20]])
             ->add('save', SubmitType::class, ['label' => 'Save settings'])
             ->getForm();
 
@@ -83,9 +81,6 @@ class TweakController extends AbstractController
     {
         ini_set('set_time_limit', 0);
 
-        $dofConfigtoolDownload = new Settings();
-        $dofConfigtoolDownload->load();
-
         $tweaks = new Tweaks();
         $tweaks->load();
 
@@ -97,7 +92,7 @@ class TweakController extends AbstractController
         $file = '';
         foreach ($tweaks->getSettingsParsed() as $section => $adjustments) {
             if (strpos($section, '.ini')) {
-                $file = $dofConfigtoolDownload->getDofConfigPath() . DIRECTORY_SEPARATOR . $section;
+                $file = $this->settings->getDofConfigPath() . DIRECTORY_SEPARATOR . $section;
                 if (file_exists($file)) {
                     $mods[$file] = [0 => $adjustments];
                 } else {
@@ -136,19 +131,22 @@ class TweakController extends AbstractController
                         $game_row_elements = str_getcsv($game_row);
                         $game_name = $game_row_elements[0];
                         $game = [];
-                        $rgb_ports[$game_name] = [];
+                        $rgb_ports[$file][$game_name] = [];
                         $real_port = 0;
                         foreach ($game_row_elements as $port => $game_row_element) {
-                            $game[$real_port] = $game_row_element;
+                            $game[$real_port] = trim($game_row_element);
                             if ($real_port) { // Skip Rom name on port 0.
                                 foreach ($colors as $color) {
                                     if (strpos($game_row_element, $color) !== FALSE) {
                                         $game[++$real_port] = 0;
-                                        $rgb_ports[$game_name][] = $real_port;
+                                        $rgb_ports[$file][$game_name][] = $real_port;
                                         $game[++$real_port] = 0;
-                                        $rgb_ports[$game_name][] = $real_port;
+                                        $rgb_ports[$file][$game_name][] = $real_port;
                                         break;
                                     }
+                                }
+                                if ('0' === $game_row_element) {
+                                    $game_row_elements[$port] = 0;
                                 }
                             }
                             ++$real_port;
@@ -214,51 +212,59 @@ class TweakController extends AbstractController
                                                     break;
 
                                                 case 'default_effect_duration':
-                                                    $triggers = explode('/', $game[$port]);
-                                                    foreach ($triggers as &$trigger) {
-                                                        $trigger = preg_replace('/([SWE]\d+$)/', '$1 ' . $setting, $trigger);
-                                                    }
-                                                    unset($trigger);
-                                                    $new = implode('/', $triggers);
-                                                    if ($new != $game[$port]) {
-                                                        $game[$port] = $new;
+                                                    if (0 !== $game[$port]) {
+                                                        $triggers = explode('/', $game[$port]);
+                                                        foreach ($triggers as &$trigger) {
+                                                            $trigger = preg_replace('/([SWE]\d+$)/', '$1 ' . $setting, $trigger);
+                                                        }
+                                                        unset($trigger);
+                                                        $new = implode('/', $triggers);
+                                                        if ($new != $game[$port]) {
+                                                            $game[$port] = $new;
+                                                        }
                                                     }
                                                     break;
 
                                                 case 'turn_off':
-                                                    $game_names = explode(',', $setting);
-                                                    array_walk($game_names, 'trim');
-                                                    if (in_array($game[0], $game_names) && 0 != $game[$port]) {
-                                                        $game[$port] = 0;
+                                                    if (0 !== $game[$port]) {
+                                                        $game_names = explode(',', $setting);
+                                                        array_walk($game_names, 'trim');
+                                                        if (in_array('*', $game_names) || in_array($game[0], $game_names)) {
+                                                            $game[$port] = 0;
+                                                        }
                                                     }
                                                     break;
 
                                                 case 'turn_on':
-                                                    $game_names = explode(',', $setting);
-                                                    array_walk($game_names, 'trim');
-                                                    if (!in_array($game[0], $game_names) && 0 != $game[$port]) {
-                                                        $game[$port] = 0;
+                                                    if (0 !== $game[$port]) {
+                                                        $game_names = explode(',', $setting);
+                                                        array_walk($game_names, 'trim');
+                                                        if (!in_array('*', $game_names) && !in_array($game[0], $game_names)) {
+                                                            $game[$port] = 0;
+                                                        }
                                                     }
                                                     break;
 
                                                 case 'adjust_intensity':
-                                                    $triggers = explode('/', $game[$port]);
-                                                    foreach ($triggers as &$trigger) {
-                                                        if (preg_match('/[I](\d+)/', $trigger, $matches)) {
-                                                            $intensity = (int)(((int)$matches[1]) * ((float)$setting));
-                                                            if ($intensity < 1) {
-                                                                $intensity = 1;
+                                                    if (0 !== $game[$port]) {
+                                                        $triggers = explode('/', $game[$port]);
+                                                        foreach ($triggers as &$trigger) {
+                                                            if (preg_match('/[I](\d+)/', $trigger, $matches)) {
+                                                                $intensity = (int)(((int)$matches[1]) * ((float)$setting));
+                                                                if ($intensity < 1) {
+                                                                    $intensity = 1;
+                                                                }
+                                                                if ($intensity > 48) {
+                                                                    $intensity = 48;
+                                                                }
+                                                                $trigger = preg_replace('/[I]\d+/', 'I' . $intensity, $trigger);
                                                             }
-                                                            if ($intensity > 48) {
-                                                                $intensity = 48;
-                                                            }
-                                                            $trigger = preg_replace('/[I]\d+/', 'I' . $intensity, $trigger);
                                                         }
-                                                    }
-                                                    unset($trigger);
-                                                    $new = implode('/', $triggers);
-                                                    if ($new != $game[$port]) {
-                                                        $game[$port] = $new;
+                                                        unset($trigger);
+                                                        $new = implode('/', $triggers);
+                                                        if ($new != $game[$port]) {
+                                                            $game[$port] = $new;
+                                                        }
                                                     }
                                                     break;
                                             }
@@ -268,7 +274,7 @@ class TweakController extends AbstractController
                                 }
                             }
                         }
-                        foreach ($rgb_ports[$game_name] as $rgb_port) {
+                        foreach ($rgb_ports[$file][$game_name] as $rgb_port) {
                             unset($game[$rgb_port]);
                         }
                         $games[] = implode(',', $game);
@@ -287,7 +293,13 @@ class TweakController extends AbstractController
             $new_lines = explode("\r\n", $content);
             foreach($old_lines as $number => $line) {
                 if ($line != $new_lines[$number]) {
-                    $diff_cells = explode(',', $diff->render($line, $new_lines[$number]));
+                    $old_cells = explode(',', $line);
+                    $new_cells = explode(',', $new_lines[$number]);
+                    $num_cells = count($old_cells);
+                    $diff_cells = [$old_cells[0]];
+                    for ($i = 1; $i < $num_cells; $i++) {
+                        $diff_cells[] = $diff->render($old_cells[$i], $new_cells[$i]);
+                    }
                     $header = '';
                     $data = '';
                     $game_name = $diff_cells[0];
@@ -295,10 +307,10 @@ class TweakController extends AbstractController
                     foreach ($diff_cells as $port => $dof_string) {
                         $dof_string = str_replace(['<ins>', '<del>'], ['<ins class="bg-success">', '<del class="bg-danger">'], $dof_string);
 
-                        $header .= '<th scope="col"' . (in_array($real_port + 1, $rgb_ports[$game_name]) ? ' bgcolor="red">' : '>') . ($real_port ?: '');
+                        $header .= '<th scope="col"' . (in_array($real_port + 1, $rgb_ports[$file][$game_name]) ? ' bgcolor="red">' : '>') . ($real_port ?: '');
                         ++$real_port;
                         $colspan = 1;
-                        while (in_array($real_port, $rgb_ports[$game_name])) {
+                        while (in_array($real_port, $rgb_ports[$file][$game_name])) {
                             ++$colspan;
                             $header .= '</th><th scope="col" bgcolor="' . (2 == $colspan ? 'green' : 'blue') . '">' .  $real_port++;
                         }

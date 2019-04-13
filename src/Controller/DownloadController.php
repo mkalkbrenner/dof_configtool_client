@@ -2,14 +2,11 @@
 
 namespace App\Controller;
 
-use App\Entity\Settings;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
-class DownloadController extends AbstractController
+class DownloadController extends AbstractSettingsController
 {
     /**
      * @Route("/download", name="download")
@@ -29,18 +26,14 @@ class DownloadController extends AbstractController
                 case 'download':
                     ini_set('set_time_limit', 0);
 
-                    $dofConfigtoolDownload = new Settings();
-                    $dofConfigtoolDownload->load();
-
-                    $zip_file = tempnam(sys_get_temp_dir(), 'dof_config');
-                    if (copy('http://configtool.vpuniverse.com/api.php?query=getconfig&apikey=' . $dofConfigtoolDownload->getLcpApiKey(), $zip_file) && filesize($zip_file)) {
+                    $zip_file = $this->filesystem->tempnam($this->filesystem->getTempDir(), 'dof_config');
+                    if (copy('http://configtool.vpuniverse.com/api.php?query=getconfig&apikey=' . $this->settings->getLcpApiKey(), $zip_file) && filesize($zip_file)) {
                         try {
-                            $config_path = $dofConfigtoolDownload->getDofConfigPath();
-                            if (!is_dir($config_path)) {
-                                mkdir($config_path);
-                            }
+                            $config_path = $this->settings->getDofConfigPath();
                             $zip = new \ZipArchive();
-                            if ($zip->open($zip_file) && $zip->extractTo($config_path)) {
+                            if (true == $zip->open($zip_file)) {
+                                $zip->extractTo($config_path);
+                                $zip->close();
                                 $this->addFlash('success', 'Successfully downloaded and extracted configuration files to ' . $config_path . '.');
                             } else {
                                 $this->addFlash('warning', 'Failed to extract downloaded files! Please verify that the target directory is writable.');
@@ -51,7 +44,7 @@ class DownloadController extends AbstractController
                     } else {
                         $this->addFlash('warning', 'Download failed!');
                     }
-                    @unlink($zip_file);
+                    $this->filesystem->remove($zip_file);
                     break;
             }
         }

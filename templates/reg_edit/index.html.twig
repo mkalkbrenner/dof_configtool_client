@@ -9,7 +9,7 @@
     {{ form_errors(reg_edit_form) }}
     <table class="table table-striped">
         {% for entry in reg_edit_form.entries %}
-            <tr><td>{{ form_label(entry) }}{{ form_widget(entry.rom) }}</td><td>{{ form_widget(entry.cabinet_mode) }}</td><td>{{ form_widget(entry.ignore_rom_crc) }}</td><td>{{ form_widget(entry.ddraw) }}</td><td>{{ form_widget(entry.dmd_colorize) }}</td></tr>
+            <tr><td>{{ form_label(entry) }}{{ form_widget(entry.rom) }}</td><td>{{ form_widget(entry.cabinet_mode) }}</td><td>{{ form_widget(entry.ignore_rom_crc) }}</td><td>{{ form_widget(entry.sound) }}</td><td>{{ form_widget(entry.samples) }}</td><td>{{ form_widget(entry.ddraw) }}</td><td>{{ form_widget(entry.dmd_colorize) }}</td><td>{{ form_widget(entry.showpindmd) }}</td><td>{{ form_widget(entry.showwindmd) }}</td></tr>
         {% endfor %}
     </table>
     {{ form_widget(reg_edit_form.save) }}

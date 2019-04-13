@@ -2,21 +2,14 @@
 
 namespace App\Controller;
 
-use App\Entity\Settings;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
-class BackglassesController extends AbstractController
+class BackglassesController extends AbstractSettingsController
 {
-    /**
-     * @var Settings
-     */
-    private $settings;
-
     /**
      * @Route("/backglasses", name="backglasses")
      */
@@ -39,34 +32,53 @@ class BackglassesController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $filesystem = new Filesystem();
-            $settings = $this->getSettings();
-            $table_path = $settings->getTablesPath() . DIRECTORY_SEPARATOR;
+            $table_path = $this->settings->getTablesPath() . DIRECTORY_SEPARATOR;
             $data = $form->getData();
             $count = array_count_values($data);
             foreach ($data as $key => $backglass_file) {
-                $target_backglass_file = $table_path . $tables[$key] . '.directb2s';
-                if ('_' !== $backglass_file) {
-                    if (!$filesystem->exists($target_backglass_file)) {
-                        if ($count[$backglass_file] > 1) {
+                $target_backglass_file = $tables[$key] . '.directb2s';
+                $disabled_backglass_file = '_' . $target_backglass_file;
+                if ($target_backglass_file !== $backglass_file) {
+                    if ('_' !== $backglass_file) {
+                        if ($filesystem->exists($table_path . $target_backglass_file)) {
                             try {
-                                $filesystem->copy( $table_path . $backglass_file, $target_backglass_file, true);
-                                $this->addFlash('success', 'Copied ' . $backglass_file . ' to ' . $tables[$key] . '.directb2s');
-                            } catch (\Exception $e) {
-                            }
-                        } else {
-                            try {
-                                $filesystem->rename($table_path . $backglass_file, $target_backglass_file, true);
-                                $this->addFlash('success', 'Renamed ' . $backglass_file . ' to ' . $tables[$key] . '.directb2s');
+                                $filesystem->rename($table_path . $target_backglass_file, $table_path . $disabled_backglass_file);
+                                $this->addFlash('success', 'Renamed ' . $target_backglass_file . ' to ' . $disabled_backglass_file);
                             } catch (\Exception $e) {
                             }
                         }
-                    }
-                } else {
-                    if ($filesystem->exists($target_backglass_file)) {
-                        try {
-                            $filesystem->rename( $target_backglass_file, $table_path . '_' . $tables[$key] . '.directb2s', true);
-                            $this->addFlash('success', 'Renamed ' . $tables[$key] . '.directb2s to _' . $tables[$key] . '.directb2s');
-                        } catch (\Exception $e) {
+                        if (!$filesystem->exists($table_path . $target_backglass_file)) {
+                            if ($count[$backglass_file] > 1) {
+                                try {
+                                    $filesystem->copy($table_path . $backglass_file, $table_path . $target_backglass_file);
+                                    $this->addFlash('success', 'Copied ' . $backglass_file . ' to ' . $target_backglass_file);
+                                } catch (\Exception $e) {
+                                }
+                            } else {
+                                try {
+                                    $filesystem->rename($table_path . $backglass_file, $table_path . $target_backglass_file);
+                                    $this->addFlash('success', 'Renamed ' . $backglass_file . ' to ' . $target_backglass_file);
+                                } catch (\Exception $e) {
+                                }
+                            }
+                        }
+                    } else {
+                        if ($filesystem->exists($table_path . $target_backglass_file)) {
+                            while ($filesystem->exists($table_path . $disabled_backglass_file)) {
+                                if (preg_match('/^(.+?)(\d*)\.directb2s$/', $disabled_backglass_file, $matches)) {
+                                    $counter = (int) ($matches[2] ?? 0);
+                                    $disabled_backglass_file = $matches[1] . ++$counter . '.directb2s';
+                                }
+                                else {
+                                    $this->addFlash('warning', 'Failed to disable ' . $target_backglass_file);
+                                    break(2);
+                                }
+                            }
+                            try {
+                                $filesystem->rename($table_path . $target_backglass_file, $table_path . $disabled_backglass_file);
+                                $this->addFlash('success', 'Renamed ' . $target_backglass_file . ' to _' . $disabled_backglass_file);
+                            } catch (\Exception $e) {
+                            }
                         }
                     }
                 }
@@ -84,7 +96,7 @@ class BackglassesController extends AbstractController
     {
         $tables = [];
         $backglasses = [];
-        $tables_path = $this->getSettings()->getTablesPath();
+        $tables_path = $this->settings->getTablesPath();
         if (is_writable($tables_path)) {
             foreach (scandir($tables_path) as $filename) {
                 $basename = preg_replace('/\.vpx/i', '', $filename);
@@ -94,7 +106,8 @@ class BackglassesController extends AbstractController
                 }
                 $basename = preg_replace('/\.directb2s/i', '', $filename);
                 if ($basename !== $filename) {
-                    $backglasses[$basename] = $filename;
+                    // Use $basename . '.directb2s' instead of $filename to ensure lower case file type.
+                    $backglasses[$basename] = $basename . '.directb2s';
                 }
             }
         } else {
@@ -125,15 +138,7 @@ class BackglassesController extends AbstractController
         }
 
         return [
-            'No Backglass or PUP Pack' => '_',
+            'No Backglass (or PUP Pack used instead)' => '_',
         ] + array_filter($group, 'count');
-    }
-
-    private function getSettings(): Settings {
-        if (!$this->settings) {
-            $this->settings = new Settings();
-            $this->settings->load();
-        }
-        return $this->settings;
     }
 }

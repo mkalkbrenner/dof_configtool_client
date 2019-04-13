@@ -1,7 +1,7 @@
 # DOF Configtool Client
 
-This is a client for downloading your config files from [http://configtool.vpuniverse.com] and for applying additional
-tweaks to them and the Visual Pinball system itself.
+This is (mainly) a client for downloading your config files from [http://configtool.vpuniverse.com] and for applying
+additional tweaks to them. In addition it contains some tools to administer the Visual Pinball system itself.
 
 ## Motivation
 
@@ -298,8 +298,40 @@ might know uncomfortable that task is. 😉
 * At the moment the moment the adjustable settings are limited for good reasons to ...
   * cabinet_mode
   * ignore_rom_crc
+  * sound
+  * samples
   * ddraw
+  * showpindmd
+  * showwindmd
   * dmd_colorize
+
+### 4. Colorize
+
+The DMD output of ROM files could be colorized. Depending on the ROM there're two different ways to do so. While one
+just requires to put some files at the right place in the VPinMAME folder structure, the other requires to patch the
+ROM binary, name it correctly and to put files at the right place in the VPinMAME folder structure.
+
+The Colorize function provides a wizard that does everything for you and avoids that you have to deal with Windows
+command line.
+
+The first step is to select and check the color patch zip file you want to apply. Then you just need to follow the
+instructions.
+
+**_Note:_** In case that a ROM file needs to patched, the wizard starts `bspatch.exe`. So Windows might ask you to allow
+it to apply modifications to the file system, which is required.
+
+**_Note:_** `bspatch.exe` is already included in the DOF Configtool Client. There's no need to download it separately.
+
+### 5. Backglasses
+
+DirectB2S Backglasses need to match the VPX table name. So if you have several versions of a table you might need to
+have multiple correctly named copies of a backglass. And if you use PUP Packs you need to delete a backglass or rename
+it.
+
+This simple tool eases such tasks as you can simply assign a backglass to a table or select to use a PUP Pack instead.
+All the required file system tasks happen tranparently in the background.
+
+In addition, the tool suggests backglasses for table.
 
 ### Leveraged components and their licences
 
