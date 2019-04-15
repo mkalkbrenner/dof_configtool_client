@@ -261,6 +261,41 @@ This tweak swaps to ports. So `swap[7] = 14` will assign the configuration of po
 
 Maybe you want to swap the gear and the shaker motor for a specific game, who knows? 😉
 
+##### `move_drop_target`
+
+Using this tweak you can extract the triggers for a drop target from a port (usually a bumper) and attach them to a
+different port. So `move_drop_target[17] = 23` will remove all drop target instructions from port _17_ and attach them
+to port _23_. `move_drop_target[17] = 23,36` will remove all drop target instructions from port _17_ and attach them to
+the ports _23_ and _36_.
+
+###### Use-cases
+
+If you mount heavy contactors at the wall of your cabinet, they sound great for bumpers. But for drop targets the sound
+effect might be too heavy. In this case you might want to move the drop target effects to smaller contactors or
+contactors not mounted at the wall. The bumper effects themselves will not be touched and remain assigned where they
+should be.
+
+**_Note:_** These dedicated drop target contactors are for sure not listed in the DOF configtool itself. Once mounted to
+your controller the DOF Configtool Client introduces them. Like for bumpers you can have up to 6 dedicated drop targets.
+If you use combos instead of 6 dedicated bumpers, they apply 1:1 for the new drop targets.
+
+##### `move_target`
+
+This tweak is the complement to `move_drop_target` and enables you to extract the triggers for a target (usually a
+bumper) from a port an attach them to a different port. So `move_target[17] = 23` will remove all target instructions
+from port _17_ and attach them to port _23_.
+
+###### Use-cases
+
+If you mount heavy contactors at the wall of your cabinet, they sound great for Bumpers. But for drop targets the sound
+effect might be too heavy. In this case you might want to move the drop target effects to smaller contactors or
+contactors not mounted at the wall. The bumper effects themselves will not be touched and remain assigned where they
+should be.
+
+**_Note:_** These dedicated drop target contactors are for sure not listed in the DOF configtool itself. Once mounted to
+your controller the DOF Configtool Client introduces them. Like for bumpers you can have up to 6 dedicated drop targets.
+If you use combos instead of 6 dedicated bumpers, they apply 1:1 for the new drop targets.
+
 #### Complete `tweaks.ini` example
 
 ```INI

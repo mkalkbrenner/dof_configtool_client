@@ -145,8 +145,8 @@ class TweakController extends AbstractSettingsController
                                         break;
                                     }
                                 }
-                                if ('0' === $game_row_element) {
-                                    $game_row_elements[$port] = 0;
+                                if ('0' === $game[$real_port]) {
+                                    $game[$real_port] = 0;
                                 }
                             }
                             ++$real_port;
@@ -216,6 +216,53 @@ class TweakController extends AbstractSettingsController
                                                         $triggers = explode('/', $game[$port]);
                                                         foreach ($triggers as &$trigger) {
                                                             $trigger = preg_replace('/([SWE]\d+$)/', '$1 ' . $setting, $trigger);
+                                                        }
+                                                        unset($trigger);
+                                                        $new = implode('/', $triggers);
+                                                        if ($new != $game[$port]) {
+                                                            $game[$port] = $new;
+                                                        }
+                                                    }
+                                                    break;
+
+                                                case 'move_drop_target':
+                                                    if (0 !== $game[$port]) {
+                                                        $triggers = explode('/', $game[$port]);
+                                                        foreach ($triggers as $key => $trigger) {
+                                                            if (false !== strpos($trigger, '@dt@')) {
+                                                                $ports_to_merge = explode(',', $setting);
+                                                                foreach ($ports_to_merge as $port_to_merge) {
+                                                                    $port_to_merge = trim($port_to_merge);
+                                                                    if (0 !== $game[$port_to_merge]) {
+                                                                        $game[$port_to_merge] .= '/' . $trigger;
+                                                                    } else {
+                                                                        $game[$port_to_merge] = $trigger;
+                                                                    }
+                                                                }
+                                                                unset($triggers[$key]);
+                                                            }
+                                                        }
+                                                        unset($trigger);
+                                                        $new = implode('/', $triggers);
+                                                        if ($new != $game[$port]) {
+                                                            $game[$port] = $new;
+                                                        }
+                                                    }
+                                                    break;
+
+                                                case 'move_target':
+                                                    if (0 !== $game[$port]) {
+                                                        $triggers = explode('/', $game[$port]);
+                                                        foreach ($triggers as $key => $trigger) {
+                                                            $ports_to_merge = explode(',', $setting);
+                                                            foreach ($ports_to_merge as $port_to_merge) {
+                                                                $port_to_merge = trim($port_to_merge);
+                                                                if (0 !== $game[$port_to_merge]) {
+                                                                    $game[$port_to_merge] .= '/' . $trigger;
+                                                                } else {
+                                                                    $game[$port_to_merge] = $trigger;
+                                                                }
+                                                            }
                                                         }
                                                         unset($trigger);
                                                         $new = implode('/', $triggers);
