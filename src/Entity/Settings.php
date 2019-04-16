@@ -64,7 +64,7 @@ class Settings
 
     public function getDofConfigPath(): ?string
     {
-        $config_path = $this->getDofPath() . DIRECTORY_SEPARATOR . 'config';
+        $config_path = $this->getDofPath() . DIRECTORY_SEPARATOR . 'Config';
         if (!is_dir($config_path)) {
             mkdir($config_path);
         }

@@ -292,7 +292,7 @@ See the use-cases for `move_drop_target` above.
 ##### `rgb_brightness`
 
 The standard DOF Configtool allows to adjust the three brightness values (only globally for all tables and controllers
-andtheir ports):
+and their ports):
 * PF Strobe MX
 * Flasher
 * Ledstrip Flasher
@@ -300,7 +300,7 @@ andtheir ports):
 For other RGB toys there's no explicit setting at all.
 
 Using this tweak you can set the brightness of any RGB toy (stripes, flasher, flipper buttons, ...) individually per
-controller per port (and individually per table if you like). So `rgb_brightnesst[11] = 80` will set the brightness of
+controller per port (and individually per table if you like). So `rgb_brightness[11] = 80` will set the brightness of
 port _11_ to _80_. The brightness has to be set as hexadecimal value between _00_ and _FF_. So _FF_ means 100%
 brightness, _80_ means 50%.
 
@@ -321,7 +321,7 @@ is the complex undercab illumination, your corresponding tweaks.ini section to s
 rgb_brightness[1] = 80
 rgb_brightness[4] = 80
 rgb_brightness[7] = 80
-rgb_brightness[7] = CD
+rgb_brightness[10] = CD
 ```
 
 #### Complete `tweaks.ini` example
