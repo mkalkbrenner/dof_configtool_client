@@ -88,6 +88,7 @@ class TweakController extends AbstractSettingsController
         $modded_files = [];
         $files = [];
         $rgb_ports = [];
+        $colors = [];
 
         $file = '';
         foreach ($tweaks->getSettingsParsed() as $section => $adjustments) {
@@ -109,7 +110,7 @@ class TweakController extends AbstractSettingsController
                 $contents = preg_replace('/\R/', "\r\n", $contents);
                 $files[$file] = $contents;
                 list($head, $config) = explode('[Config DOF]', $contents);
-                $colors = [];
+                $colors[$file] = [];
                 $color_section = FALSE;
                 foreach (explode("\r\n", $head) as $line) {
                     if (strpos($line, '[Colors DOF]') === 0) {
@@ -121,7 +122,8 @@ class TweakController extends AbstractSettingsController
                             break;
                         }
                         if (strpos($line, '=#')) {
-                            list($colors[],) = explode('=', $line);
+                            list($color_name, $color_value) = explode('=', $line);
+                            $colors[$file][$color_name] = substr($color_value, 0, 7);
                         }
                     }
                 }
@@ -136,7 +138,7 @@ class TweakController extends AbstractSettingsController
                         foreach ($game_row_elements as $port => $game_row_element) {
                             $game[$real_port] = trim($game_row_element);
                             if ($real_port) { // Skip Rom name on port 0.
-                                foreach ($colors as $color) {
+                                foreach (array_keys($colors[$file]) as $color) {
                                     if (strpos($game_row_element, $color) !== FALSE) {
                                         $game[++$real_port] = 0;
                                         $rgb_ports[$file][$game_name][] = $real_port;
@@ -311,6 +313,15 @@ class TweakController extends AbstractSettingsController
                                                         $new = implode('/', $triggers);
                                                         if ($new != $game[$port]) {
                                                             $game[$port] = $new;
+                                                        }
+                                                    }
+                                                    break;
+
+                                                case 'rgb_brightness':
+                                                    if (0 !== $game[$port]) {
+                                                        $brightness = trim($setting);
+                                                        foreach ($colors[$file] as $color_name => $color_value) {
+                                                            $game[$port] = str_replace(' ' . $color_name, ' ' . $color_value . $brightness, $game[$port]);
                                                         }
                                                     }
                                                     break;
