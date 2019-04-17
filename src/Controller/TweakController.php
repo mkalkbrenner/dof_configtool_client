@@ -394,9 +394,12 @@ class TweakController extends AbstractSettingsController
             ->setAction($this->generateUrl('tweak_do'))
             ->getForm();
 
+        $parsedown = new \Parsedown();
+
         return $this->render('tweak/confirm.html.twig', [
             'confirm_form' => $form->createView(),
             'diffs' => $diffs,
+            'docs' => $parsedown->parse(file_get_contents(__DIR__ . '/../../templates/tweak/IniFiles.md')),
         ]);
     }
 
