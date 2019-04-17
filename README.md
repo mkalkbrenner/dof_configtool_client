@@ -287,14 +287,42 @@ from port _17_ and attach them to port _23_.
 
 ###### Use-cases
 
-If you mount heavy contactors at the wall of your cabinet, they sound great for Bumpers. But for drop targets the sound
-effect might be too heavy. In this case you might want to move the drop target effects to smaller contactors or
-contactors not mounted at the wall. The bumper effects themselves will not be touched and remain assigned where they
-should be.
+See the use-cases for `move_drop_target` above.
 
-**_Note:_** These dedicated drop target contactors are for sure not listed in the DOF configtool itself. Once mounted to
-your controller the DOF Configtool Client introduces them. Like for bumpers you can have up to 6 dedicated drop targets.
-If you use combos instead of 6 dedicated bumpers, they apply 1:1 for the new drop targets.
+##### `rgb_brightness`
+
+The standard DOF Configtool allows to adjust the three brightness values (only globally for all tables and controllers
+and their ports):
+* PF Strobe MX
+* Flasher
+* Ledstrip Flasher
+
+For other RGB toys there's no explicit setting at all.
+
+Using this tweak you can set the brightness of any RGB toy (stripes, flasher, flipper buttons, ...) individually per
+controller per port (and individually per table if you like). So `rgb_brightness[11] = 80` will set the brightness of
+port _11_ to _80_. The brightness has to be set as hexadecimal value between _00_ and _FF_. So _FF_ means 100%
+brightness, _80_ means 50%.
+
+**_Note:_** A RGB toy is alway attached to three controller ports in a row. So the example above would automatically
+adjust ports _12_ and _13_, too. So there's no need to provide dedicated settings for these two ports.
+
+###### Use-cases
+
+Maybe you want to have your addressable LED stripes mounted under the cabinet to have the full brightness while the
+brightness of the playfield stripes should be reduced.
+
+For example, if you configured the first three teensy driven stripes to be playfield left, top and right and the fourth
+is the complex undercab illumination, your corresponding tweaks.ini section to set the playfield brightness to 50%
+(hex 80 equals decimal 128, which is 50% of hex FF or decimal 256) and undercab to 80% (hex CD) will look like this:
+
+```INI
+[directoutputconfig30.ini]
+rgb_brightness[1] = 80
+rgb_brightness[4] = 80
+rgb_brightness[7] = 80
+rgb_brightness[10] = CD
+```
 
 #### Complete `tweaks.ini` example
 
