@@ -172,19 +172,6 @@ class TweakController extends AbstractSettingsController
                                                 // merge port 13 and 21 and save the result on port 13.
                                                 // merge[17] = 21
                                                 case 'merge':
-                                                    $ports_to_merge = explode(',', $setting);
-                                                    foreach ($ports_to_merge as $port_to_merge) {
-                                                        $port_to_merge = trim($port_to_merge);
-                                                        if ($game[$port_to_merge]) {
-                                                            if ($game[$port]) {
-                                                                $game[$port] .= '/' . $game[$port_to_merge];
-                                                            } else {
-                                                                $game[$port] = $game[$port_to_merge];
-                                                            }
-                                                        }
-                                                    }
-                                                    break;
-
                                                 case 'merge_and_turn_off':
                                                     $ports_to_merge = explode(',', $setting);
                                                     foreach ($ports_to_merge as $port_to_merge) {
@@ -195,7 +182,10 @@ class TweakController extends AbstractSettingsController
                                                             } else {
                                                                 $game[$port] = $game[$port_to_merge];
                                                             }
-                                                            $game[$port_to_merge] = 0;
+
+                                                            if ('merge_and_turn_off' === $name) {
+                                                                $game[$port_to_merge] = 0;
+                                                            }
                                                         }
                                                     }
                                                     break;
@@ -224,18 +214,30 @@ class TweakController extends AbstractSettingsController
                                                     if (0 !== $game[$port]) {
                                                         $triggers = explode('/', $game[$port]);
                                                         foreach ($triggers as &$trigger) {
-                                                            $trigger = preg_replace('/([SWE]\d+$)/', '$1 ' . $setting, $trigger);
+                                                            $trigger = preg_replace('/([SWE]\d+$)/', '$1 ' . trim($setting), $trigger);
                                                         }
                                                         unset($trigger);
                                                         $game[$port] = implode('/', $triggers);
                                                     }
                                                     break;
 
+                                                case 'target_effect_duration':
+                                                case 'drop_target_effect_duration':
+                                                    if (0 !== $game[$port]) {
+                                                        $pattern = 'target_effect_duration' === $name ? '@t@' : '@dt@';
+                                                        if (false !== strpos($game[$port], $pattern)) {
+                                                            $game[$port] = str_replace($pattern, trim($setting), $game[$port]);
+                                                        }
+                                                    }
+                                                    break;
+
+                                                case 'move_target':
                                                 case 'move_drop_target':
                                                     if (0 !== $game[$port]) {
+                                                        $pattern = 'move_target' === $name ? '@t@' : '@dt@';
                                                         $triggers = explode('/', $game[$port]);
                                                         foreach ($triggers as $key => $trigger) {
-                                                            if (false !== strpos($trigger, '@dt@')) {
+                                                            if (false !== strpos($trigger, $pattern)) {
                                                                 $ports_to_merge = explode(',', $setting);
                                                                 foreach ($ports_to_merge as $port_to_merge) {
                                                                     $port_to_merge = trim($port_to_merge);
@@ -246,25 +248,6 @@ class TweakController extends AbstractSettingsController
                                                                     }
                                                                 }
                                                                 unset($triggers[$key]);
-                                                            }
-                                                        }
-                                                        unset($trigger);
-                                                        $game[$port] = implode('/', $triggers);
-                                                    }
-                                                    break;
-
-                                                case 'move_target':
-                                                    if (0 !== $game[$port]) {
-                                                        $triggers = explode('/', $game[$port]);
-                                                        foreach ($triggers as $key => $trigger) {
-                                                            $ports_to_merge = explode(',', $setting);
-                                                            foreach ($ports_to_merge as $port_to_merge) {
-                                                                $port_to_merge = trim($port_to_merge);
-                                                                if (0 !== $game[$port_to_merge]) {
-                                                                    $game[$port_to_merge] .= '/' . $trigger;
-                                                                } else {
-                                                                    $game[$port_to_merge] = $trigger;
-                                                                }
                                                             }
                                                         }
                                                         unset($trigger);

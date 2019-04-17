@@ -152,8 +152,9 @@ output controller port per trigger.
 Using the DOF configtool it's impossible to set a different default duration other then the global one on a specific
 port. You would have to do that for all tables.
 
-Using this option you can set such a per port default duration for all games at once. But this will only happen if
-there's not yet set an individual duration.
+Using this option you can set such a default duration per port for all games at once. But this will only happen if
+there's not yet set an individual duration. To modify some of such individual durations see `target_effect_duration` and
+`drop_target_effect_duration` below.
 
 So `default_effect_duration[23] = 100` sets the duration to _100ms_ for all triggers on output _23_ of a given output
 controller if an individual setting doesn't exist already.
@@ -165,6 +166,24 @@ really heavy ones which need a longer trigger to fire correctly, it makes no sen
 for **all** effects just to satisfy these heavy contactors because that will have a negative effect on your force
 feedback toys in general. Your setup will become more _sluggish_.
 Using this tweak you can limit the modification to the ports where you need it.
+
+##### `target_effect_duration` / `drop_target_effect_duration`
+
+The standard DOF configs defines global effect durations for _targets_ and _drop targets_. Individual durations need to
+be set per game per output controller port per trigger.
+
+Using the DOF configtool it's impossible to set different durations other then the global ones on a specific port. You
+would have to do that for all tables individually instead.
+
+Using these options you can overwrite the global duration for _targets_ or _drop targets_ per port for all games at
+once.
+
+So `target_effect_duration[23] = 100` sets the duration of a target to _100ms_ for all triggers on output _23_ of a
+given output controller if an individual setting doesn't exist already.
+
+###### Use-cases
+
+Same as for `default_effect_duration`.
 
 ##### `turn_off` / `turn_on`
 
@@ -203,7 +222,7 @@ the small one depeneding on your game.
 ##### `adjust_intensity`
 
 This tweak allows you to boost or reduce the intensity off an effect by a given factor on specific ports of your output
-controller. So `adjust_intensity[28] = 1.2` will boost all existing intensities by _1.2_. For example an instensity of
+controller. So `adjust_intensity[28] = 1.2` will boost all existing intensities by _1.2_. For example an intensity of
 _32_ will become _41_.
 
 This tweak internally ensures that the intesity will not exceed the DOF maximum of 48.
