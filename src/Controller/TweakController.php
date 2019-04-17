@@ -129,6 +129,13 @@ class TweakController extends AbstractSettingsController
                 }
                 $games = [];
                 foreach (explode("\r\n", $config) as $game_row) {
+                    if (preg_match('/^Pinball[XY]/', $game_row)) {
+                        // Don't modify PinballX and PinballY settings. They use a different scheme and would require to
+                        // many exceptions for now.
+                        $games[] = $game_row;
+                        continue;
+                    }
+
                     if ($game_row = trim($game_row)) {
                         $game_row_elements = str_getcsv($game_row);
                         $game_name = $game_row_elements[0];
@@ -220,10 +227,7 @@ class TweakController extends AbstractSettingsController
                                                             $trigger = preg_replace('/([SWE]\d+$)/', '$1 ' . $setting, $trigger);
                                                         }
                                                         unset($trigger);
-                                                        $new = implode('/', $triggers);
-                                                        if ($new != $game[$port]) {
-                                                            $game[$port] = $new;
-                                                        }
+                                                        $game[$port] = implode('/', $triggers);
                                                     }
                                                     break;
 
@@ -245,10 +249,7 @@ class TweakController extends AbstractSettingsController
                                                             }
                                                         }
                                                         unset($trigger);
-                                                        $new = implode('/', $triggers);
-                                                        if ($new != $game[$port]) {
-                                                            $game[$port] = $new;
-                                                        }
+                                                        $game[$port] = implode('/', $triggers);
                                                     }
                                                     break;
 
@@ -267,10 +268,7 @@ class TweakController extends AbstractSettingsController
                                                             }
                                                         }
                                                         unset($trigger);
-                                                        $new = implode('/', $triggers);
-                                                        if ($new != $game[$port]) {
-                                                            $game[$port] = $new;
-                                                        }
+                                                        $game[$port] = implode('/', $triggers);
                                                     }
                                                     break;
 
@@ -310,10 +308,7 @@ class TweakController extends AbstractSettingsController
                                                             }
                                                         }
                                                         unset($trigger);
-                                                        $new = implode('/', $triggers);
-                                                        if ($new != $game[$port]) {
-                                                            $game[$port] = $new;
-                                                        }
+                                                        $game[$port] =  implode('/', $triggers);
                                                     }
                                                     break;
 
@@ -321,7 +316,10 @@ class TweakController extends AbstractSettingsController
                                                     if (0 !== $game[$port]) {
                                                         $brightness = trim($setting);
                                                         foreach ($colors[$file] as $color_name => $color_value) {
-                                                            $game[$port] = str_replace(' ' . $color_name, ' ' . $color_value . $brightness, $game[$port]);
+                                                            $color_name = ' ' . $color_name;
+                                                            if (false !== strpos($game[$port], $color_name)) {
+                                                                $game[$port] = str_replace($color_name, ' ' . $color_value . $brightness, $game[$port]);
+                                                            }
                                                         }
                                                     }
                                                     break;
