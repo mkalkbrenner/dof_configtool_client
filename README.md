@@ -308,6 +308,11 @@ from port _17_ and attach them to port _23_.
 
 See the use-cases for `move_drop_target` above.
 
+##### `copy_drop_target` / `copy_target`
+
+These two tweaks work exactly like `move_drop_target` and `move_target` decribed above, except that the instructions are
+not removed from the original port.
+
 ##### `rgb_brightness`
 
 The standard DOF Configtool allows to adjust the three brightness values (only globally for all tables and controllers

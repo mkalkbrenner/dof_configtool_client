@@ -224,17 +224,19 @@ class TweakController extends AbstractSettingsController
                                                 case 'target_effect_duration':
                                                 case 'drop_target_effect_duration':
                                                     if (0 !== $game[$port]) {
-                                                        $pattern = 'target_effect_duration' === $name ? '@t@' : '@dt@';
+                                                        $pattern = (FALSE !== strpos($name, 'drop_target')) ? '@dt@' : '@t@';
                                                         if (false !== strpos($game[$port], $pattern)) {
                                                             $game[$port] = str_replace($pattern, trim($setting), $game[$port]);
                                                         }
                                                     }
                                                     break;
 
+                                                case 'copy_target':
+                                                case 'copy_drop_target':
                                                 case 'move_target':
                                                 case 'move_drop_target':
                                                     if (0 !== $game[$port]) {
-                                                        $pattern = 'move_target' === $name ? '@t@' : '@dt@';
+                                                        $pattern = (FALSE !== strpos($name, 'drop_target')) ? '@dt@' : '@t@';
                                                         $triggers = explode('/', $game[$port]);
                                                         foreach ($triggers as $key => $trigger) {
                                                             if (false !== strpos($trigger, $pattern)) {
@@ -247,7 +249,9 @@ class TweakController extends AbstractSettingsController
                                                                         $game[$port_to_merge] = $trigger;
                                                                     }
                                                                 }
-                                                                unset($triggers[$key]);
+                                                                if (FALSE === strpos($name, 'copy')) {
+                                                                    unset($triggers[$key]);
+                                                                }
                                                             }
                                                         }
                                                         unset($trigger);
