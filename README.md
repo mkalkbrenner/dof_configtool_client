@@ -280,6 +280,27 @@ This tweak swaps to ports. So `swap[7] = 14` will assign the configuration of po
 
 Maybe you want to swap the gear and the shaker motor for a specific game, who knows? 😉
 
+##### `overwrite`
+
+This tweak entirely overwrites a port with a custom setting. So `overwrite[7] = ON Red` will assign the value _ON RED_ to
+port _7_.
+
+**_Note:_** This tweak might make most sense per table instead of overwriting a port in general.
+
+###### Use-cases
+
+For example you can use a different color for your flipper buttons.
+
+##### `append`
+
+This tweak appends a string to a port's configuration. So `append[7] = Blink` will append the value _Blink_ to port _7_.
+For example _ON RED_ becomes _ON Red Blink_
+port _7_.
+
+###### Use-cases
+
+A simple example are blinking flipper buttons (FYI fading is possible.)
+
 ##### `move_drop_target`
 
 Using this tweak you can extract the triggers for a drop target from a port (usually a bumper) and attach them to a

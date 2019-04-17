@@ -210,6 +210,21 @@ class TweakController extends AbstractSettingsController
                                                     $game[$setting] = $tmp;
                                                     break;
 
+                                                case 'overwrite':
+                                                    $game[$port] = trim($setting);
+                                                    break;
+
+                                                case 'append':
+                                                    if ($game[$port]) {
+                                                        $setting = trim($setting);
+                                                        if (0 === strpos($setting, '/')) {
+                                                            $game[$port] .= $setting;
+                                                        } else {
+                                                            $game[$port] .= ' ' . $setting;
+                                                        }
+                                                    }
+                                                    break;
+
                                                 case 'default_effect_duration':
                                                     if (0 !== $game[$port]) {
                                                         $triggers = explode('/', $game[$port]);
