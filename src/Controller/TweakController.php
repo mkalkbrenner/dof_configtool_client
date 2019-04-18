@@ -71,6 +71,8 @@ class TweakController extends AbstractSettingsController
 
         return $this->render('tweak/settings.html.twig', [
             'settings_form' => $form->createView(),
+            'tweak_explanation' => $this->getTweakExplanation(),
+            'dof_explanation' => $this->getDofExplanation(),
         ]);
     }
 
@@ -210,12 +212,23 @@ class TweakController extends AbstractSettingsController
                                                     $game[$setting] = $tmp;
                                                     break;
 
-                                                case 'overwrite':
+                                                case 'string_overwrite':
                                                     $game[$port] = trim($setting);
                                                     break;
 
-                                                case 'append':
-                                                    if ($game[$port]) {
+                                                case 'string_append':
+                                                    if (0 !== $game[$port]) {
+                                                        $setting = trim($setting);
+                                                        if (0 === strpos($setting, '/')) {
+                                                            $game[$port] .= $setting;
+                                                        } else {
+                                                            $game[$port] .= ' ' . $setting;
+                                                        }
+                                                    }
+                                                    break;
+
+                                                case 'remove':
+                                                    if (0 !== $game[$port]) {
                                                         $setting = trim($setting);
                                                         if (0 === strpos($setting, '/')) {
                                                             $game[$port] .= $setting;
@@ -394,12 +407,10 @@ class TweakController extends AbstractSettingsController
             ->setAction($this->generateUrl('tweak_do'))
             ->getForm();
 
-        $parsedown = new \Parsedown();
-
         return $this->render('tweak/confirm.html.twig', [
             'confirm_form' => $form->createView(),
             'diffs' => $diffs,
-            'docs' => $parsedown->parse(file_get_contents(__DIR__ . '/../../templates/tweak/IniFiles.md')),
+            'dof_explanation' => $this->getDofExplanation(),
         ]);
     }
 
@@ -438,6 +449,35 @@ class TweakController extends AbstractSettingsController
         }
 
         return $this->redirectToRoute('tweak');
+    }
+
+    /**
+     * @return mixed
+     * @throws \Psr\Cache\InvalidArgumentException
+     */
+    protected function getDofExplanation() {
+        $explanations = $this->cache->getItem('dof.explanation');
+        if (!$explanations->isHit()) {
+            $parsedown = new \Parsedown();
+            $explanations->set($parsedown->parse(file_get_contents(__DIR__ . '/../../templates/tweak/IniFiles.md')));
+        }
+        return $explanations->get();
+    }
+
+    /**
+     * @return mixed
+     * @throws \Psr\Cache\InvalidArgumentException
+     */
+    protected function getTweakExplanation() {
+        $explanations = $this->cache->getItem('tweak.explanation');
+        if (!$explanations->isHit()) {
+            $content = file_get_contents(__DIR__ . '/../../README.md');
+            $content = preg_replace('/.*#### Scopes/sm', '#### Scopes', $content);
+            $content = preg_replace('/### 3. RegEdit.*/sm', '', $content);
+            $parsedown = new \Parsedown();
+            $explanations->set($parsedown->parse($content));
+        }
+        return $explanations->get();
     }
 
 }

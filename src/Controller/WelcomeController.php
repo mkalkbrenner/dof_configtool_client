@@ -15,10 +15,23 @@ class WelcomeController extends AbstractSettingsController
             $this->filesystem->remove($this->filesystem->getTempDir());
         }
 
-        $parsedown = new \Parsedown();
-
         return $this->render('welcome/index.html.twig', [
-            'readme' => $parsedown->parse(file_get_contents(__DIR__. '/../../README.md')),
+            'readme' => $this->getReadme(),
         ]);
+    }
+
+    /**
+     * @return mixed
+     * @throws \Psr\Cache\InvalidArgumentException
+     */
+    protected function getReadme() {
+        $readme = $this->cache->getItem('welcome.readme');
+        if (!$readme->isHit()) {
+            $content = file_get_contents(__DIR__ . '/../../README.md');
+            $content = preg_replace('/## Installation.*## Usage/sm', '## Usage', $content);
+            $parsedown = new \Parsedown();
+            $readme->set($parsedown->parse($content));
+        }
+        return $readme->get();
     }
 }

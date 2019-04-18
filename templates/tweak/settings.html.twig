@@ -9,4 +9,10 @@
     {{ form_errors(settings_form) }}
     {{ form_widget(settings_form) }}
     {{ form_end(settings_form) }}
+
+    <hr>
+
+    {% include 'tweak/tweak_explanation.html.twig' %}
+    {% include 'tweak/dof_explanation.html.twig' %}
+
 {% endblock %}
