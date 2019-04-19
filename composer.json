@@ -9,6 +9,7 @@
         "ext-iconv": "*",
         "ext-zip": "*",
         "coderstephen/windows-registry": "dev-master",
+        "cpliakas/git-wrapper": "^2.1",
         "erusev/parsedown": "^1.7",
         "iphis/finediff": "0.4.*",
         "sensio/framework-extra-bundle": "^5.1",

@@ -9,4 +9,9 @@
     {{ form_errors(download_form) }}
     {{ form_widget(download_form) }}
     {{ form_end(download_form) }}
+
+    {% if git_diff|default %}
+        <hr>
+        {% include 'git_diff.html.twig' %}
+    {% endif %}
 {% endblock %}

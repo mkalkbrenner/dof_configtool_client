@@ -31,3 +31,4 @@ settings.ini
 *:Zone.Identifier:$DATA
 /build/Output/
 /public/dev.txt
+/bin/

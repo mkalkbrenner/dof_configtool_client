@@ -2,6 +2,9 @@
     "coderstephen/windows-registry": {
         "version": "v0.9.1"
     },
+    "cpliakas/git-wrapper": {
+        "version": "v2.1.0"
+    },
     "doctrine/annotations": {
         "version": "1.0",
         "recipe": {
