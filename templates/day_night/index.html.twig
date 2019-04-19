@@ -1,0 +1,12 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Day Night Switch{% endblock %}
+
+{% block body %}
+    <h2>Day Night Switch</h2>
+    <h3>Current DOF settings in use: <em>{{ branch|default('-') }}</em></h3>
+    {{ form_start(day_night_form) }}
+    {{ form_errors(day_night_form) }}
+    {{ form_widget(day_night_form) }}
+    {{ form_end(day_night_form) }}
+{% endblock %}

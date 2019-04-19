@@ -3,11 +3,13 @@
 namespace App\Controller;
 
 use App\Entity\Tweaks;
+use GitWrapper\GitException;
 use iphis\FineDiff\Diff;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
 class TweakController extends AbstractSettingsController
@@ -15,11 +17,12 @@ class TweakController extends AbstractSettingsController
     /**
      * @Route("/tweak", name="tweak")
      */
-    public function index(Request $request)
+    public function index(Request $request, SessionInterface $session)
     {
         $form = $this->createFormBuilder()
             ->add('settings', SubmitType::class, ['label' => 'Edit tweak settings'])
-            ->add('tweak', SubmitType::class, ['label' => 'Tweak DOF configuration files'])
+            ->add('tweakDay', SubmitType::class, ['label' => 'Tweak DOF configuration for day mode'])
+            ->add('tweakNight', SubmitType::class, ['label' => 'Tweak DOF configuration for night mode'])
             ->getForm();
 
         $form->handleRequest($request);
@@ -31,38 +34,62 @@ class TweakController extends AbstractSettingsController
                 case 'settings':
                     return $this->redirectToRoute('tweak_settings');
 
-                case 'tweak':
-                    return $this->redirectToRoute('tweak_confirm');
+                case 'tweakDay':
+                    return $this->redirectToRoute('tweak_confirm', ['cycle' => 'day']);
+
+                case 'tweakNight':
+                    return $this->redirectToRoute('tweak_confirm', ['cycle' => 'night']);
             }
+        }
+
+        $changes = $session->get('git_diff', '');
+        if ($changes) {
+            $session->remove('git_diff');
         }
 
         return $this->render('tweak/index.html.twig', [
             'tweak_form' => $form->createView(),
+            'git_diff' => nl2br($changes),
         ]);
     }
 
     /**
      * @Route("/tweak/settings", name="tweak_settings")
      */
-    public function settings(Request $request)
+    public function settings(Request $request, SessionInterface $session)
     {
         $tweaks = new Tweaks();
         $tweaks->load();
 
         $form = $this->createFormBuilder($tweaks)
-            ->add('settings', TextareaType::class, ['label' => 'Settings', 'attr' => ['rows' => 20]])
+            ->add('daySettings', TextareaType::class, ['label' => 'Day Settings', 'attr' => ['rows' => 20]])
+            ->add('nightSettings', TextareaType::class, ['label' => 'Night Settings', 'attr' => ['rows' => 20]])
             ->add('save', SubmitType::class, ['label' => 'Save settings'])
             ->getForm();
 
         $form->handleRequest($request);
 
+        $changes = '';
         if ($form->isSubmitted() && $form->isValid()) {
             /** @var Tweaks $tweaks */
             $tweaks = $form->getData();
 
             try {
                 $tweaks->persist();
-                $this->addFlash('success', 'Saved settings to '.$tweaks->getIni().'.');
+                $this->addFlash('success', 'Saved settings.');
+                if ($this->settings->isVersionControl()) {
+                    $workingCopy = $this->getGitWorkingCopy($tweaks->getDirectory());
+                    if ($workingCopy->hasChanges()) {
+                        try {
+                            $workingCopy->add('*.ini');
+                            $workingCopy->commit('Saved tweak settings');
+                            $changes = $workingCopy->run('show');
+                        } catch (GitException $e) {
+                            $this->addFlash('warning', $e->getMessage());
+                        }
+                    }
+                }
+                $session->set('git_diff', $changes);
                 return $this->redirectToRoute('tweak');
             } catch (\Exception $e) {
                 $this->addFlash('warning', $e->getMessage());
@@ -73,15 +100,30 @@ class TweakController extends AbstractSettingsController
             'settings_form' => $form->createView(),
             'tweak_explanation' => $this->getTweakExplanation(),
             'dof_explanation' => $this->getDofExplanation(),
+            'git_diff' => nl2br($changes),
         ]);
     }
 
     /**
-     * @Route("/tweak/confirm", name="tweak_confirm")
+     * @Route("/tweak/confirm/{cycle}", name="tweak_confirm")
      */
-    public function confirm(Request $request)
+    public function confirm(Request $request, string $cycle)
     {
         ini_set('set_time_limit', 0);
+
+        if (!$this->settings->isVersionControl()) {
+            if ('day' !== $cycle) {
+                $this->addFlash('warning', 'Day night cycle requires version control to be enabled. Check your settings.');
+                return $this->redirectToRoute('tweak');
+            }
+        } else {
+            try {
+                $workingCopy = $this->getGitWorkingCopy($this->settings->getDofConfigPath());
+                $workingCopy->checkout('download');
+            } catch (GitException $e) {
+                $this->addFlash('warning', $e->getMessage());
+            }
+        }
 
         $tweaks = new Tweaks();
         $tweaks->load();
@@ -93,7 +135,7 @@ class TweakController extends AbstractSettingsController
         $colors = [];
 
         $file = '';
-        foreach ($tweaks->getSettingsParsed() as $section => $adjustments) {
+        foreach ($tweaks->getSettingsParsed($cycle) as $section => $adjustments) {
             if (strpos($section, '.ini')) {
                 $file = $this->settings->getDofConfigPath() . DIRECTORY_SEPARATOR . $section;
                 if (file_exists($file)) {
@@ -403,8 +445,9 @@ class TweakController extends AbstractSettingsController
         if ($diffs) {
             $formBuilder->add('save', SubmitType::class, ['label' => 'Save']);
         }
-        $form = $formBuilder->add('files', HiddenType::class, ['data' => base64_encode(serialize($modded_files))])
-            ->setAction($this->generateUrl('tweak_do'))
+        $form = $formBuilder
+            ->add('files', HiddenType::class, ['data' => base64_encode(serialize($modded_files))])
+            ->setAction($this->generateUrl('tweak_do', ['cycle' => $cycle]))
             ->getForm();
 
         return $this->render('tweak/confirm.html.twig', [
@@ -415,9 +458,9 @@ class TweakController extends AbstractSettingsController
     }
 
     /**
-     * @Route("/tweak/do", name="tweak_do")
+     * @Route("/tweak/do/{cycle}", name="tweak_do")
      */
-    public function tweak(Request $request)
+    public function tweak(Request $request, SessionInterface $session, string $cycle)
     {
         $form = $this->createFormBuilder()
             ->add('cancel', SubmitType::class, ['label' => 'Cancel'])
@@ -427,11 +470,26 @@ class TweakController extends AbstractSettingsController
 
         $form->handleRequest($request);
 
+        $changes = '';
         if ($form->isSubmitted() && $form->isValid()) {
             /** @var \Symfony\Component\Form\Form $form */
             $name = $form->getClickedButton()->getConfig()->getName();
             switch ($name) {
                 case 'save':
+                    if ($this->settings->isVersionControl()) {
+                        try {
+                            $workingCopy = $this->getGitWorkingCopy($this->settings->getDofConfigPath());
+                            $branches = $workingCopy->getBranches();
+                            if (!in_array($cycle, $branches->all())) {
+                                $workingCopy->checkoutNewBranch($cycle);
+                            } else {
+                                $workingCopy->checkout($cycle);
+                            }
+                        } catch (GitException $e) {
+                            $this->addFlash('warning', $e->getMessage());
+                        }
+                    }
+
                     try {
                         $files = unserialize(base64_decode($form->getData()['files']), [false]);
                         foreach ($files as $file => $content) {
@@ -441,12 +499,24 @@ class TweakController extends AbstractSettingsController
                                 $this->addFlash('danger', 'Failed to save tweaked version of' . $file . '.');
                             }
                         }
+                        if ($this->settings->isVersionControl() && $workingCopy->hasChanges()) {
+                            try {
+                                $workingCopy->add('*.ini');
+                                $workingCopy->add('*.xml');
+                                $workingCopy->add('*.png');
+                                $workingCopy->commit('Applied ' . $cycle . ' tweaks.');
+                                $changes = nl2br($workingCopy->run('show'));
+                            } catch (GitException $e) {
+                                $this->addFlash('warning', $e->getMessage());
+                            }
+                        }
                     } catch (\Exception $e) {
                         $this->addFlash('warning', $e->getMessage());
                     }
                     break;
             }
         }
+        $session->set('git_diff', $changes);
 
         return $this->redirectToRoute('tweak');
     }

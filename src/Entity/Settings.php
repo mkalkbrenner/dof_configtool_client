@@ -48,7 +48,7 @@ class Settings
     /**
      * @var string
      */
-    private $gitEmail = 'mm47@localhost';
+    private $gitEmail = 'mk47@localhost';
 
     private $ini;
 
