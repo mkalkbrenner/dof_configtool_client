@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "DOF Configtool Client"
-#define MyAppVersion "0.2.1"
+#define MyAppVersion "0.3.0-alpha.1"
 #define MyAppPublisher "MK47"
 #define MyAppURL "https://github.com/mkalkbrenner/dof_configtool_client"
 #define MyAppExeName "DOFConfigtoolClient.exe"
@@ -35,7 +35,7 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 
 [Files]
 Source: "C:\Users\mkalkbrenner\Documents\DOFConfigtoolClient\DOFConfigtoolClient.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\mkalkbrenner\Documents\DOFConfigtoolClient\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: ".git,.gitignore,.idea,dev.txt,www\ini\*.ini,www\System*,www\build,www\var,phpunit,tests,webcache\*,\debug,*.log,directoutputconfig*,DirectOutputShapes*,tablemappings*"
+Source: "C:\Users\mkalkbrenner\Documents\DOFConfigtoolClient\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: ".git,.gitignore,.idea,dev.txt,www\ini,www\System*,www\build,www\var,phpunit,tests,webcache\*,\debug,*.log,directoutputconfig*,DirectOutputShapes*,tablemappings*"
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]

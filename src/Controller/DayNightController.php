@@ -28,22 +28,18 @@ class DayNightController extends AbstractSettingsController
         }
 
         $formBuilder = $this->createFormBuilder();
-        $button = false;
-        if ('day' !== $branch && in_array('day', $branches)) {
-            $formBuilder->add('day', SubmitType::class, ['label' => 'Switch to day DOF settings']);
-            $button = true;
-        }
-        if ('night' !== $branch && in_array('night', $branches)) {
-            $formBuilder->add('night', SubmitType::class, ['label' => 'Switch to night DOF settings']);
-            $button = true;
-        }
-        if ('download' !== $branch && in_array('download', $branches)) {
-            $formBuilder->add('download', SubmitType::class, ['label' => 'Switch to unmodified/downloaded DOF settings']);
-            $button = true;
+        $cmd = [];
+        foreach (['day' => 'day', 'night' => 'night', 'download' => 'unmodified/downloaded'] as $name => $label) {
+            if (in_array($name, $branches)) {
+                if ($name !== $branch) {
+                    $formBuilder->add($name, SubmitType::class, ['label' => 'Switch to ' . $label . ' DOF settings']);
+                }
+                $cmd[$label] = $this->settings->getGitBinary() . ' --git-dir ' . $this->settings->getDofConfigPath() . ' checkout ' . $name;
+            }
         }
         $form = $formBuilder->getForm();
 
-        if (!$button) {
+        if (!$cmd) {
             $this->addFlash('warning', 'No optional DOF settings detected. Try to download and tweak them first.');
         }
 
@@ -64,6 +60,7 @@ class DayNightController extends AbstractSettingsController
         return $this->render('day_night/index.html.twig', [
             'day_night_form' => $form->createView(),
             'branch' => $branch,
+            'cmd' => $cmd,
         ]);
     }
 }

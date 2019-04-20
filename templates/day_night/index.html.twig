@@ -9,4 +9,15 @@
     {{ form_errors(day_night_form) }}
     {{ form_widget(day_night_form) }}
     {{ form_end(day_night_form) }}
+
+    {% if cmd|default %}
+        <hr>
+        <h3>Command lines to trigger a day night switch from your prefered frontend:</h3>
+        <ul>
+            {% for label, command in cmd %}
+                <li><strong>{{ label }}</strong>:<pre><kbd>{{ command|raw }}</kbd></pre></li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
 {% endblock %}
