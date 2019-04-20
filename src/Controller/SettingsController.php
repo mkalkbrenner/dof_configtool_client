@@ -20,6 +20,7 @@ class SettingsController extends AbstractSettingsController
             ->add('lcpApiKey', TextType::class, ['label' => 'LCP_APIKEY'])
             ->add('dofPath', TextType::class, ['label' => 'DOF Path'])
             ->add('visualPinballPath', TextType::class, ['label' => 'Visual Pinball Path'])
+            ->add('bsPatchBinary', TextType::class, ['label' => 'pspatch Binary'])
             ->add('versionControl', CheckboxType::class, ['label' => 'Enable Version Control via Git'])
             ->add('gitBinary', TextType::class, ['label' => 'Git Binary'])
             ->add('gitUser', TextType::class, ['label' => 'Git User'])
