@@ -43,6 +43,11 @@ class Settings
     /**
      * @var string
      */
+    private $bsPatchBinary;
+
+    /**
+     * @var string
+     */
     private $gitUser = 'DOF Configtool Client';
 
     /**
@@ -55,12 +60,25 @@ class Settings
     public function __construct()
     {
         $this->ini = ($_SERVER['PROGRAM_DATA'] ?? (__DIR__ . '/../../ini')) . '/settings.ini';
-        if (extension_loaded('com_dotnet')) {
-            $this->gitBinary = dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'bin' . DIRECTORY_SEPARATOR . 'PortableGit' . DIRECTORY_SEPARATOR. 'bin' . DIRECTORY_SEPARATOR . 'git.exe';
-        } else {
-            $this->gitBinary = 'git'; // Unix
-        }
 
+        // Default for Unix and Windows custom installs, where the binaries should be in PATH.
+        $this->gitBinary = 'git';
+        $this->bsPatchBinary = 'bspatch';
+
+        if (extension_loaded('com_dotnet')) {
+            $this->gitBinary .= '.exe';
+            $this->bsPatchBinary .= '.exe';
+
+            $gitBinary = dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'bin' . DIRECTORY_SEPARATOR . 'PortableGit' . DIRECTORY_SEPARATOR. 'bin' . DIRECTORY_SEPARATOR . 'git.exe';
+            if (file_exists($gitBinary)) {
+                $this->gitBinary = $gitBinary;
+            }
+
+            $bsPatchBinary = dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'bin' . DIRECTORY_SEPARATOR . 'bsdiff_win_exe' . DIRECTORY_SEPARATOR. 'bspatch.exe';
+            if (file_exists($bsPatchBinary)) {
+                $this->bsPatchBinary = $bsPatchBinary;
+            }
+        }
     }
 
     /**
@@ -215,6 +233,24 @@ class Settings
         return $this;
     }
 
+    /**
+     * @return string
+     */
+    public function getBsPatchBinary(): string
+    {
+        return $this->bsPatchBinary;
+    }
+
+    /**
+     * @param string $bsPatchBinary
+     * @return self
+     */
+    public function setBsPatchBinary(string $bsPatchBinary): self
+    {
+        $this->bsPatchBinary = $bsPatchBinary;
+        return $this;
+    }
+
     public function load(): self
     {
         if (file_exists($this->ini)) {
@@ -226,7 +262,9 @@ class Settings
             $this->setGitBinary($download['git']['binary'] ?? $this->getGitBinary());
             $this->setGitUser($download['git']['user'] ?? $this->getGitUser());
             $this->setGitEmail($download['git']['email'] ?? $this->getGitEmail());
+            $this->setBsPatchBinary($download['bsdiff']['bspatch_binary'] ?? $this->getBsPatchBinary());
         } else {
+            // 0.1.x backward compatibility
             $old = ($_SERVER['PROGRAM_DATA'] ?? (__DIR__ . '/../../ini')) . '/download.ini';
             if (file_exists($old)) {
                 $download = parse_ini_file($old, TRUE);
@@ -250,7 +288,9 @@ class Settings
                 'enabled = ' . (int) $this->isVersionControl() . "\r\n" .
                 'binary = ' . $this->getGitBinary() . "\r\n" .
                 'user = ' . $this->getGitUser() . "\r\n" .
-                'email = ' . $this->getGitEmail() . "\r\n"
+                'email = ' . $this->getGitEmail() . "\r\n" .
+                "[bsdiff]\r\n" .
+                'bspatch_binary = ' . $this->getBsPatchBinary() . "\r\n"
             )
         ) {
             throw new \RuntimeException('Could not write file ' . $this->ini);

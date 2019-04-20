@@ -12,7 +12,7 @@ adjusting the individual table settings. But doing so has to downsides:
 * as soon as you have done that, you're decoupled from the upstream (the centralized table database) and you need to
   track changes manually
 
-Both downsides could be avoided if we add more layers of configuration to the DOF Configtool, for example per port or
+All downsides could be avoided if we add more layers of configuration to the DOF Configtool, for example per port or
 per toy. Since it's currently not possible to contribute to the DOF Configtool directly this client aims to add this
 missing layers by introducing a kind of rule-set config file and a client that downloads your pre-configured
 configuration files from the DOF Configtool and tweaks them accordingly.
