@@ -34,7 +34,7 @@ class DayNightController extends AbstractSettingsController
                 if ($name !== $branch) {
                     $formBuilder->add($name, SubmitType::class, ['label' => 'Switch to ' . $label . ' DOF settings']);
                 }
-                $cmd[$label] = $this->settings->getGitBinary() . ' --git-dir ' . $this->settings->getDofConfigPath() . ' checkout ' . $name;
+                $cmd[$label] = $this->settings->getGitBinary() . ' -C ' . $this->settings->getDofConfigPath() . ' checkout ' . $name;
             }
         }
         $form = $formBuilder->getForm();
