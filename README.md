@@ -443,7 +443,7 @@ be added.
 
 ##### Day
 
-```ÌNI
+```INI
 [directoutputconfig51.ini]
 move_drop_target[22] = 23
 move_drop_target[24] = 23
@@ -484,7 +484,7 @@ static illumination of the eyes into a "scary" pulsing effect 😉
 
 ##### Night
 
-```ÌNI
+```INI
 [directoutputconfig51.ini]
 turn_off[22] = *
 turn_off[23] = *
