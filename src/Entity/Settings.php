@@ -30,11 +30,55 @@ class Settings
      */
     private $visualPinballPath = '';
 
+    /**
+     * @var bool
+     */
+    private $versionControl = false;
+
+    /**
+     * @var string
+     */
+    private $gitBinary;
+
+    /**
+     * @var string
+     */
+    private $bsPatchBinary;
+
+    /**
+     * @var string
+     */
+    private $gitUser = 'DOF Configtool Client';
+
+    /**
+     * @var string
+     */
+    private $gitEmail = 'mk47@localhost';
+
     private $ini;
 
     public function __construct()
     {
         $this->ini = ($_SERVER['PROGRAM_DATA'] ?? (__DIR__ . '/../../ini')) . '/settings.ini';
+
+        // Default for Unix and Windows custom installs, where the binaries should be in PATH.
+        $this->gitBinary = 'git';
+        $this->bsPatchBinary = 'bspatch';
+
+        if (extension_loaded('com_dotnet')) {
+            $this->gitBinary .= '.exe';
+            $this->bsPatchBinary .= '.exe';
+
+            $gitBinary = dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'bin' . DIRECTORY_SEPARATOR . 'PortableGit' . DIRECTORY_SEPARATOR. 'bin' . DIRECTORY_SEPARATOR . 'git.exe';
+            if (file_exists($gitBinary)) {
+                $this->gitBinary = $gitBinary;
+            }
+
+            $bsPatchBinary = dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'bin' . DIRECTORY_SEPARATOR . 'bsdiff_win_exe' . DIRECTORY_SEPARATOR. 'bspatch.exe';
+            if (file_exists($bsPatchBinary)) {
+                $this->bsPatchBinary = $bsPatchBinary;
+            }
+        }
     }
 
     /**
@@ -123,14 +167,104 @@ class Settings
         return $this;
     }
 
-    public function load() : self
+    public function isVersionControl(): ?bool
+    {
+        return $this->versionControl;
+    }
+
+    public function setVersionControl(bool $versionControl): self
+    {
+        $this->versionControl = $versionControl;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getGitBinary(): string
+    {
+        return $this->gitBinary;
+    }
+
+    /**
+     * @param string $gitBinary
+     * @return self
+     */
+    public function setGitBinary(string $gitBinary): self
+    {
+        $this->gitBinary = $gitBinary;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getGitUser(): string
+    {
+        return $this->gitUser;
+    }
+
+    /**
+     * @param string $gitUser
+     * @return self
+     */
+    public function setGitUser(string $gitUser): self
+    {
+        $this->gitUser = $gitUser;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getGitEmail(): string
+    {
+        return $this->gitEmail;
+    }
+
+    /**
+     * @param string $gitEmail
+     * @return self
+     */
+    public function setGitEmail(string $gitEmail): self
+    {
+        $this->gitEmail = $gitEmail;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getBsPatchBinary(): string
+    {
+        return $this->bsPatchBinary;
+    }
+
+    /**
+     * @param string $bsPatchBinary
+     * @return self
+     */
+    public function setBsPatchBinary(string $bsPatchBinary): self
+    {
+        $this->bsPatchBinary = $bsPatchBinary;
+        return $this;
+    }
+
+    public function load(): self
     {
         if (file_exists($this->ini)) {
             $download = parse_ini_file($this->ini, TRUE);
             $this->setLcpApiKey($download['dof']['LCP_APIKEY']);
             $this->setDofPath($download['dof']['path']);
             $this->setVisualPinballPath($download['visualpinball']['path']);
+            $this->setVersionControl((bool) ($download['git']['enabled'] ?? false));
+            $this->setGitBinary($download['git']['binary'] ?? $this->getGitBinary());
+            $this->setGitUser($download['git']['user'] ?? $this->getGitUser());
+            $this->setGitEmail($download['git']['email'] ?? $this->getGitEmail());
+            $this->setBsPatchBinary($download['bsdiff']['bspatch_binary'] ?? $this->getBsPatchBinary());
         } else {
+            // 0.1.x backward compatibility
             $old = ($_SERVER['PROGRAM_DATA'] ?? (__DIR__ . '/../../ini')) . '/download.ini';
             if (file_exists($old)) {
                 $download = parse_ini_file($old, TRUE);
@@ -142,14 +276,21 @@ class Settings
         return $this;
     }
 
-    public function persist() : self
+    public function persist(): self
     {
         if (!file_put_contents($this->ini,
                 "[dof]\r\n" .
                 'LCP_APIKEY = ' . $this->getLcpApiKey() . "\r\n" .
                 'path = ' . $this->getDofPath() . "\r\n".
                 "[visualpinball]\r\n" .
-                'path = ' . $this->getVisualPinballPath() . "\r\n"
+                'path = ' . $this->getVisualPinballPath() . "\r\n" .
+                "[git]\r\n" .
+                'enabled = ' . (int) $this->isVersionControl() . "\r\n" .
+                'binary = ' . $this->getGitBinary() . "\r\n" .
+                'user = ' . $this->getGitUser() . "\r\n" .
+                'email = ' . $this->getGitEmail() . "\r\n" .
+                "[bsdiff]\r\n" .
+                'bspatch_binary = ' . $this->getBsPatchBinary() . "\r\n"
             )
         ) {
             throw new \RuntimeException('Could not write file ' . $this->ini);

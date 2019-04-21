@@ -14,5 +14,8 @@
 
     {% include 'tweak/tweak_explanation.html.twig' %}
     {% include 'tweak/dof_explanation.html.twig' %}
+    {% if git_diff|default %}
+        {% include 'git_diff.html.twig' %}
+    {% endif %}
 
 {% endblock %}

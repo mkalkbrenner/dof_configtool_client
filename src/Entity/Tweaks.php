@@ -10,53 +10,120 @@ class Tweaks
      * @Assert\NotBlank()
      * @var string
      */
-    private $settings = '';
+    private $daySettings = '';
 
-    private $ini;
+    /**
+     * @var string
+     */
+    private $nightSettings = '';
 
-    public function __construct()
+    private $dayIni;
+
+    private $nightIni;
+
+    private $directory;
+
+    public function __construct(string $variant = 'day')
     {
-        $this->ini = ($_SERVER['PROGRAM_DATA'] ?? (__DIR__ . '/../../ini')) . '/tweaks.ini';
+        $this->directory = ($_SERVER['PROGRAM_DATA'] ?? (__DIR__ . '/../../ini')) . DIRECTORY_SEPARATOR . 'tweaks';
+        if (!is_dir($this->directory)) {
+            mkdir($this->directory);
+        }
+
+        $this->dayIni = $this->directory . DIRECTORY_SEPARATOR . 'day.ini';
+        $this->nightIni = $this->directory . DIRECTORY_SEPARATOR . 'night.ini';
     }
 
     /**
      * @return string
      */
-    public function getIni(): string
+    public function getDirectory(): string
     {
-        return $this->ini;
+        return $this->directory;
     }
 
-    public function getSettings(): ?string
+    /**
+     * @return string
+     */
+    public function getDayIni(): string
     {
-        return $this->settings;
+        return $this->dayIni;
     }
 
-    public function getSettingsParsed(): ?array
+    public function getDaySettings(): ?string
     {
-        return parse_ini_string($this->settings, TRUE);
+        return $this->daySettings;
     }
 
-    public function setSettings(string $settings): self
+    public function getDaySettingsParsed(): ?array
     {
-        $this->settings = $settings;
+        return parse_ini_string($this->daySettings, TRUE);
+    }
+
+    public function setDaySettings(string $settings): self
+    {
+        $this->daySettings = $settings;
 
         return $this;
     }
 
-    public function load() : self
+    /**
+     * @return string
+     */
+    public function getNightIni(): string
     {
-        if (file_exists($this->ini)) {
-            $this->settings = file_get_contents($this->ini);
+        return $this->nightIni;
+    }
+
+    public function getNightSettings(): ?string
+    {
+        return $this->nightSettings;
+    }
+
+    public function getNightSettingsParsed(): ?array
+    {
+        return parse_ini_string($this->nightSettings, TRUE);
+    }
+
+    public function setNightSettings(string $settings): self
+    {
+        $this->nightSettings = $settings;
+
+        return $this;
+    }
+
+    public function getSettingsParsed(string $cycle = 'day'): ?array
+    {
+        return 'day' == $cycle ? $this->getDaySettingsParsed(): $this->getNightSettingsParsed();
+    }
+
+    public function load(): self
+    {
+        if (file_exists($this->dayIni)) {
+            $this->daySettings = file_get_contents($this->dayIni);
+        } else {
+            // 0.2.x backward compatibility
+            $old = ($_SERVER['PROGRAM_DATA'] ?? (__DIR__ . '/../../ini')) . DIRECTORY_SEPARATOR . 'tweaks.ini';
+            if (file_exists($old)) {
+                $this->daySettings = file_get_contents($old);
+            }
+        }
+
+        if (file_exists($this->nightIni)) {
+            $this->nightSettings = file_get_contents($this->nightIni);
         }
 
         return $this;
     }
 
-    public function persist() : self
+    public function persist(): self
     {
-        if (!file_put_contents($this->ini, $this->settings)) {
-            throw new \RuntimeException('Could not write file ' . $this->ini);
+        if (!file_put_contents($this->dayIni, $this->daySettings)) {
+            throw new \RuntimeException('Could not write file ' . $this->dayIni);
+        }
+
+        if (!file_put_contents($this->nightIni, $this->nightSettings)) {
+            throw new \RuntimeException('Could not write file ' . $this->nightIni);
         }
 
         return $this;

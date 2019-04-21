@@ -12,7 +12,7 @@ adjusting the individual table settings. But doing so has to downsides:
 * as soon as you have done that, you're decoupled from the upstream (the centralized table database) and you need to
   track changes manually
 
-Both downsides could be avoided if we add more layers of configuration to the DOF Configtool, for example per port or
+All downsides could be avoided if we add more layers of configuration to the DOF Configtool, for example per port or
 per toy. Since it's currently not possible to contribute to the DOF Configtool directly this client aims to add this
 missing layers by introducing a kind of rule-set config file and a client that downloads your pre-configured
 configuration files from the DOF Configtool and tweaks them accordingly.
@@ -45,21 +45,20 @@ If you use this software, you do it **on your own risk!**
 
 ## Installation
 
-As mentioned above the client itself very light wight. But due to the fact that PHP is uncommon for most Windows users,
+As mentioned above, the client itself very light wight. But due to the fact that PHP is uncommon for most Windows users,
 there two variants to install the client.
 
 ### Variant 1: Using a Windows Installer (mainly for users)
 
-For every Release of the client there will be an all-in-one package based on
-[https://github.com/cztomczak/phpdesktop] that could be installed on windows just like any windows
-software.
+For every Release of the client there will be an all-in-one package based on [https://github.com/cztomczak/phpdesktop]
+that could be installed on windows just like any windows software.
 
 ### Variant 2: Regular PHP Stack (mainly for developers)
 
 * Install PHP on your system. For Windows have a look at [https://windows.php.net/download/] or
   [http://php.net/manual/en/install.windows.php].
 * Install composer on your system. Have a look at [https://getcomposer.org].
-* Download the DOF Configtool Client from [https://github.com/mkalkbrenner/dof_configtool_client].
+* Download the DOF Configtool Client from [https://github.com/mkalkbrenner/dof_configtool_client] or vlone it via git.
 * Run `composer install` within the dof_configtool_client directory.
 * Start the simple PHP web server within the dof_configtool_client directory: `php bin/console server:start`
 * Open [http://localhost:8000] using your favorite browser.
@@ -80,6 +79,20 @@ software.
   * As `Visual Pinball path` you have to provide the directory where Visual Pinball is installed. In most cases this
     should be `C:\VisualPinball`. **_Note:_** you have to ensure that this directory is writable. In case you get an
     error right click on the directory in Explorer in check this setting.
+
+  * Enter the location of `bspatch.exe` as `pspatch Binary' to be able to _colorize_ ROMs. If you used the full
+    installation of the _DOF Configtool Client_, everything is pre-configured here.
+
+  * Decide wether you want to `Enable Version Control via Git` or not. Once enabled, every change to your DOF configs
+    will be tracked. Other features like the day night switch depend on this version control. Therfore enabling version
+    control is **_highly recommended_** .
+
+    * Enter the location of `git.exe` as `Git Binary'. If you used the full installation of the _DOF Configtool Client_,
+      everything is pre-configured here.
+
+    * Even your local git repository requires a user name and an email address. As long as you don't want to share and
+      therefore push you DOF configs to a server, the values don't really matter and you can keep the defaults for
+      `Git User` and `Git Email`.
 
 ### 1. Download your configs
 
@@ -368,7 +381,7 @@ rgb_brightness[7] = 80
 rgb_brightness[10] = CD
 ```
 
-#### Complete `tweaks.ini` example
+#### Another `tweaks.ini` example
 
 ```INI
 [directoutputconfig40.ini]
@@ -394,7 +407,101 @@ adjust_intensity[28] = 1.5
 adjust_intensity[28] = 0.7
 ```
 
-### 3. RegEdit
+### 3. Day Night Switch
+
+Some VPin controllers offer a _night switch_ to turn off noisy toys during the "night". Some users include a
+_kill switch_ in their cabinet to turn off power supplies for noisy toys for the same reason. But based on the tweaks
+and the version controll via git, the _DOF Configtool Client_ offers a sophisticated day night switch that has a lot of
+advantages compared to the the common approaches mentioned before:
+
+* Independent from concrete VPin controllers, works for any controller and any mix of controllers
+* Much more flexible compared to a "kill switch":
+  * for sure you can simply turn off noisy toys
+  * you can adjust/reduce the intensity of any RGB toy
+  * you can adjust/reduce the intensity of shakers
+  * ...
+
+The day night switch can be controlled via the user interface of the _DOF Configtool Client_. But it's also possible to
+do the switching via the command line. In this case the _DOF Configtool Client_' doesn't need to run at all, not even in
+background because the switching is based on _git_ (and therefore really quick.).
+
+The required commands could be easily integrated in your preferred VPin frontend. Just copy the required commands as
+shown in the _DOF Configtool Client_ user interface.
+
+Using the Windows task scheduler you might also automate the switch.
+
+The _DOF Configtool Client_ user interface currently only supports three states of the DOF configuration:
+* **_download_**: the original configs generated by the _DOF Configtool_
+* **_day_**: the _tweaked_ config to be used at daytime, having all noisy toys turned on
+* **_night_**: the _tweaked_ config to be used at nighttime, having some noisy toys turned off and some illuminations
+               with reduced intensity
+
+In fact, this concept is not limited to these three mode. If there's demand by the community, more or custom modes could
+be added.
+
+#### Example based on parts of my own DOF setup
+
+##### Day
+
+```ÌNI
+[directoutputconfig51.ini]
+move_drop_target[22] = 23
+move_drop_target[24] = 23
+move_drop_target[25] = 26
+move_drop_target[27] = 26
+default_effect_duration[23] = 100
+default_effect_duration[26] = 100
+target_effect_duration[23] = 100
+target_effect_duration[26] = 100
+adjust_intensity[28] = 1.2
+rgb_brightness[50] = 80
+string_append[50] = Blink fu500 fd1550
+```
+
+I have a 10 Bumper setup. The three bumpers of the middle row are mounted to the ports 22, 23, and 24 of a Pinscape
+controller. The back row is attached to the ports 25, 26, and 27. The both contactors in the middle atteched to the
+ports 23 and 26 are not mounted against the cabinet wall. That's one reason why they sound different then the others.
+The second reason is that they are of a different model which is heavier. Therefore they require a longer effect
+duration then the 60ms default to get fired completely.
+
+`default_effect_duration[23] = 100` increases the default effect duration from 60ms to 100ms only for this
+port/contactor, which doesn't slow down the others. The global effect duration for _targets_ is et to 60ms, too.
+`target_effect_duration[23] = 100` increases this one as well.
+
+Since the sound of the contactors in the middle is much more appropriate for drop targets compared to the one's mounted
+against the cabinet's wall, `move_drop_target[22] = 23` removes the drop target effects from port 22 and attaches them
+to port 23. The other effect reamin on port 22 as pre-configured in the DOF Configtool.
+
+BTW The global effect duration for targets of 120ms is not touched as it fits for the contactors in the middle, too.
+
+Since my shaker motor attached to port 28 is rather a small one compared to other user's setup, I increase it's intensity using
+`adjust_intensity[28] = 1.2`.
+
+The design of my speaker panel contains an image of a face. The eyes are illuminated via two RGB LEDs using the
+_Flipper Buttons_ RGB toy. But using the default value of _FF_ is way to bright if you stand in front of the cab.
+`rgb_brightness[50] = 80` reduces the brightness by 50% (80 hex). `string_append[50] = Blink fu500 fd1550` turns the
+static illumination of the eyes into a "scary" pulsing effect 😉
+
+##### Night
+
+```ÌNI
+[directoutputconfig51.ini]
+turn_off[22] = *
+turn_off[23] = *
+turn_off[24] = *
+turn_off[25] = *
+turn_off[26] = *
+turn_off[27] = *
+adjust_intensity[28] = 0.5
+rgb_brightness[50] = 40
+string_append[50] = Blink fu500 fd1550
+```
+
+Compared to the _day_ setup, the tweaks for the _night_ mode look different. The contactors atteched to ports 22-27 are
+turned off entirely. The intewnsity of the shaker doesn't get increased but reduced by 0.5, just to be still able to
+feel it but not to heavy to disturb others. The eyes keep their pulsing effect but the brightness is reduced to 25%.
+
+### 4. RegEdit
 
 The RegEdit feature isn't directly related to DOF config files. But VPinMame will store it's configurations in the
 Windows Registry. If you ever ran into the situation that you have to change such a setting for all your games, you
@@ -412,7 +519,7 @@ might know uncomfortable that task is. 😉
   * showwindmd
   * dmd_colorize
 
-### 4. Colorize
+### 5. Colorize
 
 The DMD output of ROM files could be colorized. Depending on the ROM there're two different ways to do so. While one
 just requires to put some files at the right place in the VPinMAME folder structure, the other requires to patch the
@@ -429,7 +536,7 @@ it to apply modifications to the file system, which is required.
 
 **_Note:_** `bspatch.exe` is already included in the DOF Configtool Client. There's no need to download it separately.
 
-### 5. Backglasses
+### 6. Backglasses
 
 DirectB2S Backglasses need to match the VPX table name. So if you have several versions of a table you might need to
 have multiple correctly named copies of a backglass. And if you use PUP Packs you need to delete a backglass or rename
@@ -446,11 +553,13 @@ In addition, the tool suggests backglasses for table.
 * [https://github.com/sagebind/windows-registry] Apache 2.0
 * [https://github.com/erusev/parsedown] MIT
 * [https://github.com/iphis/fine-diff] MIT
+* [https://github.com/cpliakas/git-wrapper] MIT
 * [https://getbootstrap.com] MIT
 * [https://jquery.com] MIT
 * [https://popper.js.org/] MIT
 * [https://www.npmjs.com/package/bs-custom-file-input] MIT
 * [https://github.com/cztomczak/phpdesktop] BSD 3-clause license
 * [http://www.daemonology.net/bsdiff/] BSD Protection License
+* [https://git-scm.com/] GPLv2
 
 The _DOF Configtool Client_ source code is licenced under GPLv3.

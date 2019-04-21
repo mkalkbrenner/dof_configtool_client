@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "DOF Configtool Client"
-#define MyAppVersion "0.2.1"
+#define MyAppVersion "0.3.0"
 #define MyAppPublisher "MK47"
 #define MyAppURL "https://github.com/mkalkbrenner/dof_configtool_client"
 #define MyAppExeName "DOFConfigtoolClient.exe"
@@ -33,9 +33,20 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
+[Types]
+Name: "full"; Description: "Full installation"
+Name: "custom"; Description: "Custom installation"; Flags: iscustom
+
+[Components]
+Name: "program"; Description: "Program Files"; Types: full custom; Flags: fixed
+Name: "git"; Description: "Embedded Git"; Types: full
+Name: "bsdiff"; Description: "bsdiff/bspatch"; Types: full
+
 [Files]
-Source: "C:\Users\mkalkbrenner\Documents\DOFConfigtoolClient\DOFConfigtoolClient.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\mkalkbrenner\Documents\DOFConfigtoolClient\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: ".git,.gitignore,.idea,dev.txt,www\ini\*.ini,www\System*,www\build,www\var,phpunit,tests,webcache\*,\debug,*.log,directoutputconfig*,DirectOutputShapes*,tablemappings*"
+Source: "C:\Users\mkalkbrenner\Documents\DOFConfigtoolClient\DOFConfigtoolClient.exe"; DestDir: "{app}"; Components: program; Flags: ignoreversion
+Source: "C:\Users\mkalkbrenner\Documents\DOFConfigtoolClient\*"; DestDir: "{app}"; Components: program; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: ".git,.gitignore,.idea,dev.txt,www\ini,www\System*,www\build,www\var,phpunit,tests,webcache\*,\debug,*.log,directoutputconfig*,DirectOutputShapes*,tablemappings*,PortableGit,bsdiff_win_exe"
+Source: "C:\Users\mkalkbrenner\Documents\DOFConfigtoolClient\www\bin\PortableGit\*"; DestDir: "{app}\www\bin\PortableGit"; Components: git; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: ".git,.gitignore"
+Source: "C:\Users\mkalkbrenner\Documents\DOFConfigtoolClient\www\bin\bsdiff_win_exe\*"; DestDir: "{app}\www\bin\bsdiff_win_exe"; Components: bsdiff; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: ".git,.gitignore"
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]

@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Settings;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Request;
@@ -19,6 +20,11 @@ class SettingsController extends AbstractSettingsController
             ->add('lcpApiKey', TextType::class, ['label' => 'LCP_APIKEY'])
             ->add('dofPath', TextType::class, ['label' => 'DOF Path'])
             ->add('visualPinballPath', TextType::class, ['label' => 'Visual Pinball Path'])
+            ->add('bsPatchBinary', TextType::class, ['label' => 'pspatch Binary'])
+            ->add('versionControl', CheckboxType::class, ['label' => 'Enable Version Control via Git'])
+            ->add('gitBinary', TextType::class, ['label' => 'Git Binary'])
+            ->add('gitUser', TextType::class, ['label' => 'Git User'])
+            ->add('gitEmail', TextType::class, ['label' => 'Git Email'])
             ->add('save', SubmitType::class, ['label' => 'Save settings'])
             ->getForm();
 
