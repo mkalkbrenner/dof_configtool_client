@@ -77,5 +77,13 @@
         <script src="{{ asset('js/bootstrap.min.js') }}"></script>
         <script src="{{ asset('js/bs-custom-file-input.min.js') }}"></script>
         {% block javascripts %}{% endblock %}
+        <script>
+            $('.btn-primary').click(function() {
+                $(this).prepend(
+                    '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"> </span>'
+                ).addClass('btn-outline-primary').removeClass('btn-primary');
+                $('.btn-primary').attr("disabled", true);
+            });
+        </script>
     </body>
 </html>
