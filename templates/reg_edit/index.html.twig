@@ -8,10 +8,34 @@
     {{ form_start(reg_edit_form) }}
     {{ form_errors(reg_edit_form) }}
     <table class="table table-striped">
+        <thead>
+            <th>ROM</th>
+            <th>cabinet_mode</th>
+            <th>ignore_rom_crc</th>
+            <th>sound</th>
+            <th>samples</th>
+            <th>ddraw</th>
+            <th>dmd_colorize</th>
+            <th>showpindmd</th>
+            <th>showwindmd</th>
+            <th>synclevel<br>(0 => script yieldtime)</th>
+        </thead>
         {% for entry in reg_edit_form.entries %}
-            <tr><td>{{ form_label(entry) }}{{ form_widget(entry.rom) }}</td><td>{{ form_widget(entry.cabinet_mode) }}</td><td>{{ form_widget(entry.ignore_rom_crc) }}</td><td>{{ form_widget(entry.sound) }}</td><td>{{ form_widget(entry.samples) }}</td><td>{{ form_widget(entry.ddraw) }}</td><td>{{ form_widget(entry.dmd_colorize) }}</td><td>{{ form_widget(entry.showpindmd) }}</td><td>{{ form_widget(entry.showwindmd) }}</td></tr>
+            <tr>
+                <td>{{ form_label(entry) }}{{ form_widget(entry.rom) }}</td>
+                <td>{{ form_widget(entry.cabinet_mode) }}</td>
+                <td>{{ form_widget(entry.ignore_rom_crc) }}</td>
+                <td>{{ form_widget(entry.sound) }}</td>
+                <td>{{ form_widget(entry.samples) }}</td>
+                <td>{{ form_widget(entry.ddraw) }}</td>
+                <td>{{ form_widget(entry.dmd_colorize) }}</td>
+                <td>{{ form_widget(entry.showpindmd) }}</td>
+                <td>{{ form_widget(entry.showwindmd) }}</td>
+                <td>{{ form_widget(entry.synclevel) }}</td>
+            </tr>
         {% endfor %}
     </table>
     {{ form_widget(reg_edit_form.save) }}
+    {{ form_widget(reg_edit_form.default_changes) }}
     {{ form_end(reg_edit_form) }}
 {% endblock %}

@@ -518,6 +518,7 @@ might know uncomfortable that task is. 😉
   * showpindmd
   * showwindmd
   * dmd_colorize
+  * synclevel
 
 ### 5. Colorize
 

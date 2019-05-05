@@ -25,9 +25,11 @@ class VPinMameRegEntry
 
     private $showwindmd;
 
+    private $synclevel;
+
     private $trackChanges = FALSE;
 
-    private $hasChanges = FALSE;
+    private $hasChanges;
 
     private $hkcu;
 
@@ -66,7 +68,7 @@ class VPinMameRegEntry
     public function setCabinetMode(bool $cabinet_mode): self
     {
         if ($this->trackChanges && $this->cabinet_mode != $cabinet_mode) {
-            $this->hasChanges = TRUE;
+            $this->hasChanges['CabinetMode'] = TRUE;
         }
         $this->cabinet_mode = $cabinet_mode;
 
@@ -81,7 +83,7 @@ class VPinMameRegEntry
     public function setIgnoreRomCrc(bool $ignore_rom_crc): self
     {
         if ($this->trackChanges && $this->ignore_rom_crc != $ignore_rom_crc) {
-            $this->hasChanges = TRUE;
+            $this->hasChanges['IgnoreRomCrc'] = TRUE;
         }
         $this->ignore_rom_crc = $ignore_rom_crc;
 
@@ -96,7 +98,7 @@ class VPinMameRegEntry
     public function setDdraw(bool $ddraw): self
     {
         if ($this->trackChanges && $this->ddraw != $ddraw) {
-            $this->hasChanges = TRUE;
+            $this->hasChanges['Ddraw'] = TRUE;
         }
         $this->ddraw = $ddraw;
 
@@ -111,7 +113,7 @@ class VPinMameRegEntry
     public function setSound(bool $sound): self
     {
         if ($this->trackChanges && $this->sound != $sound) {
-            $this->hasChanges = TRUE;
+            $this->hasChanges['Sound'] = TRUE;
         }
         $this->sound = $sound;
 
@@ -126,7 +128,7 @@ class VPinMameRegEntry
     public function setSamples(bool $samples): self
     {
         if ($this->trackChanges && $this->samples != $samples) {
-            $this->hasChanges = TRUE;
+            $this->hasChanges['Samples'] = TRUE;
         }
         $this->samples = $samples;
 
@@ -141,7 +143,7 @@ class VPinMameRegEntry
     public function setDmdColorize(bool $dmd_colorize): self
     {
         if ($this->trackChanges && $this->dmd_colorize != $dmd_colorize) {
-            $this->hasChanges = TRUE;
+            $this->hasChanges['DmdColorize'] = TRUE;
         }
         $this->dmd_colorize = $dmd_colorize;
 
@@ -155,8 +157,8 @@ class VPinMameRegEntry
 
     public function setShowpindmd(bool $showpindmd): self
     {
-        if ($this->trackChanges && $this->sound != $showpindmd) {
-            $this->hasChanges = TRUE;
+        if ($this->trackChanges && $this->showpindmd != $showpindmd) {
+            $this->hasChanges['Showpindmd'] = TRUE;
         }
         $this->showpindmd = $showpindmd;
 
@@ -170,20 +172,39 @@ class VPinMameRegEntry
 
     public function setShowwindmd(bool $showwindmd): self
     {
-        if ($this->trackChanges && $this->sound != $showwindmd) {
-            $this->hasChanges = TRUE;
+        if ($this->trackChanges && $this->showwindmd != $showwindmd) {
+            $this->hasChanges['Showwindmd'] = TRUE;
         }
         $this->showwindmd = $showwindmd;
 
         return $this;
     }
 
+    public function getSynclevel(): ?int
+    {
+        return $this->synclevel;
+    }
+
+    public function setSynclevel(int $synclevel): self
+    {
+        if ($this->trackChanges && $this->synclevel != $synclevel) {
+            $this->hasChanges['Synclevel'] = TRUE;
+        }
+        $this->synclevel = $synclevel;
+
+        return $this;
+    }
 
     public function trackChanges(bool $track = TRUE): self
     {
         $this->trackChanges = $track;
 
         return $this;
+    }
+
+    public function getChanges(): ?array
+    {
+        return $this->hasChanges;
     }
 
     public function load(): self
@@ -224,7 +245,10 @@ class VPinMameRegEntry
             if (null !== $this->showwindmd) {
                 $key->setValue('showwindmd', $this->showwindmd, RegistryKey::TYPE_DWORD);
             }
-            $this->hasChanges = FALSE;
+            if (null !== $this->synclevel) {
+                $key->setValue('synclevel', $this->synclevel, RegistryKey::TYPE_DWORD);
+            }
+            $this->hasChanges = null;
         }
 
         return $this;
@@ -273,6 +297,9 @@ class VPinMameRegEntry
                 case 'showwindmd':
                     $entry->setShowwindmd((bool) $value);
                     break;
+                case 'synclevel':
+                    $entry->setSynclevel((int) $value);
+                    break;
             }
         }
         $entry->trackChanges();
@@ -293,6 +320,7 @@ class RegistryKeyDummy
             'aavenger' => $this,
             'ACDC' => $this,
             'babypac' => $this,
+            'default' => $this,
         ];
     }
 
@@ -311,6 +339,7 @@ class RegistryKeyDummy
             'dmd_colorize' => (bool)random_int(0, 1),
             'showpindmd' => (bool)random_int(0, 1),
             'showwindmd' => (bool)random_int(0, 1),
+            'synclevel' => random_int(0, 600),
         ];
     }
 

@@ -6,6 +6,7 @@ use App\Entity\VPinMameRegEntry;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
+use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -21,7 +22,8 @@ class VPinMameRegEntryType extends AbstractType
             ->add('ddraw', CheckboxType::class, ['label' => 'ddraw', 'required' => FALSE])
             ->add('dmd_colorize', CheckboxType::class, ['label' => 'dmd_colorize', 'required' => FALSE])
             ->add('showpindmd', CheckboxType::class, ['label' => 'showpindmd', 'required' => FALSE])
-            ->add('showwindmd', CheckboxType::class, ['label' => 'showwindmd', 'required' => FALSE]);
+            ->add('showwindmd', CheckboxType::class, ['label' => 'showwindmd', 'required' => FALSE])
+            ->add('synclevel', NumberType::class, ['label' => 'synclevel', 'required' => FALSE]);
     }
 
     public function configureOptions(OptionsResolver $resolver)

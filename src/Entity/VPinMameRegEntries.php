@@ -11,6 +11,11 @@ class VPinMameRegEntries implements \IteratorAggregate
         return $this->entries;
     }
 
+    public function getEntry($key): ?VPinMameRegEntry
+    {
+        return $this->entries[$key] ?? null;
+    }
+
     public function setEntries(array $entries): self
     {
         $this->entries = $entries;

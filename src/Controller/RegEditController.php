@@ -24,14 +24,39 @@ class RegEditController extends AbstractController
         $regEntries->load();
 
         $form = $this->createForm(VPinMameRegEntriesType::class, $regEntries)
-            ->add('save', SubmitType::class, ['label' => 'Save']);
+            ->add('save', SubmitType::class, ['label' => 'Save'])
+            ->add('default_changes', SubmitType::class, ['label' => 'Save and apply changes to default to all entries without changes']);
 
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            /** @var \Symfony\Component\Form\Form $form */
+            $name = $form->getClickedButton()->getConfig()->getName();
+            switch ($name) {
+                case 'default_changes':
+                    if ($default = $regEntries->getEntry('default')) {
+                        if ($changes = $default->getChanges()) {
+                            foreach (array_keys($changes) as $property) {
+                                foreach ($regEntries as $regName => $regEntry) {
+                                    if ('default' !== $regName) {
+                                        $specificChanges = $regEntry->getChanges();
+                                        if (!$specificChanges || !isset($specificChanges[$property])) {
+                                            $regEntry->{'set' . $property}($default->{'get' . $property}());
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    break;
+            }
+
             foreach ($regEntries as $regEntry) {
                 $regEntry->persist();
             }
+
+            // Force reload data from registry.
+            return $this->redirectToRoute('reg_edit');
         }
 
         return $this->render('reg_edit/index.html.twig', [
