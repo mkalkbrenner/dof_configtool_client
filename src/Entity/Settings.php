@@ -280,17 +280,17 @@ class Settings
     {
         if (!file_put_contents($this->ini,
                 "[dof]\r\n" .
-                'LCP_APIKEY = ' . $this->getLcpApiKey() . "\r\n" .
-                'path = ' . $this->getDofPath() . "\r\n".
+                'LCP_APIKEY = "' . trim($this->getLcpApiKey(), '" ') . '"' . "\r\n" .
+                'path = "' . trim($this->getDofPath(), '" ') . '"' . "\r\n".
                 "[visualpinball]\r\n" .
-                'path = ' . $this->getVisualPinballPath() . "\r\n" .
+                'path = "' . trim($this->getVisualPinballPath(), '" ') . '"' . "\r\n" .
                 "[git]\r\n" .
-                'enabled = ' . (int) $this->isVersionControl() . "\r\n" .
-                'binary = ' . $this->getGitBinary() . "\r\n" .
-                'user = ' . $this->getGitUser() . "\r\n" .
-                'email = ' . $this->getGitEmail() . "\r\n" .
+                'enabled = ' . (int) $this->isVersionControl()  . "\r\n" .
+                'binary = "' . trim($this->getGitBinary(), '" ') . '"' . "\r\n" .
+                'user = "' . trim($this->getGitUser(), '" ') . '"' . "\r\n" .
+                'email = "' . trim($this->getGitEmail(), '" ') . '"' . "\r\n" .
                 "[bsdiff]\r\n" .
-                'bspatch_binary = ' . $this->getBsPatchBinary() . "\r\n"
+                'bspatch_binary = "' . trim($this->getBsPatchBinary(), '" ') . '"' . "\r\n"
             )
         ) {
             throw new \RuntimeException('Could not write file ' . $this->ini);
