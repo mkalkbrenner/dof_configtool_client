@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\DofDatabaseSettings;
 use GitWrapper\GitException;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\Request;
@@ -15,7 +16,8 @@ class DownloadController extends AbstractSettingsController
     public function index(Request $request)
     {
         $form = $this->createFormBuilder()
-            ->add('download', SubmitType::class, ['label' => 'Download config files'])
+            ->add('download', SubmitType::class, ['label' => 'Download your config files'])
+            ->add('database', SubmitType::class, ['label' => 'Download DOF database config files'])
             ->getForm();
 
         $form->handleRequest($request);
@@ -25,6 +27,10 @@ class DownloadController extends AbstractSettingsController
             /** @var \Symfony\Component\Form\Form $form */
             $name = $form->getClickedButton()->getConfig()->getName();
             switch ($name) {
+                case 'database':
+                    $this->settings = new DofDatabaseSettings();
+                    $this->settings->load();
+                    // no break;
                 case 'download':
                     ini_set('set_time_limit', 0);
 
