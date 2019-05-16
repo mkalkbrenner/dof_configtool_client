@@ -2,8 +2,11 @@
 
 namespace App\Controller;
 
+use App\Entity\DirectOutputConfig;
+use App\Entity\DofDatabaseSettings;
 use App\Entity\Settings;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Request;
@@ -28,9 +31,22 @@ class SettingsController extends AbstractSettingsController
 
         $dofConfigPath = $this->settings->getDofConfigPath();
         if (is_dir($dofConfigPath) && is_readable($dofConfigPath)) {
+            $dofDatabaseSettings = new DofDatabaseSettings();
+            $portAssignments = $dofDatabaseSettings->getPortAssignments();
+            $choices = array_merge(['-'], $portAssignments[51], $portAssignments[30]);
             foreach (scandir($dofConfigPath) as $file) {
-               if (preg_match('/^directoutputconfig\d+\.ini$/i', $file)) {
-
+               if (preg_match('/^directoutputconfig(\d+)\.ini$/i', $file, $matches)) {
+                   $directOutputConfig = new DirectOutputConfig($dofConfigPath . DIRECTORY_SEPARATOR . $file);
+                   $directOutputConfig->load();
+                   $ports = 0;
+                   foreach ($directOutputConfig->getGames() as $game) {
+                       if (is_array($game) && max(array_keys($game)) > $ports) {
+                           $ports = max(array_keys($game));
+                       }
+                   }
+                   for ($i=1; $i <= $ports; $i++) {
+                       $formBuilder->add($matches[1] . '_' . $i, ChoiceType::class,  ['label' => $file . ' Port #' . $i, 'choices' => array_combine($choices, $choices)]);
+                   }
                }
             }
         }
@@ -60,6 +76,10 @@ class SettingsController extends AbstractSettingsController
                     if ('save' === $name) {
                         $this->addFlash('success', 'Saved settings to '.$this->settings->getIni().'.');
                     }
+                    break;
+
+                case 'autodetect':
+                    dump($this->settings);
                     break;
             }
         }

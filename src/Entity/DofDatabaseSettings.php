@@ -26,7 +26,7 @@ class DofDatabaseSettings extends Settings
     public function getPortAssignments() : array
     {
         return [
-            'directoutputconfig30.ini' => [
+            30 => [
                 1 => 'RGB Undercab Complex MX',
                 4 => 'PF Left Flashers MX',
                 7 => 'PF Left Effects MX',
@@ -42,7 +42,7 @@ class DofDatabaseSettings extends Settings
                 37 => 'Magnasave Left MX',
                 40 => 'Magnasave Right MX',
             ],
-            'directoutputconfig51.ini' => [
+            51 => [
                 1 => 'Start Button',
                 2 => 'Launch Button',
                 3 => 'Authentic Launch Ball',
@@ -94,7 +94,7 @@ class DofDatabaseSettings extends Settings
                 71 => 'RGB Right Magnasave',
                 74 => 'RGB Undercab Smart',
                 77 => 'RGB Undercab Complex',
-            ]
+            ],
         ];
     }
 }
