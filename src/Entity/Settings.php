@@ -364,14 +364,14 @@ class Settings
     {
         if (file_exists($this->ini)) {
             $download = parse_ini_file($this->ini, TRUE);
-            $this->setLcpApiKey($download['dof']['LCP_APIKEY']);
-            $this->setDofPath($download['dof']['path']);
-            $this->setVisualPinballPath($download['visualpinball']['path']);
+            $this->setLcpApiKey(stripslashes($download['dof']['LCP_APIKEY']));
+            $this->setDofPath(stripslashes($download['dof']['path']));
+            $this->setVisualPinballPath(stripslashes($download['visualpinball']['path']));
             $this->setVersionControl((bool) ($download['git']['enabled'] ?? false));
-            $this->setGitBinary($download['git']['binary'] ?? $this->getGitBinary());
-            $this->setGitUser($download['git']['user'] ?? $this->getGitUser());
-            $this->setGitEmail($download['git']['email'] ?? $this->getGitEmail());
-            $this->setBsPatchBinary($download['bsdiff']['bspatch_binary'] ?? $this->getBsPatchBinary());
+            $this->setGitBinary(stripslashes($download['git']['binary'] ?? $this->getGitBinary()));
+            $this->setGitUser(stripslashes($download['git']['user'] ?? $this->getGitUser()));
+            $this->setGitEmail(stripslashes($download['git']['email'] ?? $this->getGitEmail()));
+            $this->setBsPatchBinary(stripslashes($download['bsdiff']['bspatch_binary'] ?? $this->getBsPatchBinary()));
         } else {
             // 0.1.x backward compatibility
             $old = ($_SERVER['PROGRAM_DATA'] ?? (__DIR__ . '/../../ini')) . DIRECTORY_SEPARATOR . 'download.ini';
@@ -389,26 +389,24 @@ class Settings
     {
         $content =
             "[dof]\r\n" .
-            'LCP_APIKEY = ' . $this->getLcpApiKey() . "\r\n" .
-            'path = ' . $this->getDofPath() . "\r\n".
+            'LCP_APIKEY = "' . addslashes(trim($this->getLcpApiKey(), '" ')) . '"' . "\r\n" .
+            'path = "' . addslashes(trim($this->getDofPath(), '" ')) . '"' . "\r\n".
             "[visualpinball]\r\n" .
-            'path = ' . $this->getVisualPinballPath() . "\r\n" .
+            'path = "' . addslashes(trim($this->getVisualPinballPath(), '" ')) . '"' . "\r\n" .
             "[git]\r\n" .
-            'enabled = ' . (int) $this->isVersionControl() . "\r\n" .
-            'binary = ' . $this->getGitBinary() . "\r\n" .
-            'user = ' . $this->getGitUser() . "\r\n" .
-            'email = ' . $this->getGitEmail() . "\r\n" .
+            'enabled = ' . (int) $this->isVersionControl()  . "\r\n" .
+            'binary = "' . addslashes(trim($this->getGitBinary(), '" ')) . '"' . "\r\n" .
+            'user = "' . addslashes(trim($this->getGitUser(), '" ')) . '"' . "\r\n" .
+            'email = "' . addslashes(trim($this->getGitEmail(), '" ')) . '"' . "\r\n" .
             "[bsdiff]\r\n" .
-            'bspatch_binary = ' . $this->getBsPatchBinary() . "\r\n";
+            'bspatch_binary = "' . addslashes(trim($this->getBsPatchBinary(), '" ')) . '"' . "\r\n";
+
 
         foreach ($this->getPortAssignments() as $fileName => $ports) {
 
         }
 
-            if (!file_put_contents($this->ini,
-
-            )
-        ) {
+        if (!file_put_contents($this->ini, $content)) {
             throw new \RuntimeException('Could not write file ' . $this->ini);
         }
 
