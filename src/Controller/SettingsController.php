@@ -16,7 +16,7 @@ class SettingsController extends AbstractSettingsController
      */
     public function index(Request $request)
     {
-        $form = $this->createFormBuilder($this->settings)
+        $formBuilder = $this->createFormBuilder($this->settings)
             ->add('lcpApiKey', TextType::class, ['label' => 'LCP_APIKEY'])
             ->add('dofPath', TextType::class, ['label' => 'DOF Path'])
             ->add('visualPinballPath', TextType::class, ['label' => 'Visual Pinball Path'])
@@ -24,8 +24,20 @@ class SettingsController extends AbstractSettingsController
             ->add('versionControl', CheckboxType::class, ['label' => 'Enable Version Control via Git'])
             ->add('gitBinary', TextType::class, ['label' => 'Git Binary'])
             ->add('gitUser', TextType::class, ['label' => 'Git User'])
-            ->add('gitEmail', TextType::class, ['label' => 'Git Email'])
+            ->add('gitEmail', TextType::class, ['label' => 'Git Email']);
+
+        $dofConfigPath = $this->settings->getDofConfigPath();
+        if (is_dir($dofConfigPath) && is_readable($dofConfigPath)) {
+            foreach (scandir($dofConfigPath) as $file) {
+               if (preg_match('/^directoutputconfig\d+\.ini$/i', $file)) {
+
+               }
+            }
+        }
+
+        $form = $formBuilder
             ->add('save', SubmitType::class, ['label' => 'Save settings'])
+            ->add('autodetect', SubmitType::class, ['label' => 'Autodetect port assignments'])
             ->getForm();
 
         $form->handleRequest($request);

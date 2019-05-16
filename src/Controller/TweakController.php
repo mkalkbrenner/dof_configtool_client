@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\DirectOutputConfig;
 use App\Entity\Tweaks;
 use GitWrapper\GitException;
 use iphis\FineDiff\Diff;
@@ -149,253 +150,211 @@ class TweakController extends AbstractSettingsController
         }
 
         foreach ($mods as $file => $per_game_mods) {
-            if ($contents = file_get_contents($file)) {
-                // Normalize line endings.
-                $contents = preg_replace('/\R/', "\r\n", $contents);
+            $directOutputConfig = new DirectOutputConfig($file);
+            $contents = $directOutputConfig->load()->getContent();
+            if ($contents) {
                 $files[$file] = $contents;
-                list($head, $config) = explode('[Config DOF]', $contents);
-                $colors[$file] = [];
-                $color_section = FALSE;
-                foreach (explode("\r\n", $head) as $line) {
-                    if (strpos($line, '[Colors DOF]') === 0) {
-                        $color_section = TRUE;
-                        continue;
-                    }
-                    if ($color_section) {
-                        if (strpos($line,'[') === 0) {
-                            break;
-                        }
-                        if (strpos($line, '=#')) {
-                            list($color_name, $color_value) = explode('=', $line);
-                            $colors[$file][$color_name] = substr($color_value, 0, 7);
-                        }
-                    }
-                }
+                $colors[$file] = $directOutputConfig->getColors();
+                $rgb_ports[$file] = $directOutputConfig->getRgbPorts();
                 $games = [];
-                foreach (explode("\r\n", $config) as $game_row) {
-                    if (preg_match('/^Pinball[XY]/', $game_row)) {
-                        // Don't modify PinballX and PinballY settings. They use a different scheme and would require to
-                        // many exceptions for now.
-                        $games[] = $game_row;
+
+                foreach ($directOutputConfig->getGames() as $game_name => $game) {
+                    if (is_string($game)) {
+                        // Don't modify PinballX and PinballY or other frontend settings. They use a different scheme
+                        // and would require too many exceptions for now. And preserve empty lines.
+                        $games[] = $game;
                         continue;
                     }
 
-                    if ($game_row = trim($game_row)) {
-                        $game_row_elements = str_getcsv($game_row);
-                        $game_name = $game_row_elements[0];
-                        $game = [];
-                        $rgb_ports[$file][$game_name] = [];
-                        $real_port = 0;
-                        foreach ($game_row_elements as $port => $game_row_element) {
-                            $game[$real_port] = trim($game_row_element);
-                            if ($real_port) { // Skip Rom name on port 0.
-                                foreach (array_keys($colors[$file]) as $color) {
-                                    if (strpos($game_row_element, $color) !== FALSE) {
-                                        $game[++$real_port] = 0;
-                                        $rgb_ports[$file][$game_name][] = $real_port;
-                                        $game[++$real_port] = 0;
-                                        $rgb_ports[$file][$game_name][] = $real_port;
-                                        break;
-                                    }
-                                }
-                                if ('0' === $game[$real_port]) {
-                                    $game[$real_port] = 0;
-                                }
-                            }
-                            ++$real_port;
-                        }
-                        foreach ($per_game_mods as $per_game_name => $adjustments) {
-                            foreach ($adjustments as $name => $settings) {
-                                foreach ($settings as $port => $setting) {
-                                    // Skip global setting when a game-specific setting exists.
-                                    if ($per_game_name === $game[0] || (!$per_game_name && (!isset($per_game_mods[$game[0]]) || !isset($per_game_mods[$game[0]][$name]) || !isset($per_game_mods[$game[0]][$name][$port])))) {
-                                        if (isset($game[$port])) {
+                    foreach ($per_game_mods as $per_game_name => $adjustments) {
+                        foreach ($adjustments as $name => $settings) {
+                            foreach ($settings as $port => $setting) {
+                                // Skip global setting when a game-specific setting exists.
+                                if ($per_game_name === $game[0] || (!$per_game_name && (!isset($per_game_mods[$game[0]]) || !isset($per_game_mods[$game[0]][$name]) || !isset($per_game_mods[$game[0]][$name][$port])))) {
+                                    if (isset($game[$port])) {
 
-                                            switch ($name) {
+                                        switch ($name) {
 
-                                                // merge port 13 and 21 and save the result on port 13.
-                                                // merge[17] = 21
-                                                case 'merge':
-                                                case 'merge_and_turn_off':
-                                                    $ports_to_merge = explode(',', $setting);
-                                                    foreach ($ports_to_merge as $port_to_merge) {
-                                                        $port_to_merge = trim($port_to_merge);
-                                                        if ($game[$port_to_merge]) {
-                                                            if ($game[$port]) {
-                                                                $game[$port] .= '/' . $game[$port_to_merge];
-                                                            } else {
-                                                                $game[$port] = $game[$port_to_merge];
-                                                            }
+                                            // merge port 13 and 21 and save the result on port 13.
+                                            // merge[17] = 21
+                                            case 'merge':
+                                            case 'merge_and_turn_off':
+                                                $ports_to_merge = explode(',', $setting);
+                                                foreach ($ports_to_merge as $port_to_merge) {
+                                                    $port_to_merge = trim($port_to_merge);
+                                                    if ($game[$port_to_merge]) {
+                                                        if ($game[$port]) {
+                                                            $game[$port] .= '/' . $game[$port_to_merge];
+                                                        } else {
+                                                            $game[$port] = $game[$port_to_merge];
+                                                        }
 
-                                                            if ('merge_and_turn_off' === $name) {
-                                                                $game[$port_to_merge] = 0;
-                                                            }
+                                                        if ('merge_and_turn_off' === $name) {
+                                                            $game[$port_to_merge] = 0;
                                                         }
                                                     }
-                                                    break;
+                                                }
+                                                break;
 
-                                                case 'replace':
-                                                    $ports_to_merge = explode(',', $setting);
-                                                    $replacements = [];
-                                                    foreach ($ports_to_merge as $port_to_merge) {
-                                                        $port_to_merge = trim($port_to_merge);
-                                                        if ($game[$port_to_merge]) {
-                                                            $replacements[] = $game[$port_to_merge];
-                                                        }
+                                            case 'replace':
+                                                $ports_to_merge = explode(',', $setting);
+                                                $replacements = [];
+                                                foreach ($ports_to_merge as $port_to_merge) {
+                                                    $port_to_merge = trim($port_to_merge);
+                                                    if ($game[$port_to_merge]) {
+                                                        $replacements[] = $game[$port_to_merge];
                                                     }
-                                                    $replacement = implode('/', $replacements);
-                                                    $game[$port] = $replacement ?: '0';
-                                                    break;
+                                                }
+                                                $replacement = implode('/', $replacements);
+                                                $game[$port] = $replacement ?: '0';
+                                                break;
 
-                                                case 'swap':
+                                            case 'swap':
+                                                $setting = trim($setting);
+                                                $tmp = $game[$port];
+                                                $game[$port] = $game[$setting];
+                                                $game[$setting] = $tmp;
+                                                break;
+
+                                            case 'string_overwrite':
+                                                $game[$port] = trim($setting);
+                                                break;
+
+                                            case 'string_append':
+                                                if (0 !== $game[$port]) {
                                                     $setting = trim($setting);
-                                                    $tmp = $game[$port];
-                                                    $game[$port] = $game[$setting];
-                                                    $game[$setting] = $tmp;
-                                                    break;
-
-                                                case 'string_overwrite':
-                                                    $game[$port] = trim($setting);
-                                                    break;
-
-                                                case 'string_append':
-                                                    if (0 !== $game[$port]) {
-                                                        $setting = trim($setting);
-                                                        if (0 === strpos($setting, '/')) {
-                                                            $game[$port] .= $setting;
-                                                        } else {
-                                                            $game[$port] .= ' ' . $setting;
-                                                        }
+                                                    if (0 === strpos($setting, '/')) {
+                                                        $game[$port] .= $setting;
+                                                    } else {
+                                                        $game[$port] .= ' ' . $setting;
                                                     }
-                                                    break;
+                                                }
+                                                break;
 
-                                                case 'remove':
-                                                    if (0 !== $game[$port]) {
-                                                        $setting = trim($setting);
-                                                        if (0 === strpos($setting, '/')) {
-                                                            $game[$port] .= $setting;
-                                                        } else {
-                                                            $game[$port] .= ' ' . $setting;
-                                                        }
+                                            case 'remove':
+                                                if (0 !== $game[$port]) {
+                                                    $setting = trim($setting);
+                                                    if (0 === strpos($setting, '/')) {
+                                                        $game[$port] .= $setting;
+                                                    } else {
+                                                        $game[$port] .= ' ' . $setting;
                                                     }
-                                                    break;
+                                                }
+                                                break;
 
-                                                case 'default_effect_duration':
-                                                    if (0 !== $game[$port]) {
-                                                        $triggers = explode('/', $game[$port]);
-                                                        foreach ($triggers as &$trigger) {
-                                                            $trigger = preg_replace('/([SWE]\d+$)/', '$1 ' . trim($setting), $trigger);
-                                                        }
-                                                        unset($trigger);
-                                                        $game[$port] = implode('/', $triggers);
+                                            case 'default_effect_duration':
+                                                if (0 !== $game[$port]) {
+                                                    $triggers = explode('/', $game[$port]);
+                                                    foreach ($triggers as &$trigger) {
+                                                        $trigger = preg_replace('/([SWE]\d+$)/', '$1 ' . trim($setting), $trigger);
                                                     }
-                                                    break;
+                                                    unset($trigger);
+                                                    $game[$port] = implode('/', $triggers);
+                                                }
+                                                break;
 
-                                                case 'target_effect_duration':
-                                                case 'drop_target_effect_duration':
-                                                    if (0 !== $game[$port]) {
-                                                        $pattern = (FALSE !== strpos($name, 'drop_target')) ? '@dt@' : '@t@';
-                                                        if (false !== strpos($game[$port], $pattern)) {
-                                                            $game[$port] = str_replace($pattern, trim($setting), $game[$port]);
-                                                        }
+                                            case 'target_effect_duration':
+                                            case 'drop_target_effect_duration':
+                                                if (0 !== $game[$port]) {
+                                                    $pattern = (FALSE !== strpos($name, 'drop_target')) ? '@dt@' : '@t@';
+                                                    if (false !== strpos($game[$port], $pattern)) {
+                                                        $game[$port] = str_replace($pattern, trim($setting), $game[$port]);
                                                     }
-                                                    break;
+                                                }
+                                                break;
 
-                                                case 'copy_target':
-                                                case 'copy_drop_target':
-                                                case 'move_target':
-                                                case 'move_drop_target':
-                                                    if (0 !== $game[$port]) {
-                                                        $pattern = (FALSE !== strpos($name, 'drop_target')) ? '@dt@' : '@t@';
-                                                        $triggers = explode('/', $game[$port]);
-                                                        foreach ($triggers as $key => $trigger) {
-                                                            if (false !== strpos($trigger, $pattern)) {
-                                                                $ports_to_merge = explode(',', $setting);
-                                                                foreach ($ports_to_merge as $port_to_merge) {
-                                                                    $port_to_merge = trim($port_to_merge);
-                                                                    if (0 !== $game[$port_to_merge]) {
-                                                                        $game[$port_to_merge] .= '/' . $trigger;
-                                                                    } else {
-                                                                        $game[$port_to_merge] = $trigger;
-                                                                    }
-                                                                }
-                                                                if (FALSE === strpos($name, 'copy')) {
-                                                                    unset($triggers[$key]);
+                                            case 'copy_target':
+                                            case 'copy_drop_target':
+                                            case 'move_target':
+                                            case 'move_drop_target':
+                                                if (0 !== $game[$port]) {
+                                                    $pattern = (FALSE !== strpos($name, 'drop_target')) ? '@dt@' : '@t@';
+                                                    $triggers = explode('/', $game[$port]);
+                                                    foreach ($triggers as $key => $trigger) {
+                                                        if (false !== strpos($trigger, $pattern)) {
+                                                            $ports_to_merge = explode(',', $setting);
+                                                            foreach ($ports_to_merge as $port_to_merge) {
+                                                                $port_to_merge = trim($port_to_merge);
+                                                                if (0 !== $game[$port_to_merge]) {
+                                                                    $game[$port_to_merge] .= '/' . $trigger;
+                                                                } else {
+                                                                    $game[$port_to_merge] = $trigger;
                                                                 }
                                                             }
-                                                        }
-                                                        unset($trigger);
-                                                        $game[$port] = implode('/', $triggers);
-                                                    }
-                                                    break;
-
-                                                case 'turn_off':
-                                                    if (0 !== $game[$port]) {
-                                                        $game_names = explode(',', $setting);
-                                                        array_walk($game_names, 'trim');
-                                                        if (in_array('*', $game_names) || in_array($game[0], $game_names)) {
-                                                            $game[$port] = 0;
-                                                        }
-                                                    }
-                                                    break;
-
-                                                case 'turn_on':
-                                                    if (0 !== $game[$port]) {
-                                                        $game_names = explode(',', $setting);
-                                                        array_walk($game_names, 'trim');
-                                                        if (!in_array('*', $game_names) && !in_array($game[0], $game_names)) {
-                                                            $game[$port] = 0;
-                                                        }
-                                                    }
-                                                    break;
-
-                                                case 'adjust_intensity':
-                                                    if (0 !== $game[$port]) {
-                                                        $triggers = explode('/', $game[$port]);
-                                                        foreach ($triggers as &$trigger) {
-                                                            if (preg_match('/[I](\d+)/', $trigger, $matches)) {
-                                                                $intensity = (int)(((int)$matches[1]) * ((float)$setting));
-                                                                if ($intensity < 1) {
-                                                                    $intensity = 1;
-                                                                }
-                                                                if ($intensity > 48) {
-                                                                    $intensity = 48;
-                                                                }
-                                                                $trigger = preg_replace('/[I]\d+/', 'I' . $intensity, $trigger);
-                                                            }
-                                                        }
-                                                        unset($trigger);
-                                                        $game[$port] =  implode('/', $triggers);
-                                                    }
-                                                    break;
-
-                                                case 'rgb_brightness':
-                                                    if (0 !== $game[$port]) {
-                                                        $brightness = trim($setting);
-                                                        foreach ($colors[$file] as $color_name => $color_value) {
-                                                            $color_name = ' ' . $color_name;
-                                                            if (false !== strpos($game[$port], $color_name)) {
-                                                                $game[$port] = str_replace($color_name, ' ' . $color_value . $brightness, $game[$port]);
+                                                            if (FALSE === strpos($name, 'copy')) {
+                                                                unset($triggers[$key]);
                                                             }
                                                         }
                                                     }
-                                                    break;
-                                            }
+                                                    unset($trigger);
+                                                    $game[$port] = implode('/', $triggers);
+                                                }
+                                                break;
 
+                                            case 'turn_off':
+                                                if (0 !== $game[$port]) {
+                                                    $game_names = explode(',', $setting);
+                                                    array_walk($game_names, 'trim');
+                                                    if (in_array('*', $game_names) || in_array($game[0], $game_names)) {
+                                                        $game[$port] = 0;
+                                                    }
+                                                }
+                                                break;
+
+                                            case 'turn_on':
+                                                if (0 !== $game[$port]) {
+                                                    $game_names = explode(',', $setting);
+                                                    array_walk($game_names, 'trim');
+                                                    if (!in_array('*', $game_names) && !in_array($game[0], $game_names)) {
+                                                        $game[$port] = 0;
+                                                    }
+                                                }
+                                                break;
+
+                                            case 'adjust_intensity':
+                                                if (0 !== $game[$port]) {
+                                                    $triggers = explode('/', $game[$port]);
+                                                    foreach ($triggers as &$trigger) {
+                                                        if (preg_match('/[I](\d+)/', $trigger, $matches)) {
+                                                            $intensity = (int)(((int)$matches[1]) * ((float)$setting));
+                                                            if ($intensity < 1) {
+                                                                $intensity = 1;
+                                                            }
+                                                            if ($intensity > 48) {
+                                                                $intensity = 48;
+                                                            }
+                                                            $trigger = preg_replace('/[I]\d+/', 'I' . $intensity, $trigger);
+                                                        }
+                                                    }
+                                                    unset($trigger);
+                                                    $game[$port] =  implode('/', $triggers);
+                                                }
+                                                break;
+
+                                            case 'rgb_brightness':
+                                                if (0 !== $game[$port]) {
+                                                    $brightness = trim($setting);
+                                                    foreach ($colors[$file] as $color_name => $color_value) {
+                                                        $color_name = ' ' . $color_name;
+                                                        if (false !== strpos($game[$port], $color_name)) {
+                                                            $game[$port] = str_replace($color_name, ' ' . $color_value . $brightness, $game[$port]);
+                                                        }
+                                                    }
+                                                }
+                                                break;
                                         }
+
                                     }
                                 }
                             }
                         }
-                        foreach ($rgb_ports[$file][$game_name] as $rgb_port) {
-                            unset($game[$rgb_port]);
-                        }
-                        $games[] = implode(',', $game);
-                    } else {
-                        $games[] = '';
                     }
+                    foreach ($rgb_ports[$file][$game_name] as $rgb_port) {
+                        unset($game[$rgb_port]);
+                    }
+                    $games[] = implode(',', $game);
                 }
-                $modded_files[$file] = $head . '[Config DOF]' . implode("\r\n", $games);
+                $modded_files[$file] = $directOutputConfig->getHead() . '[Config DOF]' . implode("\r\n", $games);
             }
         }
 

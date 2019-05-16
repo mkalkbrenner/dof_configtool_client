@@ -2,115 +2,169 @@
 
 namespace App\Entity;
 
-use Symfony\Component\Validator\Constraints as Assert;
-
-class Tweaks
+class DirectOutputConfig
 {
     /**
-     * @Assert\NotBlank()
      * @var string
      */
-    private $daySettings = '';
+    private $head = '';
 
     /**
      * @var string
      */
-    private $nightSettings = '';
+    private $content = '';
 
-    private $dayIni;
+    /**
+     * @var array
+     */
+    private $colors = [];
 
-    private $nightIni;
+    /**
+     * @var string
+     */
+    private $config = '';
 
-    private $directory;
+    /**
+     * @var array
+     */
+    private $rgbPorts = [];
 
-    public function __construct(string $variant = 'day')
+    /**
+     * @var array
+     */
+    private $games = [];
+
+    /**
+     * @var string
+     */
+    private $file;
+
+    public function __construct(string $file)
     {
-        $this->directory = ($_SERVER['PROGRAM_DATA'] ?? (__DIR__ . '/../../ini')) . DIRECTORY_SEPARATOR . 'tweaks';
-        if (!is_dir($this->directory)) {
-            mkdir($this->directory);
-        }
-
-        $this->dayIni = $this->directory . DIRECTORY_SEPARATOR . 'day.ini';
-        $this->nightIni = $this->directory . DIRECTORY_SEPARATOR . 'night.ini';
+        $this->file = $file;
     }
 
     /**
      * @return string
      */
-    public function getDirectory(): string
+    public function getHead(): string
     {
-        return $this->directory;
+        return $this->head;
     }
 
     /**
      * @return string
      */
-    public function getDayIni(): string
+    public function getContent(): string
     {
-        return $this->dayIni;
+        return $this->content;
     }
 
-    public function getDaySettings(): ?string
+    /**
+     * @return self
+     */
+    public function setContent($content): self
     {
-        return $this->daySettings;
+        $this->content = $content;
+
+        return $this;
     }
 
-    public function getDaySettingsParsed(): ?array
+    public function getColors(): array
     {
-        return parse_ini_string($this->daySettings, TRUE);
+        return $this->colors;
     }
 
-    public function setDaySettings(string $settings): self
+    public function setColors(array $colors): self
     {
-        $this->daySettings = $settings;
-
+        $this->colors = $colors;
         return $this;
     }
 
     /**
      * @return string
      */
-    public function getNightIni(): string
+    public function getConfig(): string
     {
-        return $this->nightIni;
+        return $this->config;
     }
 
-    public function getNightSettings(): ?string
+    /**
+     * @return array
+     */
+    public function getGames(): array
     {
-        return $this->nightSettings;
+        return $this->games;
     }
 
-    public function getNightSettingsParsed(): ?array
+    /**
+     * @return array
+     */
+    public function getRgbPorts(): array
     {
-        return parse_ini_string($this->nightSettings, TRUE);
-    }
-
-    public function setNightSettings(string $settings): self
-    {
-        $this->nightSettings = $settings;
-
-        return $this;
-    }
-
-    public function getSettingsParsed(string $cycle = 'day'): ?array
-    {
-        return 'day' == $cycle ? $this->getDaySettingsParsed(): $this->getNightSettingsParsed();
+        return $this->rgbPorts;
     }
 
     public function load(): self
     {
-        if (file_exists($this->dayIni)) {
-            $this->daySettings = file_get_contents($this->dayIni);
-        } else {
-            // 0.2.x backward compatibility
-            $old = ($_SERVER['PROGRAM_DATA'] ?? (__DIR__ . '/../../ini')) . DIRECTORY_SEPARATOR . 'tweaks.ini';
-            if (file_exists($old)) {
-                $this->daySettings = file_get_contents($old);
+        if ($contents = file_get_contents($this->file)) {
+            // Normalize line endings.
+            $this->content = preg_replace('/\R/', "\r\n", $contents);
+            list($this->head, $this->config) = explode('[Config DOF]', $this->content);
+            $color_section = FALSE;
+            foreach (explode("\r\n", $this->head) as $line) {
+                if (strpos($line, '[Colors DOF]') === 0) {
+                    $color_section = TRUE;
+                    continue;
+                }
+                if ($color_section) {
+                    if (strpos($line, '[') === 0) {
+                        break;
+                    }
+                    if (strpos($line, '=#')) {
+                        list($color_name, $color_value) = explode('=', $line);
+                        $this->colors[$color_name] = substr($color_value, 0, 7);
+                    }
+                }
             }
-        }
 
-        if (file_exists($this->nightIni)) {
-            $this->nightSettings = file_get_contents($this->nightIni);
+            foreach (explode("\r\n", $this->config) as $game_row) {
+                if (preg_match('/^Pinball[XY]/', $game_row, $matches)) {
+                    // Don't modify PinballX and PinballY settings. They use a different scheme and would require
+                    // too many exceptions for now.
+                    $this->games[$matches[0]] = $game_row;
+                    continue;
+                }
+
+                if ($game_row = trim($game_row)) {
+                    $game_row_elements = str_getcsv($game_row);
+                    $game_name = $game_row_elements[0];
+                    $this->games[$game_name] = [];
+                    $this->rgbPorts[$game_name] = [];
+                    $real_port = 0;
+                    foreach ($game_row_elements as $port => $game_row_element) {
+                        $this->games[$game_name][$real_port] = trim($game_row_element);
+                        if ($real_port) { // Skip Rom name on port 0.
+                            foreach (array_keys($this->colors) as $color) {
+                                if (strpos($game_row_element, $color) !== FALSE) {
+                                    $this->games[$game_name][++$real_port] = 0;
+                                    $this->rgbPorts[$game_name][] = $real_port;
+                                    $this->games[$game_name][++$real_port] = 0;
+                                    $this->rgbPorts[$game_name][] = $real_port;
+                                    break;
+                                }
+                            }
+                            if ('0' === $this->games[$game_name][$real_port]) {
+                                $this->games[$game_name][$real_port] = 0;
+                            }
+                        }
+                        ++$real_port;
+                    }
+                } else {
+                    // Add an "empty line" to ease the diff on modifications.
+                    $this->games[] = '';
+                }
+            }
         }
 
         return $this;
@@ -118,12 +172,8 @@ class Tweaks
 
     public function persist(): self
     {
-        if (!file_put_contents($this->dayIni, $this->daySettings)) {
-            throw new \RuntimeException('Could not write file ' . $this->dayIni);
-        }
-
-        if (!file_put_contents($this->nightIni, $this->nightSettings)) {
-            throw new \RuntimeException('Could not write file ' . $this->nightIni);
+        if (!file_put_contents($this->file, $this->getContent())) {
+            throw new \RuntimeException('Could not write file ' . $this->file);
         }
 
         return $this;
