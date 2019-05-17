@@ -30,6 +30,7 @@ class SettingsController extends AbstractSettingsController
             ->add('gitUser', TextType::class, ['label' => 'Git User'])
             ->add('gitEmail', TextType::class, ['label' => 'Git Email']);
 
+        $rgbToys = $this->settings->getRgbToys();
         $dofConfigPath = $this->settings->getDofConfigPath();
         $dofDatabaseSettings = new DofDatabaseSettings();
         $portAssignmentsDatabase = $dofDatabaseSettings->getPortAssignments();
@@ -42,6 +43,7 @@ class SettingsController extends AbstractSettingsController
                    $deviceId = $matches[1];
                    $directOutputConfigs[$deviceId] = new DirectOutputConfig($dofConfigPath . DIRECTORY_SEPARATOR . $file);
                    $directOutputConfigs[$deviceId]->load();
+                   $deviceName = $directOutputConfigs[$deviceId]->getDeviceName();
                    $ports = 0;
                    foreach ($directOutputConfigs[$deviceId]->getGames() as $game) {
                        if (is_array($game) && max(array_keys($game)) > $ports) {
@@ -49,16 +51,33 @@ class SettingsController extends AbstractSettingsController
                        }
                    }
                    for ($i=1; $i <= $ports; $i++) {
+                       $data = explode('|', ($portAssignments[$deviceId][$i]) ?? '-');
+
                        $formBuilder->add($deviceId . '_' . $i, ChoiceType::class,  [
-                           'label' => $deviceId . ' Port #' . $i,
+                           'label' => $deviceName . ' - Port #' . $i,
                            'choices' => array_combine($choices, $choices),
-                           'data' => explode('|', ($portAssignments[$deviceId][$i]) ?? '-'),
+                           'data' => $data,
                            'multiple' => true,
                        ]);
+
+                       foreach ($data as $toy) {
+                           if (in_array($toy, $rgbToys)) {
+                               for ($k = 0; $k <= 1; $k++) {
+                                   $formBuilder->add($deviceId . '_' . ++$i, ChoiceType::class, [
+                                       'label' => $deviceName . ' - Port #' . $i,
+                                       'choices' => array_combine($choices, $choices),
+                                       'data' => $data,
+                                       'multiple' => true,
+                                       'disabled' => true,
+                                   ]);
+                               }
+                               break;
+                           }
+                       }
                    }
                }
             }
-            $formBuilder->add('autodetect', SubmitType::class, ['label' => 'Autodetect port assignments']);
+            $formBuilder->add('autodetect', SubmitType::class, ['label' => 'Autodetect port assignments and save settings']);
         }
 
         $form = $formBuilder

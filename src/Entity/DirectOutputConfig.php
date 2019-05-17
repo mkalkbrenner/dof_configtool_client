@@ -44,9 +44,16 @@ class DirectOutputConfig
      */
     private $file;
 
+    /**
+     * @var int
+     */
+    private $deviceId;
+
     public function __construct(string $file)
     {
         $this->file = $file;
+        preg_match('/directoutputconfig(\d*)\.ini$/i', $file, $matches);
+        $this->deviceId = (int) $matches[1];
     }
 
     /**
@@ -129,6 +136,85 @@ class DirectOutputConfig
     public function getRgbPorts(): array
     {
         return $this->rgbPorts;
+    }
+
+    public function getDevices(): array
+    {
+        return [
+            0 => 'Ledwiz 1',
+            2 => 'Ledwiz 2',
+            3 => 'Ledwiz 3',
+            4 => 'Ledwiz 4',
+            5 => 'Ledwiz 5',
+            6 => 'Ledwiz 6',
+            8 => 'FRDM-KL25Z 1',
+            19 => 'PacDrive 1',
+            20 => 'PacLed 1',
+            21 => 'PacLed 2',
+            22 => 'PacLed 3',
+            23 => 'PacLed 4',
+            27 => 'Ultimate/IO 1',
+            28 => 'Ultimate/IO 2',
+            30 => 'WS2811 1',
+            31 => 'WS2811 2',
+            32 => 'WS2811 3',
+            33 => 'WS2811 4',
+            40 => 'SainSmart 1',
+            41 => 'SainSmart 2',
+            42 => 'SainSmart 3',
+            43 => 'SainSmart 4',
+            44 => 'SainSmart 5',
+            45 => 'SainSmart 6',
+            46 => 'SainSmart 7',
+            47 => 'SainSmart 8',
+            48 => 'SainSmart 9',
+            49 => 'SainSmart 10',
+            51 => 'Pinscape 1',
+            52 => 'Pinscape 2',
+            53 => 'Pinscape 3',
+            54 => 'Pinscape 4',
+            55 => 'Pinscape 5',
+            56 => 'Pinscape 6',
+            57 => 'Pinscape 7',
+            58 => 'Pinscape 8',
+            59 => 'Pinscape 9',
+            60 => 'Pinscape 10',
+            61 => 'Pinscape 11',
+            62 => 'Pinscape 12',
+            63 => 'Pinscape 13',
+            64 => 'Pinscape 14',
+            65 => 'Pinscape 15',
+            70 => 'Philips_Hue 1',
+            71 => 'Philips_Hue 2',
+            80 => 'Pincontrol1 1',
+            85 => 'Pincontrol2 1',
+            100 => 'Artnet 1',
+            101 => 'Artnet 2',
+            102 => 'Artnet 3',
+            103 => 'Artnet 4',
+            104 => 'Artnet 5',
+            105 => 'Artnet 6',
+            106 => 'Artnet 7',
+            107 => 'Artnet 8',
+            108 => 'Artnet 9',
+            109 => 'Artnet 10',
+            110 => 'Artnet 11',
+            111 => 'Artnet 12',
+            112 => 'Artnet 13',
+            113 => 'Artnet 14',
+            114 => 'Artnet 15',
+            115 => 'Artnet 16',
+        ];
+    }
+
+    public function getDeviceName(): string
+    {
+        return $this->getDevices()[$this->getDeviceId()];
+    }
+
+    public function getDeviceId(): int
+    {
+        return $this->deviceId;
     }
 
     public function load(): self
