@@ -299,17 +299,17 @@ class Settings
         return $this;
     }
 
-    public function __get(string $name)
+    public function __get(string $name): array
     {
         if (preg_match('/^(\d+)_(\d+)$/', $name, $matches)) {
-            return $this->portAssignments[$matches[1]][$matches[2]] ?? '';
+            return explode('|', $this->portAssignments[$matches[1]][$matches[2]] ?? '');
         }
     }
 
-    public function __set(string $name, $value)
+    public function __set(string $name, $values)
     {
         if (preg_match('/^(\d+)_(\d+)$/', $name, $matches)) {
-            $this->portAssignments[$matches[1]][$matches[2]] = $value;
+            $this->portAssignments[$matches[1]][$matches[2]] = implode('|', $values);
         }
     }
 

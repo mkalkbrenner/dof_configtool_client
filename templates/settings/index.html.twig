@@ -3,9 +3,26 @@
 {% block title %}Settings{% endblock %}
 
 {% block body %}
-    <h2>Settings</h2>
+    <h2>Common Settings</h2>
     {{ form_start(settings_form) }}
     {{ form_errors(settings_form) }}
+    {{ form_row(settings_form.lcpApiKey) }}
+    {{ form_row(settings_form.dofPath) }}
+    {{ form_row(settings_form.visualPinballPath) }}
+    {{ form_row(settings_form.bsPatchBinary) }}
+    {{ form_row(settings_form.versionControl) }}
+    {{ form_row(settings_form.gitBinary) }}
+    {{ form_row(settings_form.gitUser) }}
+    {{ form_row(settings_form.gitEmail) }}
+    <hr>
+    <h2>Port Assignments</h2>
+    <p>
+        The port settings are not required to download and tweak your DOF configs. But they will be required if you want
+        to manage your DOFLinks configuration, too. Once you downloaded your "DOF Configuration" and the "Database" the
+        autodetection of the port assignments should work.
+    </p>
+    {{ form_widget(settings_form) }}
+    <hr>
     {{ form_widget(settings_form) }}
     {{ form_end(settings_form) }}
 {% endblock %}

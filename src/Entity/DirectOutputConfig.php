@@ -20,6 +20,11 @@ class DirectOutputConfig
     private $colors = [];
 
     /**
+     * @var array
+     */
+    private $variables = [];
+
+    /**
      * @var string
      */
     private $config = '';
@@ -81,6 +86,27 @@ class DirectOutputConfig
         return $this;
     }
 
+    public function getColorNamesAndVariables(): array
+    {
+        return array_merge(
+            array_keys($this->getColors()),
+            array_keys(array_filter($this->getVariables(), static function ($value) {
+                return strpos($value, 'SHP') !== false;
+            }))
+        );
+    }
+
+    public function getVariables(): array
+    {
+        return $this->variables;
+    }
+
+    public function setVariables(array $variables): self
+    {
+        $this->variables = $variables;
+        return $this;
+    }
+
     /**
      * @return string
      */
@@ -112,21 +138,39 @@ class DirectOutputConfig
             $this->content = preg_replace('/\R/', "\r\n", $contents);
             list($this->head, $this->config) = explode('[Config DOF]', $this->content);
             $color_section = FALSE;
+            $variable_section = FALSE;
             foreach (explode("\r\n", $this->head) as $line) {
                 if (strpos($line, '[Colors DOF]') === 0) {
                     $color_section = TRUE;
+                    $variable_section = FALSE;
                     continue;
                 }
+                if (strpos($line, '[Variables DOF]') === 0) {
+                    $color_section = FALSE;
+                    $variable_section = TRUE;
+                    continue;
+                }
+                if (strpos($line, '[') === 0) {
+                    $color_section = FALSE;
+                    $variable_section = FALSE;
+                    continue;
+                }
+
                 if ($color_section) {
-                    if (strpos($line, '[') === 0) {
-                        break;
-                    }
                     if (strpos($line, '=#')) {
                         list($color_name, $color_value) = explode('=', $line);
                         $this->colors[$color_name] = substr($color_value, 0, 7);
                     }
                 }
+                if ($variable_section) {
+                    if (strpos($line, '=')) {
+                        list($variable_name, $variable_value) = explode(' = ', $line);
+                        $this->variables[$variable_name] = trim($variable_value);
+                    }
+                }
             }
+
+            $colorIndicators = $this->getColorNamesAndVariables();
 
             foreach (explode("\r\n", $this->config) as $game_row) {
                 if (preg_match('/^Pinball[XY]/', $game_row, $matches)) {
@@ -145,8 +189,8 @@ class DirectOutputConfig
                     foreach ($game_row_elements as $port => $game_row_element) {
                         $this->games[$game_name][$real_port] = trim($game_row_element);
                         if ($real_port) { // Skip Rom name on port 0.
-                            foreach (array_keys($this->colors) as $color) {
-                                if (strpos($game_row_element, $color) !== FALSE) {
+                            foreach ($colorIndicators as $color) {
+                                if (stripos($game_row_element, $color) !== FALSE || strpos($game_row_element, '#') !== FALSE) {
                                     $this->games[$game_name][++$real_port] = 0;
                                     $this->rgbPorts[$game_name][] = $real_port;
                                     $this->games[$game_name][++$real_port] = 0;

@@ -37,7 +37,8 @@ abstract class AbstractSettingsController extends AbstractController
         $this->cache = new FilesystemAdapter();
     }
 
-    protected function getGitWorkingCopy(string $path) : GitWorkingCopy {
+    protected function getGitWorkingCopy(string $path): GitWorkingCopy
+    {
         $gitWrapper = new GitWrapper($this->settings->getGitBinary());
 
         $workingCopy = $gitWrapper->workingCopy($path);
@@ -57,5 +58,10 @@ abstract class AbstractSettingsController extends AbstractController
         }
 
         return $workingCopy;
+    }
+
+    protected function getCurrentBranch(GitWorkingCopy $workingCopy): string
+    {
+        return trim($workingCopy->run('symbolic-ref', ['--short', 'HEAD']));
     }
 }

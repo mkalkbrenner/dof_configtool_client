@@ -38,12 +38,14 @@ class DownloadController extends AbstractSettingsController
                     if (copy('http://configtool.vpuniverse.com/api.php?query=getconfig&apikey=' . $this->settings->getLcpApiKey(), $zip_file) && filesize($zip_file)) {
                         $config_path = $this->settings->getDofConfigPath();
                         try {
+                            $previous_branch = 'download';
                             if ($this->settings->isVersionControl()) {
                                 $workingCopy = $this->getGitWorkingCopy($config_path);
                                 $branches = $workingCopy->getBranches();
                                 if (!in_array('download', $branches->all())) {
                                     $workingCopy->checkoutNewBranch('download');
                                 } else {
+                                    $previous_branch = $this->getCurrentBranch($workingCopy);
                                     $workingCopy->checkout('download');
                                 }
                             }
@@ -60,6 +62,9 @@ class DownloadController extends AbstractSettingsController
                                         $workingCopy->add('*.xml');
                                         $workingCopy->add('*.png');
                                         $workingCopy->commit('Download from configtool.vpuniverse.com');
+                                        if ('download' !== $previous_branch) {
+                                            $workingCopy->checkout($previous_branch);
+                                        }
                                         $changes = nl2br($workingCopy->run('show'));
                                     } catch (GitException $e) {
                                         $this->addFlash('warning', $e->getMessage());
