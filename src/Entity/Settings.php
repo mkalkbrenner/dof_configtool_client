@@ -353,14 +353,14 @@ class Settings
     {
         if (file_exists($this->ini)) {
             $settings = parse_ini_file($this->ini, TRUE);
-            $this->setLcpApiKey(stripslashes($settings['dof']['LCP_APIKEY']));
-            $this->setDofPath(stripslashes($settings['dof']['path']));
-            $this->setVisualPinballPath(stripslashes($settings['visualpinball']['path']));
+            $this->setLcpApiKey($settings['dof']['LCP_APIKEY']);
+            $this->setDofPath($settings['dof']['path']);
+            $this->setVisualPinballPath($settings['visualpinball']['path']);
             $this->setVersionControl((bool) ($settings['git']['enabled'] ?? false));
-            $this->setGitBinary(stripslashes($settings['git']['binary'] ?? $this->getGitBinary()));
-            $this->setGitUser(stripslashes($settings['git']['user'] ?? $this->getGitUser()));
-            $this->setGitEmail(stripslashes($settings['git']['email'] ?? $this->getGitEmail()));
-            $this->setBsPatchBinary(stripslashes($settings['bsdiff']['bspatch_binary'] ?? $this->getBsPatchBinary()));
+            $this->setGitBinary($settings['git']['binary'] ?? $this->getGitBinary());
+            $this->setGitUser($settings['git']['user'] ?? $this->getGitUser());
+            $this->setGitEmail($settings['git']['email'] ?? $this->getGitEmail());
+            $this->setBsPatchBinary($settings['bsdiff']['bspatch_binary'] ?? $this->getBsPatchBinary());
             $this->setPortAssignments($settings['portassignments'] ?? []);
         } else {
             // 0.1.x backward compatibility
