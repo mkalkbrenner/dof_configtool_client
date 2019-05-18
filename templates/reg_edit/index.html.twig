@@ -4,6 +4,14 @@
 
 {% block body %}
     <h2>RegEdit</h2>
+    <table class="table">
+        <thead>
+            <th style="background-color: #bd2130">ROM zip file not found.</th>
+            <th style="background-color: #e0a800">Alt sound directory for ROM exists.</th>
+            <th style="background-color: #9fcdff">Alt color directory for ROM exists.</th>
+            <th style="background-color: #34ce57">Default values for new ROMs.</th>
+        </thead>
+    </table>
     {{ form_start(reg_edit_form) }}
     {{ form_errors(reg_edit_form) }}
     <table class="table table-striped">
@@ -64,14 +72,14 @@
                 </tr>
             {% endif %}
             <tr{%  if 'default' == roms[romcounter] %} style="background-color: #34ce57"{% endif %}>
-                <td><b>{{ form_label(entry, roms[romcounter]) }}</b>{{ form_widget(entry.rom) }}</td>
+                <td{% if roms[romcounter] not in romfiles and 'default' != roms[romcounter] %} style="background-color: #bd2130"{% endif %}><b>{{ form_label(entry, roms[romcounter]) }}</b>{{ form_widget(entry.rom) }}</td>
                 <td>{{ form_widget(entry.cabinet_mode) }}</td>
                 <td>{{ form_widget(entry.ignore_rom_crc) }}</td>
                 <td>{{ form_widget(entry.sound) }}</td>
-                <td>{{ form_widget(entry.sound_mode) }}</td>
+                <td{% if roms[romcounter] in altsound %} style="background-color: #e0a800"{% endif %}>{{ form_widget(entry.sound_mode) }}</td>
                 <td>{{ form_widget(entry.samples) }}</td>
                 <td>{{ form_widget(entry.ddraw) }}</td>
-                <td>{{ form_widget(entry.dmd_colorize) }}</td>
+                <td{% if roms[romcounter] in altcolor %} style="background-color: #9fcdff"{% endif %}>{{ form_widget(entry.dmd_colorize) }}</td>
                 <td>{{ form_widget(entry.showpindmd) }}</td>
                 <td>{{ form_widget(entry.showwindmd) }}</td>
                 <td>{{ form_widget(entry.synclevel) }}</td>

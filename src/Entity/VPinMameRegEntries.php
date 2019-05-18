@@ -18,7 +18,7 @@ class VPinMameRegEntries implements \IteratorAggregate
 
     public function setEntries(array $entries): self
     {
-        dump($entries);
+        // 'default' should be at the end of the list.
         if (isset($entries['default'])) {
             $default = $entries['default'];
             unset($entries['default']);

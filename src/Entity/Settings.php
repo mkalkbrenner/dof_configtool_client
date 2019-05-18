@@ -139,6 +139,17 @@ class Settings
         return $this->getVPinMamePath() . DIRECTORY_SEPARATOR . 'roms';
     }
 
+    public function getRoms(): array
+    {
+        $roms = [];
+        foreach (scandir($this->getRomsPath()) as $filename) {
+            if (preg_match('/(.+)\.zip$/i', $filename, $matches)) {
+                $roms[] = strtolower($matches[1]);
+            }
+        }
+        return $roms;
+    }
+
     public function getAltcolorPath(): ?string
     {
         $altcolor_dir = $this->getVPinMamePath() . DIRECTORY_SEPARATOR . 'altcolor';
@@ -148,6 +159,18 @@ class Settings
         return $altcolor_dir;
     }
 
+
+    public function getAltcolorRoms(): array
+    {
+        $roms = [];
+        foreach (scandir($this->getAltcolorPath()) as $filename) {
+            if (is_dir($this->getAltcolorPath() . DIRECTORY_SEPARATOR . $filename)) {
+                $roms[] = strtolower($filename);
+            }
+        }
+        return $roms;
+    }
+
     public function getAltsoundPath(): ?string
     {
         $altsound_dir = $this->getVPinMamePath() . DIRECTORY_SEPARATOR . 'altsound';
@@ -155,6 +178,18 @@ class Settings
             mkdir($altsound_dir);
         }
         return $altsound_dir;
+    }
+
+
+    public function getAltsoundRoms(): array
+    {
+        $roms = [];
+        foreach (scandir($this->getAltsoundPath()) as $filename) {
+            if (is_dir($this->getAltsoundPath() . DIRECTORY_SEPARATOR . $filename)) {
+                $roms[] = strtolower($filename);
+            }
+        }
+        return $roms;
     }
 
     public function getTablesPath(): ?string
@@ -287,12 +322,12 @@ class Settings
         ];
     }
 
-    public function getPortAssignments() : array
+    public function getPortAssignments(): array
     {
         return $this->portAssignments;
     }
 
-    public function setPortAssignments(array $portAssignments) : self
+    public function setPortAssignments(array $portAssignments): self
     {
         $this->portAssignments = $portAssignments;
 
@@ -306,11 +341,12 @@ class Settings
         }
     }
 
-    public function __set(string $name, $values)
+    public function __set(string $name, $values): self
     {
         if (preg_match('/^(\d+)_(\d+)$/', $name, $matches)) {
             $this->portAssignments[$matches[1]][$matches[2]] = implode('|', $values);
         }
+        return $this;
     }
 
     public function load(): self

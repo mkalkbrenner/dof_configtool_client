@@ -9,7 +9,7 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
-class RegEditController extends AbstractController
+class RegEditController extends AbstractSettingsController
 {
     /**
      * @Route("/regedit", name="reg_edit")
@@ -59,9 +59,17 @@ class RegEditController extends AbstractController
             return $this->redirectToRoute('reg_edit');
         }
 
+        $roms = [];
+        foreach (array_keys($regEntries->getEntries()) as $rom) {
+            $roms[] = strtolower($rom);
+        }
+
         return $this->render('reg_edit/index.html.twig', [
             'reg_edit_form' => $form->createView(),
-            'roms' => array_keys($regEntries->getEntries()),
+            'roms' => $roms,
+            'romfiles' => $this->settings->getRoms(),
+            'altcolor' => $this->settings->getAltcolorRoms(),
+            'altsound' => $this->settings->getAltsoundRoms(),
         ]);
     }
 }
