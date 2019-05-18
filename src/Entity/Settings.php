@@ -30,6 +30,8 @@ class Settings
      */
     private $visualPinballPath = '';
 
+    private $portAssignments = [];
+
     /**
      * @var bool
      */
@@ -251,25 +253,86 @@ class Settings
         return $this;
     }
 
+    public function getRgbToys() : ?array
+    {
+        return [
+            'RGB Undercab Complex MX',
+            'PF Left Flashers MX',
+            'PF Left Effects MX',
+            'PF Back Flashers MX',
+            'PF Back Effects MX',
+            'PF Back Strobe MX',
+            'PF Back Beacon MX',
+            'PF Back PBX MX',
+            'PF Right Flashers MX',
+            'PF Right Effects MX',
+            'Flipper Button MX',
+            'Flipper Button PBX MX',
+            'Magnasave Left MX',
+            'Magnasave Right MX',
+            'Hellball Color',
+            '5 Flasher Outside Left',
+            '5 Flasher Left',
+            '5 Flasher Center',
+            '5 Flasher Right',
+            '5 Flasher Outside Right',
+            '3 Flasher Left',
+            '3 Flasher Center',
+            '3 Flasher Right',
+            'RGB Flippers',
+            'RGB Left Magnasave',
+            'RGB Right Magnasave',
+            'RGB Undercab Smart',
+            'RGB Undercab Complex',
+        ];
+    }
+
+    public function getPortAssignments() : array
+    {
+        return $this->portAssignments;
+    }
+
+    public function setPortAssignments(array $portAssignments) : self
+    {
+        $this->portAssignments = $portAssignments;
+
+        return $this;
+    }
+
+    public function __get(string $name): array
+    {
+        if (preg_match('/^(\d+)_(\d+)$/', $name, $matches)) {
+            return explode('|', $this->portAssignments[$matches[1]][$matches[2]] ?? '');
+        }
+    }
+
+    public function __set(string $name, $values)
+    {
+        if (preg_match('/^(\d+)_(\d+)$/', $name, $matches)) {
+            $this->portAssignments[$matches[1]][$matches[2]] = implode('|', $values);
+        }
+    }
+
     public function load(): self
     {
         if (file_exists($this->ini)) {
-            $download = parse_ini_file($this->ini, TRUE);
-            $this->setLcpApiKey(stripslashes($download['dof']['LCP_APIKEY']));
-            $this->setDofPath(stripslashes($download['dof']['path']));
-            $this->setVisualPinballPath(stripslashes($download['visualpinball']['path']));
-            $this->setVersionControl((bool) ($download['git']['enabled'] ?? false));
-            $this->setGitBinary(stripslashes($download['git']['binary'] ?? $this->getGitBinary()));
-            $this->setGitUser(stripslashes($download['git']['user'] ?? $this->getGitUser()));
-            $this->setGitEmail(stripslashes($download['git']['email'] ?? $this->getGitEmail()));
-            $this->setBsPatchBinary(stripslashes($download['bsdiff']['bspatch_binary'] ?? $this->getBsPatchBinary()));
+            $settings = parse_ini_file($this->ini, TRUE);
+            $this->setLcpApiKey(stripslashes($settings['dof']['LCP_APIKEY']));
+            $this->setDofPath(stripslashes($settings['dof']['path']));
+            $this->setVisualPinballPath(stripslashes($settings['visualpinball']['path']));
+            $this->setVersionControl((bool) ($settings['git']['enabled'] ?? false));
+            $this->setGitBinary(stripslashes($settings['git']['binary'] ?? $this->getGitBinary()));
+            $this->setGitUser(stripslashes($settings['git']['user'] ?? $this->getGitUser()));
+            $this->setGitEmail(stripslashes($settings['git']['email'] ?? $this->getGitEmail()));
+            $this->setBsPatchBinary(stripslashes($settings['bsdiff']['bspatch_binary'] ?? $this->getBsPatchBinary()));
+            $this->setPortAssignments($settings['portassignments'] ?? []);
         } else {
             // 0.1.x backward compatibility
-            $old = ($_SERVER['PROGRAM_DATA'] ?? (__DIR__ . '/../../ini')) . '/download.ini';
+            $old = ($_SERVER['PROGRAM_DATA'] ?? (__DIR__ . '/../../ini')) . DIRECTORY_SEPARATOR . 'download.ini';
             if (file_exists($old)) {
-                $download = parse_ini_file($old, TRUE);
-                $this->setLcpApiKey($download['download']['LCP_APIKEY']);
-                $this->setDofPath($download['download']['DOF_CONFIG_PATH']);
+                $settings = parse_ini_file($old, TRUE);
+                $this->setLcpApiKey($settings['download']['LCP_APIKEY']);
+                $this->setDofPath($settings['download']['DOF_CONFIG_PATH']);
             }
         }
 
@@ -278,21 +341,30 @@ class Settings
 
     public function persist(): self
     {
-        if (!file_put_contents($this->ini,
-                "[dof]\r\n" .
-                'LCP_APIKEY = "' . addslashes(trim($this->getLcpApiKey(), '" ')) . '"' . "\r\n" .
-                'path = "' . addslashes(trim($this->getDofPath(), '" ')) . '"' . "\r\n".
-                "[visualpinball]\r\n" .
-                'path = "' . addslashes(trim($this->getVisualPinballPath(), '" ')) . '"' . "\r\n" .
-                "[git]\r\n" .
-                'enabled = ' . (int) $this->isVersionControl()  . "\r\n" .
-                'binary = "' . addslashes(trim($this->getGitBinary(), '" ')) . '"' . "\r\n" .
-                'user = "' . addslashes(trim($this->getGitUser(), '" ')) . '"' . "\r\n" .
-                'email = "' . addslashes(trim($this->getGitEmail(), '" ')) . '"' . "\r\n" .
-                "[bsdiff]\r\n" .
-                'bspatch_binary = "' . addslashes(trim($this->getBsPatchBinary(), '" ')) . '"' . "\r\n"
-            )
-        ) {
+        $content =
+            "[dof]\r\n" .
+            'LCP_APIKEY = "' . addslashes(trim($this->getLcpApiKey(), '" ')) . '"' . "\r\n" .
+            'path = "' . addslashes(trim($this->getDofPath(), '" ')) . '"' . "\r\n".
+            "[visualpinball]\r\n" .
+            'path = "' . addslashes(trim($this->getVisualPinballPath(), '" ')) . '"' . "\r\n" .
+            "[git]\r\n" .
+            'enabled = ' . (int) $this->isVersionControl()  . "\r\n" .
+            'binary = "' . addslashes(trim($this->getGitBinary(), '" ')) . '"' . "\r\n" .
+            'user = "' . addslashes(trim($this->getGitUser(), '" ')) . '"' . "\r\n" .
+            'email = "' . addslashes(trim($this->getGitEmail(), '" ')) . '"' . "\r\n" .
+            "[bsdiff]\r\n" .
+            'bspatch_binary = "' . addslashes(trim($this->getBsPatchBinary(), '" ')) . '"' . "\r\n";
+
+        if ($portAssignments = $this->getPortAssignments()) {
+            $content .= "[portassignments]\r\n";
+            foreach ($portAssignments as $deviceId => $ports) {
+                foreach ($ports as $port => $toy) {
+                    $content .= $deviceId . '[' . $port . ']' . ' = "' . $toy . '"' . "\r\n";
+                }
+            }
+        }
+
+        if (!file_put_contents($this->ini, $content)) {
             throw new \RuntimeException('Could not write file ' . $this->ini);
         }
 

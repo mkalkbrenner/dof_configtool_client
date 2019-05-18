@@ -21,7 +21,7 @@ class DayNightController extends AbstractSettingsController
 
         try {
             $workingCopy = $this->getGitWorkingCopy($this->settings->getDofConfigPath());
-            $branch = trim($workingCopy->run('symbolic-ref', ['--short', 'HEAD']));
+            $branch = $this->getCurrentBranch($workingCopy);
             $branches = $workingCopy->getBranches()->all();
         } catch (GitException $e) {
             $this->addFlash('warning', $e->getMessage());
