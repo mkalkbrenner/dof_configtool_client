@@ -61,6 +61,7 @@ class RegEditController extends AbstractController
 
         return $this->render('reg_edit/index.html.twig', [
             'reg_edit_form' => $form->createView(),
+            'roms' => array_keys($regEntries->getEntries()),
         ]);
     }
 }

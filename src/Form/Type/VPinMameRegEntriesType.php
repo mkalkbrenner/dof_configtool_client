@@ -14,7 +14,6 @@ class VPinMameRegEntriesType extends AbstractType
     {
         $builder->add('entries', CollectionType::class, [
             'entry_type' => VPinMameRegEntryType::class,
-            #'entry_options' => ['label_format' => 'reg_edit_form.rom']
         ]);
     }
 

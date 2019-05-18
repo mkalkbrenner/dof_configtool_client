@@ -9,23 +9,39 @@
     {{ form_errors(reg_edit_form) }}
     <table class="table table-striped">
         <thead>
-            <th>ROM</th>
-            <th>cabinet_mode</th>
-            <th>ignore_rom_crc</th>
-            <th>sound</th>
-            <th>samples</th>
+            <th></th>
+            <th>Cabinet Mode</th>
+            <th>Ignore ROM CRC errors</th>
+            <th>Use Sound</th>
+            <th>Alt Sound Mode</th>
+            <th>Use Samples</th>
             <th>ddraw</th>
-            <th>dmd_colorize</th>
-            <th>showpindmd</th>
-            <th>showwindmd</th>
-            <th>synclevel<br>(0 => script yieldtime)</th>
+            <th>Colorize DMD</th>
+            <th>Use external DMD (dll)</th>
+            <th>Show DMD/Display window</th>
+            <th>VP&lt;-&gt;VPM Synclevel<br>(0 => script yieldtime)</th>
         </thead>
+        <tr>
+            <td><b>ROM</b></td>
+            <td><b>cabinet_mode</b></td>
+            <td><b>ignore_rom_crc</b></td>
+            <td><b>sound</b></td>
+            <td><b>sound_mode</b></td>
+            <td><b>samples</b></td>
+            <td><b>ddraw</b></td>
+            <td><b>dmd_colorize</b></td>
+            <td><b>showpindmd</b></td>
+            <td><b>showwindmd</b></td>
+            <td><b>synclevel</b></td>
+        </tr>
+        {% set romcounter = 0 %}
         {% for entry in reg_edit_form.entries %}
             <tr>
-                <td>{{ form_label(entry) }}{{ form_widget(entry.rom) }}</td>
+                <td>{{ form_label(entry, roms[romcounter]) }}{{ form_widget(entry.rom) }}</td>
                 <td>{{ form_widget(entry.cabinet_mode) }}</td>
                 <td>{{ form_widget(entry.ignore_rom_crc) }}</td>
                 <td>{{ form_widget(entry.sound) }}</td>
+                <td>{{ form_widget(entry.sound_mode) }}</td>
                 <td>{{ form_widget(entry.samples) }}</td>
                 <td>{{ form_widget(entry.ddraw) }}</td>
                 <td>{{ form_widget(entry.dmd_colorize) }}</td>
@@ -33,6 +49,7 @@
                 <td>{{ form_widget(entry.showwindmd) }}</td>
                 <td>{{ form_widget(entry.synclevel) }}</td>
             </tr>
+            {% set romcounter = romcounter + 1 %}
         {% endfor %}
     </table>
     {{ form_widget(reg_edit_form.save) }}

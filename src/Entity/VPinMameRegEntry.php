@@ -17,6 +17,8 @@ class VPinMameRegEntry
 
     private $sound;
 
+    private $sound_mode;
+
     private $samples;
 
     private $dmd_colorize;
@@ -116,6 +118,22 @@ class VPinMameRegEntry
             $this->hasChanges['Sound'] = TRUE;
         }
         $this->sound = $sound;
+
+        return $this;
+    }
+
+    public function getSoundMode(): ?int
+    {
+        return $this->sound_mode;
+    }
+
+    public function setSoundMode(?int $sound_mode): self
+    {
+        $sound_mode = (int) $sound_mode;
+        if ($this->trackChanges && $this->sound_mode != $sound_mode) {
+            $this->hasChanges['SoundMode'] = TRUE;
+        }
+        $this->sound_mode = $sound_mode;
 
         return $this;
     }
@@ -230,6 +248,9 @@ class VPinMameRegEntry
             if (null !== $this->sound) {
                 $key->setValue('sound', $this->sound, RegistryKey::TYPE_DWORD);
             }
+            if (null !== $this->sound_mode) {
+                $key->setValue('sound_mode', $this->sound_mode, RegistryKey::TYPE_DWORD);
+            }
             if (null !== $this->samples) {
                 $key->setValue('samples', $this->samples, RegistryKey::TYPE_DWORD);
             }
@@ -281,6 +302,9 @@ class VPinMameRegEntry
                     break;
                 case 'sound':
                     $entry->setSound((bool) $value);
+                    break;
+                case 'sound_mode':
+                    $entry->setSoundMode((int) $value);
                     break;
                 case 'samples':
                     $entry->setSamples((bool) $value);
@@ -334,6 +358,7 @@ class RegistryKeyDummy
             'cabinet_mode' => (bool)random_int(0, 1),
             'ignore_rom_crc' => (bool)random_int(0, 1),
             'sound' => (bool)random_int(0, 1),
+            'sound_mode' => random_int(0, 3),
             'samples' => (bool)random_int(0, 1),
             'ddraw' => (bool)random_int(0, 1),
             'dmd_colorize' => (bool)random_int(0, 1),
