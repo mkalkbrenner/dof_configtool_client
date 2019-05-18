@@ -134,7 +134,7 @@ class TweakController extends AbstractSettingsController
         $files = [];
         $rgb_ports = [];
         $colors = [];
-
+        $devices = [];
         $file = '';
         foreach ($tweaks->getSettingsParsed($cycle) as $section => $adjustments) {
             if (strpos($section, '.ini')) {
@@ -156,6 +156,7 @@ class TweakController extends AbstractSettingsController
                 $files[$file] = $contents;
                 $colors[$file] = $directOutputConfig->getColors();
                 $rgb_ports[$file] = $directOutputConfig->getRgbPorts();
+                $devices[$file] = $directOutputConfig->getDeviceName();
                 $games = [];
 
                 foreach ($directOutputConfig->getGames() as $game_name => $game) {
@@ -379,7 +380,7 @@ class TweakController extends AbstractSettingsController
                     foreach ($diff_cells as $port => $dof_string) {
                         $dof_string = str_replace(['<ins>', '<del>'], ['<ins class="bg-success">', '<del class="bg-danger">'], $dof_string);
 
-                        $header .= '<th scope="col"' . (in_array($real_port + 1, $rgb_ports[$file][$game_name]) ? ' bgcolor="red">' : '>') . ($real_port ?: '');
+                        $header .= '<th scope="col"' . (in_array($real_port + 1, $rgb_ports[$file][$game_name]) ? ' bgcolor="red">' : '>') . ($real_port ?: 'ROM \ Port');
                         ++$real_port;
                         $colspan = 1;
                         while (in_array($real_port, $rgb_ports[$file][$game_name])) {
@@ -394,7 +395,7 @@ class TweakController extends AbstractSettingsController
                             $data .= '<th scope="row">' . $dof_string . '</th>';
                         }
                     }
-                    $diffs[basename($file)][] = '<tr>' . $header . '</tr><tr>' . $data . '</tr>';
+                    $diffs[$devices[$file] . ': ' . basename($file)][] = '<tr>' . $header . '</tr><tr>' . $data . '</tr>';
                 }
             }
         }
