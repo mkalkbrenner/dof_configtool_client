@@ -22,7 +22,7 @@
             <th>VP&lt;-&gt;VPM Synclevel<br>(0 => script yieldtime)</th>
         </thead>
         <tr>
-            <td><b>ROM</b></td>
+            <td><b>ROM \ Key</b></td>
             <td><b>cabinet_mode</b></td>
             <td><b>ignore_rom_crc</b></td>
             <td><b>sound</b></td>
@@ -37,7 +37,7 @@
         {% set romcounter = 0 %}
         {% for entry in reg_edit_form.entries %}
             <tr>
-                <td>{{ form_label(entry, roms[romcounter]) }}{{ form_widget(entry.rom) }}</td>
+                <td><b>{{ form_label(entry, roms[romcounter]) }}</b>{{ form_widget(entry.rom) }}</td>
                 <td>{{ form_widget(entry.cabinet_mode) }}</td>
                 <td>{{ form_widget(entry.ignore_rom_crc) }}</td>
                 <td>{{ form_widget(entry.sound) }}</td>
