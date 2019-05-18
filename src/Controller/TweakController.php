@@ -157,6 +157,7 @@ class TweakController extends AbstractSettingsController
                 $colors[$file] = $directOutputConfig->getColors();
                 $rgb_ports[$file] = $directOutputConfig->getRgbPorts();
                 $devices[$file] = $directOutputConfig->getDeviceName();
+                $variables = $directOutputConfig->getVariables();
                 $games = [];
 
                 foreach ($directOutputConfig->getGames() as $game_name => $game) {
@@ -314,6 +315,22 @@ class TweakController extends AbstractSettingsController
 
                                             case 'adjust_intensity':
                                                 if (0 !== $game[$port]) {
+                                                    // Resolve target and drop target variables to be able to adjust
+                                                    // their intensities, too.
+                                                    $searches = [];
+                                                    $replacements = [];
+                                                    if (!empty($variables['dt'])) {
+                                                        $searches[] = '@dt@';
+                                                        $replacements[] = $variables['dt'];
+                                                    }
+                                                    if (!empty($variables['t'])) {
+                                                        $searches[] = '@t@';
+                                                        $replacements[] = $variables['t'];
+                                                    }
+                                                    if ($searches) {
+                                                        $game[$port] = str_replace($searches, $replacements, $game[$port]);
+                                                    }
+
                                                     $triggers = explode('/', $game[$port]);
                                                     foreach ($triggers as &$trigger) {
                                                         if (preg_match('/[I](\d+)/', $trigger, $matches)) {
