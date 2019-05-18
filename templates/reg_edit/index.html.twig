@@ -4,7 +4,6 @@
 
 {% block body %}
     <h2>RegEdit</h2>
-    <p>RegEdit</p>
     {{ form_start(reg_edit_form) }}
     {{ form_errors(reg_edit_form) }}
     <table class="table table-striped">
@@ -36,7 +35,35 @@
         </tr>
         {% set romcounter = 0 %}
         {% for entry in reg_edit_form.entries %}
-            <tr>
+            {%  if 'default' == roms[romcounter] %}
+                <tr style="background-color: #34ce57">
+                    <td></td>
+                    <td><b>Cabinet Mode</b></td>
+                    <td><b>Ignore ROM CRC errors</b></td>
+                    <td><b>Use Sound</b></td>
+                    <td><b>Alt Sound Mode</b></td>
+                    <td><b>Use Samples</b></td>
+                    <td><b>ddraw</b></td>
+                    <td><b>Colorize DMD</b></td>
+                    <td><b>Use external DMD (dll)</b></td>
+                    <td><b>Show DMD/Display window</b></td>
+                    <td><b>VP&lt;-&gt;VPM Synclevel<br>(0 => script yieldtime)</b></td>
+                </tr>
+                <tr style="background-color: #00bf00">
+                    <td><b>ROM \ Key</b></td>
+                    <td><b>cabinet_mode</b></td>
+                    <td><b>ignore_rom_crc</b></td>
+                    <td><b>sound</b></td>
+                    <td><b>sound_mode</b></td>
+                    <td><b>samples</b></td>
+                    <td><b>ddraw</b></td>
+                    <td><b>dmd_colorize</b></td>
+                    <td><b>showpindmd</b></td>
+                    <td><b>showwindmd</b></td>
+                    <td><b>synclevel</b></td>
+                </tr>
+            {% endif %}
+            <tr{%  if 'default' == roms[romcounter] %} style="background-color: #34ce57"{% endif %}>
                 <td><b>{{ form_label(entry, roms[romcounter]) }}</b>{{ form_widget(entry.rom) }}</td>
                 <td>{{ form_widget(entry.cabinet_mode) }}</td>
                 <td>{{ form_widget(entry.ignore_rom_crc) }}</td>

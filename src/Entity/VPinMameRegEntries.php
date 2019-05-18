@@ -18,14 +18,19 @@ class VPinMameRegEntries implements \IteratorAggregate
 
     public function setEntries(array $entries): self
     {
-        $this->entries = $entries;
+        dump($entries);
+        if (isset($entries['default'])) {
+            $default = $entries['default'];
+            unset($entries['default']);
+        }
+        $this->entries = $entries + ['default' => $default];
 
         return $this;
     }
 
     public function load(): self
     {
-        $this->entries = VPinMameRegEntry::loadAll();
+        $this->setEntries(VPinMameRegEntry::loadAll());
         return $this;
     }
 

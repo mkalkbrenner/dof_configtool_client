@@ -341,10 +341,10 @@ class RegistryKeyDummy
     {
         return [
             'aar' => $this,
+            'default' => $this,
             'aavenger' => $this,
             'ACDC' => $this,
             'babypac' => $this,
-            'default' => $this,
         ];
     }
 
