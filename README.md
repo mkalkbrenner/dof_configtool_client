@@ -101,7 +101,7 @@ that could be installed on windows just like any windows software.
 * Download your configs using the corresponding button. (Note: Sometimes the configtool is slow. So the download could
   take some time.)
 
-  **_Warning:_** Existing files will be overwritten.
+  **_Warning:_** Existing files will be overwritten if you didn't `Enable Version Control via Git`.
  
 ### 2. Apply tweaks
 
