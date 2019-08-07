@@ -3,6 +3,8 @@
 This is (mainly) a client for downloading your config files from [http://configtool.vpuniverse.com] and for applying
 additional tweaks to them. In addition it contains some tools to administer the Visual Pinball system itself.
 
+The latest version could always be downloaded from https://github.com/mkalkbrenner/dof_configtool_client/releases
+
 ## Motivation
 
 The DOF Configtool is a great tool that covers most of the use-cases for the majority of it's users.
