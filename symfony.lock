@@ -53,9 +53,6 @@
     "erusev/parsedown": {
         "version": "v1.7.2"
     },
-    "facebook/webdriver": {
-        "version": "1.6.0"
-    },
     "fig/link-util": {
         "version": "1.0.0"
     },
@@ -260,9 +257,6 @@
     },
     "symfony/options-resolver": {
         "version": "v4.2.4"
-    },
-    "symfony/panther": {
-        "version": "v0.3.0"
     },
     "symfony/phpunit-bridge": {
         "version": "4.1",
