@@ -3,6 +3,8 @@
 This is (mainly) a client for downloading your config files from [http://configtool.vpuniverse.com] and for applying
 additional tweaks to them. In addition it contains some tools to administer the Visual Pinball system itself.
 
+The latest version could always be downloaded from https://github.com/mkalkbrenner/dof_configtool_client/releases
+
 ## Motivation
 
 The DOF Configtool is a great tool that covers most of the use-cases for the majority of it's users.
@@ -101,7 +103,7 @@ that could be installed on windows just like any windows software.
 * Download your configs using the corresponding button. (Note: Sometimes the configtool is slow. So the download could
   take some time.)
 
-  **_Warning:_** Existing files will be overwritten.
+  **_Warning:_** Existing files will be overwritten if you didn't `Enable Version Control via Git`.
  
 ### 2. Apply tweaks
 
