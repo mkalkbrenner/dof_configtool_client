@@ -1,0 +1,18 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Config Files History{% endblock %}
+
+{% block body %}
+    <h2>Config Files History</h2>
+    <p>
+        History of current DOF settings in use: <strong><em>{{ branch|default('-') }}</em></strong>
+    </p>
+    <p>
+        Current version: <strong><em>{{ current|default('-') }}</em></strong>
+    </p>
+    <hr>
+    {{ form_start(history_form) }}
+    {{ form_errors(history_form) }}
+    {{ form_widget(history_form) }}
+    {{ form_end(history_form) }}
+{% endblock %}

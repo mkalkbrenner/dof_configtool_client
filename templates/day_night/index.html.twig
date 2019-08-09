@@ -4,7 +4,13 @@
 
 {% block body %}
     <h2>Day Night Switch</h2>
-    <h3>Current DOF settings in use: <em>{{ branch|default('-') }}</em></h3>
+    <p>
+        Current DOF settings in use: <strong><em>{{ branch|default('-') }}</em></strong>
+    </p>
+    <p>
+        Current version: <strong><em>{{ log|default('-') }}</em></strong>
+    </p>
+    <hr>
     {{ form_start(day_night_form) }}
     {{ form_errors(day_night_form) }}
     {{ form_widget(day_night_form) }}

@@ -120,6 +120,12 @@ class SettingsController extends AbstractSettingsController
                         $gamesDatabase = $directOutputConfigsDatabase->getGames();
                         /** @var DirectOutputConfig $directOutputConfig */
                         foreach ($directOutputConfigs as $deviceId => $directOutputConfig) {
+                            if ($directOutputConfig->getVersion() !== $directOutputConfigsDatabase->getVersion()) {
+                                $this->addFlash('danger', 'Your config files version ' . $directOutputConfig->getVersion() . ' differs from the database version ' . $directOutputConfigsDatabase->getVersion() . '. Download the latest versions first.');
+                                return $this->render('settings/index.html.twig', [
+                                    'settings_form' => $form->createView(),
+                                ]);
+                            }
                             $rgbPorts = $directOutputConfig->getRgbPorts();
                             foreach ($directOutputConfig->getGames() as $name => $game) {
                                 if (is_array($game) && !empty($game)) {

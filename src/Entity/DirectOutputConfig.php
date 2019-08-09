@@ -4,6 +4,13 @@ namespace App\Entity;
 
 class DirectOutputConfig
 {
+    const FILE_PATERN = '/directoutputconfig(\d+)\.ini$/i';
+
+    /**
+     * @var int
+     */
+    private $version = 0;
+
     /**
      * @var string
      */
@@ -52,8 +59,16 @@ class DirectOutputConfig
     public function __construct(string $file)
     {
         $this->file = $file;
-        preg_match('/directoutputconfig(\d*)\.ini$/i', $file, $matches);
+        preg_match(self::FILE_PATERN, $file, $matches);
         $this->deviceId = (int) $matches[1];
+    }
+
+    /**
+     * @return int
+     */
+    public function getVersion(): int
+    {
+        return $this->version;
     }
 
     /**
@@ -226,6 +241,10 @@ class DirectOutputConfig
             $color_section = FALSE;
             $variable_section = FALSE;
             foreach (explode("\r\n", $this->head) as $line) {
+                if (strpos($line, 'version=') === 0 && preg_match('/\d+/', $line, $matches)) {
+                    $this->version = (int) $matches[0];
+                    continue;
+                }
                 if (strpos($line, '[Colors DOF]') === 0) {
                     $color_section = TRUE;
                     $variable_section = FALSE;

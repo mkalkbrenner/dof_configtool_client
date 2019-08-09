@@ -21,6 +21,7 @@ class DayNightController extends AbstractSettingsController
 
         try {
             $workingCopy = $this->getGitWorkingCopy($this->settings->getDofConfigPath());
+            $log = $workingCopy->log('--pretty=format:"%s | %ad"', '--date=rfc2822', '-1');
             $branch = $this->getCurrentBranch($workingCopy);
             $branches = $workingCopy->getBranches()->all();
         } catch (GitException $e) {
@@ -60,6 +61,7 @@ class DayNightController extends AbstractSettingsController
         return $this->render('day_night/index.html.twig', [
             'day_night_form' => $form->createView(),
             'branch' => $branch,
+            'log' => $log,
             'cmd' => $cmd,
         ]);
     }

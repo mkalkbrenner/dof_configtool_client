@@ -453,6 +453,7 @@ class TweakController extends AbstractSettingsController
             $name = $form->getClickedButton()->getConfig()->getName();
             switch ($name) {
                 case 'save':
+                    $previous_branch = $cycle;
                     if ($this->settings->isVersionControl()) {
                         try {
                             $workingCopy = $this->getGitWorkingCopy($this->settings->getDofConfigPath());
@@ -460,6 +461,7 @@ class TweakController extends AbstractSettingsController
                             if (!in_array($cycle, $branches->all())) {
                                 $workingCopy->checkoutNewBranch($cycle);
                             } else {
+                                $previous_branch = $this->getCurrentBranch($workingCopy);
                                 $workingCopy->checkout($cycle);
                             }
                         } catch (GitException $e) {
@@ -468,10 +470,17 @@ class TweakController extends AbstractSettingsController
                     }
 
                     try {
+                        $version = 0;
+
                         $files = unserialize(base64_decode($form->getData()['files']), [false]);
                         foreach ($files as $file => $content) {
                             if (file_put_contents($file, $content)) {
                                 $this->addFlash('success', 'Saved tweaked version of ' . $file . '.');
+                                if (!$version && preg_match(DirectOutputConfig::FILE_PATERN, $file, $matches)) {
+                                    $directOutputConfig = new DirectOutputConfig($file);
+                                    $directOutputConfig->load();
+                                    $version = $directOutputConfig->getVersion();
+                                }
                             } else {
                                 $this->addFlash('danger', 'Failed to save tweaked version of' . $file . '.');
                             }
@@ -481,8 +490,11 @@ class TweakController extends AbstractSettingsController
                                 $workingCopy->add('*.ini');
                                 $workingCopy->add('*.xml');
                                 $workingCopy->add('*.png');
-                                $workingCopy->commit('Applied ' . $cycle . ' tweaks.');
+                                $workingCopy->commit('Version ' . $version . ' | applied ' . $cycle . ' tweaks');
                                 $changes = nl2br($workingCopy->run('show'));
+                                if ($cycle !== $previous_branch) {
+                                    $workingCopy->checkout($previous_branch);
+                                }
                             } catch (GitException $e) {
                                 $this->addFlash('warning', $e->getMessage());
                             }
