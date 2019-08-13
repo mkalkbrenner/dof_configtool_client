@@ -1,0 +1,6 @@
+norzechowicz_ace_editor:
+    base_path: "ace" # notice! this is starting from "your_project_root/web"!
+    autoinclude: true
+    debug: false # sources not minified, based on kernel.debug but it can force it
+    noconflict: true # uses ace.require instead of require
+

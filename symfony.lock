@@ -65,6 +65,9 @@
     "nikic/php-parser": {
         "version": "v4.2.1"
     },
+    "norzechowicz/aceeditor-bundle": {
+        "version": "4.0.1"
+    },
     "phpdocumentor/reflection-common": {
         "version": "1.0.1"
     },

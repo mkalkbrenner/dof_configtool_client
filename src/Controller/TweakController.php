@@ -6,6 +6,7 @@ use App\Entity\DirectOutputConfig;
 use App\Entity\Tweaks;
 use GitWrapper\GitException;
 use iphis\FineDiff\Diff;
+use Norzechowicz\AceEditorBundle\Form\Extension\AceEditor\Type\AceEditorType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
@@ -62,9 +63,32 @@ class TweakController extends AbstractSettingsController
         $tweaks = new Tweaks();
         $tweaks->load();
 
+        $defaults = [
+            'mode' => 'ace/mode/properties',
+            'theme' => 'ace/theme/monokai',
+            'width' => '100%',
+            'height' => 300,
+            'font_size' => 12,
+            'tab_size' => null,
+            'read_only' => null,
+            'use_soft_tabs' => null,
+            'use_wrap_mode' => true,
+            'show_print_margin' => null,
+            'show_invisibles' => null,
+            'highlight_active_line' => true,
+            'options_enable_basic_autocompletion' => false,
+            'options_enable_live_autocompletion' => false,
+            'options_enable_snippets' => false,
+            'keyboard_handler' => null
+        ];
+
         $form = $this->createFormBuilder($tweaks)
-            ->add('daySettings', TextareaType::class, ['label' => 'Day Settings', 'attr' => ['rows' => 20]])
-            ->add('nightSettings', TextareaType::class, ['label' => 'Night Settings', 'attr' => ['rows' => 20]])
+            ->add('daySettings', AceEditorType::class, [
+                'label' => 'Day Settings',
+            ] + $defaults)
+            ->add('nightSettings', AceEditorType::class, [
+                'label' => 'Night Settings',
+                ] + $defaults)
             ->add('save', SubmitType::class, ['label' => 'Save settings'])
             ->getForm();
 

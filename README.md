@@ -561,6 +561,7 @@ In addition, the tool suggests backglasses for table.
 * [https://jquery.com] MIT
 * [https://popper.js.org/] MIT
 * [https://www.npmjs.com/package/bs-custom-file-input] MIT
+* [https://ace.c9.io/] BSD
 * [https://github.com/cztomczak/phpdesktop] BSD 3-clause license
 * [http://www.daemonology.net/bsdiff/] BSD Protection License
 * [https://git-scm.com/] GPLv2
