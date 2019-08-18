@@ -527,9 +527,11 @@ might know uncomfortable that task is. 😉
 The TextEdit feature isn't related to DOF config files only. It offers quick edit access to various Virtual Pinball
 related configuration files. The editor offers basic syntax highlighting and error detection. The error detection and
 enhanced auto completion will be added in the future. Currently you can edit these files:
-
 * Cabinet.xml
+* GlobalConfig_B2SServer.xml
+* B2STableSettings.xml
 * DmdDevice.ini
+* ScreenRes.txt
 * ...
 
 ### 6. Colorize

@@ -25,15 +25,20 @@ class TextEditController extends AbstractSettingsController
                 $branches = $workingCopy->getBranches();
                 foreach ($branches as $branch) {
                     $formBuilder->add('cabinet_xml|' . $branch, SubmitType::class, ['label' => 'Edit Cabinet.xml (DOF) for cycle ' . $branch]);
+                    $formBuilder->add('globalconfig_b2sserver_xml|' . $branch, SubmitType::class, ['label' => 'Edit GlobalConfig_B2SServer.xml (DOF) for cycle ' . $branch]);
                 }
             } catch (GitException $e) {
                 $this->addFlash('warning', $e->getMessage());
             }
         } else {
             $formBuilder->add('cabinet_xml|', SubmitType::class, ['label' => 'Edit Cabinet.xml (DOF)']);
+            $formBuilder->add('globalconfig_b2sserver_xml|', SubmitType::class, ['label' => 'Edit GlobalConfig_B2SServer.xml (DOF)']);
         }
 
-        $form = $formBuilder->add('dmddevice_ini|', SubmitType::class, ['label' => 'Edit DmdDevice.ini (freezy\'s dll)'])
+        $form = $formBuilder
+            ->add('dmddevice_ini|', SubmitType::class, ['label' => 'Edit DmdDevice.ini (freezy\'s dll)'])
+            ->add('b2stablesettings_xml|', SubmitType::class, ['label' => 'Edit B2STableSettings.xml (B2S)'])
+            ->add('screenres_txt|', SubmitType::class, ['label' => 'Edit ScreenRes.txt (B2S)'])
             ->getForm();
 
         $form->handleRequest($request);
@@ -51,11 +56,33 @@ class TextEditController extends AbstractSettingsController
                         'cycle' => $cycle,
                     ]);
 
+                case 'globalconfig_b2sserver_xml':
+                    return $this->redirectToRoute('textedit_editor', [
+                        'directory' => $this->settings->getDofConfigPath(),
+                        'file' => 'GlobalConfig_B2SServer.xml',
+                        'mode' => 'ace/mode/xml',
+                        'cycle' => $cycle,
+                    ]);
+
                 case 'dmddevice_ini':
                     return $this->redirectToRoute('textedit_editor', [
                         'directory' => $this->settings->getVPinMamePath(),
-                        'file' => 'dmddevice.ini',
+                        'file' => 'DmdDevice.ini',
                         'mode' => 'ace/mode/properties',
+                    ]);
+
+                case 'b2stablesettings_xml':
+                    return $this->redirectToRoute('textedit_editor', [
+                        'directory' => $this->settings->getTablesPath(),
+                        'file' => 'B2STableSettings.xml',
+                        'mode' => 'ace/mode/xml',
+                    ]);
+
+                case 'screenres_txt':
+                    return $this->redirectToRoute('textedit_editor', [
+                        'directory' => $this->settings->getTablesPath(),
+                        'file' => 'ScreenRes.txt',
+                        'mode' => 'ace/mode/text',
                     ]);
             }
         }
