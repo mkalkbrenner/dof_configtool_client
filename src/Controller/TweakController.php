@@ -9,7 +9,6 @@ use iphis\FineDiff\Diff;
 use Norzechowicz\AceEditorBundle\Form\Extension\AceEditor\Type\AceEditorType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Routing\Annotation\Route;
@@ -85,10 +84,12 @@ class TweakController extends AbstractSettingsController
         $form = $this->createFormBuilder($tweaks)
             ->add('daySettings', AceEditorType::class, [
                 'label' => 'Day Settings',
+                 'required' => false,
             ] + $defaults)
             ->add('nightSettings', AceEditorType::class, [
                 'label' => 'Night Settings',
-                ] + $defaults)
+                'required' => false,
+            ] + $defaults)
             ->add('save', SubmitType::class, ['label' => 'Save settings'])
             ->getForm();
 

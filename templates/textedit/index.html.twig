@@ -1,0 +1,16 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Text Editor{% endblock %}
+
+{% block body %}
+    <h2>Tweak DOF Configs</h2>
+    {{ form_start(textedit_form) }}
+    {{ form_errors(textedit_form) }}
+    {{ form_widget(textedit_form) }}
+    {{ form_end(textedit_form) }}
+
+    {% if git_diff|default %}
+        <hr>
+        {% include 'git_diff.html.twig' %}
+    {% endif %}
+{% endblock %}

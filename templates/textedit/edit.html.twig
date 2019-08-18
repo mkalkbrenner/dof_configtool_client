@@ -1,0 +1,18 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit{% endblock %}
+
+{% block body %}
+    <h2>{{ file }}</h2>
+    {{ form_start(textedit_form) }}
+    {{ form_errors(textedit_form) }}
+    {{ form_widget(textedit_form) }}
+    {{ form_end(textedit_form) }}
+
+    <hr>
+
+    {% if git_diff|default %}
+        {% include 'git_diff.html.twig' %}
+    {% endif %}
+
+{% endblock %}
