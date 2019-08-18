@@ -522,7 +522,17 @@ might know uncomfortable that task is. 😉
   * dmd_colorize
   * synclevel
 
-### 5. Colorize
+### 5. TextEdit
+
+The TextEdit feature isn't related to DOF config files only. It offers quick edit access to various Virtual Pinball
+related configuration files. The editor offers basic syntax highlighting and error detection. The error detection and
+enhanced auto completion will be added in the future. Currently you can edit these files:
+
+* Cabinet.xml
+* DmdDevice.ini
+* ...
+
+### 6. Colorize
 
 The DMD output of ROM files could be colorized. Depending on the ROM there're two different ways to do so. While one
 just requires to put some files at the right place in the VPinMAME folder structure, the other requires to patch the
@@ -539,7 +549,7 @@ it to apply modifications to the file system, which is required.
 
 **_Note:_** `bspatch.exe` is already included in the DOF Configtool Client. There's no need to download it separately.
 
-### 6. Backglasses
+### 7. Backglasses
 
 DirectB2S Backglasses need to match the VPX table name. So if you have several versions of a table you might need to
 have multiple correctly named copies of a backglass. And if you use PUP Packs you need to delete a backglass or rename
