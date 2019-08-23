@@ -295,16 +295,21 @@ This tweak swaps to ports. So `swap[7] = 14` will assign the configuration of po
 
 Maybe you want to swap the gear and the shaker motor for a specific game, who knows? 😉
 
-##### `string_overwrite`
+##### `string_overwrite` and `set`
 
 This tweak entirely overwrites a port with a custom setting. So `string_overwrite[7] = ON Red` will assign the value
 _ON RED_ to port _7_.
 
 **_Note:_** This tweak might make most sense per table instead of overwriting a port in general.
 
+**_Note:_** `set` is just a synonym for `string_overwrite` and behaves exactly the same. But you can use both in your
+ruleset to better express what you mean: `string_overwrite` to replace a DOF setting, `set` to to add a setting where
+DOF doesn't provide anything.
+
 ###### Use-cases
 
-For example you can use a different color for your flipper buttons.
+For example you can use a different color for your flipper buttons. Or you can add effects for your fan or shaker on
+your own if there's no effect for that toy at all.
 
 ##### `string_append`
 
@@ -382,6 +387,18 @@ rgb_brightness[4] = 80
 rgb_brightness[7] = 80
 rgb_brightness[10] = CD
 ```
+
+##### `strobe_fixed_freq`
+
+The settings in the standard DOF Configtool for strobes are made for simple lamps / LEDs. Blinking / flashing effects
+and their duration and frequency are created by DOF itself by turning the controllers outputs on and off quickly.
+But if you own a "real" strobe that flashes by itself using an adjustable or fixed frequency, the original settings
+might cause flashing effects that look "ugly" and "unprofessional" because the manual triggers of DOF doesn't match the
+frequency of the strobe.
+
+So `strobe_fixed_freq[30] = 8` pins a strobe which flashes on its own connected to port _30_ of
+the controller to a fixed frequency of _8Hz_.
+
 
 #### Another `tweaks.ini` example
 
