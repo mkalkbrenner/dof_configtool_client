@@ -473,7 +473,12 @@ class TweakController extends AbstractSettingsController
 
         $diff = new Diff();
         $diffs = [];
+        $portAssignments = $this->settings->getPortAssignments();
         foreach ($modded_files as $file => $content) {
+            $devicdeId = 0;
+            if (preg_match('/directoutputconfig(\d+)\.ini$/i', $file, $matches)) {
+                $deviceId = $matches[1];
+            }
             $old_lines = explode("\r\n", $files[$file]);
             $new_lines = explode("\r\n", $content);
             foreach($old_lines as $number => $line) {
@@ -486,7 +491,9 @@ class TweakController extends AbstractSettingsController
                         $diff_cells[] = $diff->render($old_cells[$i], $new_cells[$i]);
                     }
                     $header = '';
+                    $toy = '';
                     $data = '';
+
                     $game_name = $diff_cells[0];
                     $real_port = 0;
                     foreach ($diff_cells as $port => $dof_string) {
@@ -502,12 +509,14 @@ class TweakController extends AbstractSettingsController
                         $header .= '</th>';
 
                         if ($port) {
+                            $toy .= '<th  scope="col"' . ($colspan > 1 ? ' colspan="' . $colspan . '"' : ''). '>' . ($portAssignments[$deviceId][$real_port] ?? '') . '</th>';
                             $data .= '<td' . ($colspan > 1 ? ' colspan="' . $colspan . '"' : ''). '>' . $dof_string . '</td>';
                         } else {
+                            $toy .= '<th scope="row"></th>';
                             $data .= '<th scope="row">' . $dof_string . '</th>';
                         }
                     }
-                    $diffs[$devices[$file] . ': ' . basename($file)][] = '<tr>' . $header . '</tr><tr>' . $data . '</tr>';
+                    $diffs[$devices[$file] . ': ' . basename($file)][] = '<tr>' . $toy . '</tr><tr>' . $header . '</tr><tr>' . $data . '</tr>';
                 }
             }
         }
