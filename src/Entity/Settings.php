@@ -334,6 +334,19 @@ class Settings
         return $this;
     }
 
+    public function getPortsByToy(string $name): array
+    {
+        $found = [];
+        foreach ($this->portAssignments as $device => $ports) {
+            foreach ($ports as $port => $toy) {
+                if ($name === $toy) {
+                    $found[$device][] = $port;
+                }
+            }
+        }
+        return $found;
+    }
+
     public function __get(string $name): array
     {
         if (preg_match('/^(\d+)_(\d+)$/', $name, $matches)) {

@@ -202,6 +202,48 @@ class TweakController extends AbstractSettingsController
 
                                         switch ($name) {
 
+                                            case 'append_ball_out':
+                                                if ('auto' === $setting) {
+                                                    $ball_out_triggers_found = false;
+                                                    $ball_out_triggers = [];
+                                                    foreach ([['left' => 'Slingshot Left', 'right' => 'Slingshot Right'], ['left' => 'Flipper Left', 'right' => 'Flipper Right']] as $toys) {
+                                                        $left = $this->settings->getPortsByToy($toys['left']);
+                                                        $right = $this->settings->getPortsByToy($toys['right']);
+                                                        if ($left && $right) {
+                                                            $deviceId = $directOutputConfig->getDeviceId();
+                                                            if (isset($left[$deviceId]) && isset($right[$deviceId])) {
+                                                                $leftPort = array_shift($left[$deviceId]);
+                                                                $rightPort = array_shift($right[$deviceId]);
+                                                                if (preg_match('/^[SWE](\d+)$/', $game[$leftPort], $single_left_trigger)) {
+                                                                    $right_triggers = explode('/', $game[$rightPort]);
+                                                                    if (count($right_triggers) > 1) {
+                                                                        foreach ($right_triggers as $right_trigger) {
+                                                                            if (preg_match('/^[SWE](\d+)$/', $right_trigger, $single_right_trigger)) {
+                                                                                if ((int)$single_right_trigger[1] === ((int)$single_left_trigger[1] + 1) || (int)$single_right_trigger[1] === ((int)$single_left_trigger[1] - 1)) {
+                                                                                    $ball_out_triggers_found = true;
+                                                                                } else {
+                                                                                    $ball_out_triggers[] = $right_trigger;
+                                                                                }
+                                                                            } else {
+                                                                                $ball_out_triggers[] = $right_trigger;
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+
+                                                    if ($ball_out_triggers_found && $ball_out_triggers) {
+                                                        if (0 === $game[$port]) {
+                                                            $game[$port] = implode('/', $ball_out_triggers);
+                                                        } else {
+                                                            $game[$port] .= '/' . implode('/', $ball_out_triggers);
+                                                        }
+                                                    }
+                                                }
+                                                break;
+
                                             // merge port 13 and 21 and save the result on port 13.
                                             // merge[17] = 21
                                             case 'merge':

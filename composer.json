@@ -11,6 +11,7 @@
         "coderstephen/windows-registry": "dev-master",
         "cpliakas/git-wrapper": "^2.1",
         "erusev/parsedown": "^1.7",
+        "helios-ag/fm-elfinder-bundle": "^9.3",
         "iphis/finediff": "0.4.*",
         "norzechowicz/aceeditor-bundle": "^4.0",
         "sensio/framework-extra-bundle": "^5.1",
@@ -43,7 +44,8 @@
         "preferred-install": {
             "*": "dist"
         },
-        "sort-packages": true
+        "sort-packages": true,
+        "component-dir": "public/assets"
     },
     "autoload": {
         "psr-4": {

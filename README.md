@@ -399,6 +399,14 @@ frequency of the strobe.
 So `strobe_fixed_freq[30] = 8` pins a strobe which flashes on its own connected to port _30_ of
 the controller to a fixed frequency of _8Hz_.
 
+##### `append_ball_out`
+
+The settings in the standard DOF Configtool don't provide a dedicated toy for _Ball Out_ which is usually a big solenoid
+that pushes the ball out of the ball pocket in front of the plunger. Usually people assign this effect to the right
+slingshot or the right flipper instead. By setting `append_ball_out[46] = auto` an algorithm tries to auto detect the
+triggers for the _ball out_ and appends those to the port _46_ on success. In this example port 46 drives a big solenoid
+mounted at the cabinet's wall, like the existing ones for bumpers or a dedicated one to simulate the ball out.
+
 
 #### Another `tweaks.ini` example
 

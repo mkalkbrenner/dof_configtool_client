@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\DirectOutputConfig;
 use App\Entity\DofDatabaseSettings;
 use App\Entity\Settings;
+use FM\ElfinderBundle\Form\Type\ElFinderType;
 use GitWrapper\GitException;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -24,6 +25,7 @@ class SettingsController extends AbstractSettingsController
             ->add('lcpApiKey', TextType::class, ['label' => 'LCP_APIKEY'])
             ->add('dofPath', TextType::class, ['label' => 'DOF Path'])
             ->add('visualPinballPath', TextType::class, ['label' => 'Visual Pinball Path'])
+            // ->add('visualPinballPath', ElFinderType::class, ['label' => 'Visual Pinball Path', 'instance' => 'form', 'enable' => true])
             ->add('bsPatchBinary', TextType::class, ['label' => 'pspatch Binary'])
             ->add('versionControl', CheckboxType::class, ['label' => 'Enable Version Control via Git'])
             ->add('gitBinary', TextType::class, ['label' => 'Git Binary'])
