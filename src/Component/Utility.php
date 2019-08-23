@@ -43,7 +43,7 @@ class Utility
                         $dof_string = str_replace(['<ins>', '<del>'], ['<ins class="bg-success">', '<del class="bg-danger">'], $dof_string);
 
                         $header .= '<th scope="col"' . (in_array($real_port + 1, $rgb_ports[$game_name] ?? []) ? ' bgcolor="red">' : '>') . ($real_port ?: 'ROM \ Port');
-                        ++$real_port;
+                        $device_real_port = $real_port++;
                         $colspan = 1;
                         while (in_array($real_port, $rgb_ports[$game_name] ?? [])) {
                             ++$colspan;
@@ -52,7 +52,7 @@ class Utility
                         $header .= '</th>';
 
                         if ($port) {
-                            $toy .= '<th  scope="col"' . ($colspan > 1 ? ' colspan="' . $colspan . '"' : ''). '>' . ($portAssignments[$deviceId][$real_port] ?? '') . '</th>';
+                            $toy .= '<th  scope="col"' . ($colspan > 1 ? ' colspan="' . $colspan . '"' : ''). '>' . ($portAssignments[$deviceId][$device_real_port] ?? '') . '</th>';
                             $data .= '<td' . ($colspan > 1 ? ' colspan="' . $colspan . '"' : ''). '>' . $dof_string . '</td>';
                         } else {
                             $toy .= '<th scope="row"></th>';
