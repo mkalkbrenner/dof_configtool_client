@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Component\Utility;
 use GitWrapper\GitException;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\Request;
@@ -38,6 +39,11 @@ class DayNightController extends AbstractSettingsController
                 $cmd[$label] = $this->settings->getGitBinary() . ' -C ' . $this->settings->getDofConfigPath() . ' checkout ' . $name;
             }
         }
+        foreach (['day' => 'day', 'night' => 'night'] as $name => $label) {
+            if (in_array($name, $branches)) {
+                $formBuilder->add($name . '_diff', SubmitType::class, ['label' => 'Show differences of ' . $label . ' compared to unmodified/downloaded version']);
+            }
+        }
         $form = $formBuilder->getForm();
 
         if (!$cmd) {
@@ -46,16 +52,45 @@ class DayNightController extends AbstractSettingsController
 
         $form->handleRequest($request);
 
+        $diffs = [];
         if ($form->isSubmitted() && $form->isValid()) {
             /** @var \Symfony\Component\Form\Form $form */
             $branch = $form->getClickedButton()->getConfig()->getName();
             try {
-                $workingCopy->checkout($branch);
+                if (strpos($branch, '_diff') !== false) {
+                    $branch = str_replace('_diff', '', $branch);
+                    $previous_branch = $this->getCurrentBranch($workingCopy);
+
+                    $download_files = [];
+                    $branch_files = [];
+
+                    $workingCopy->checkout('download');
+                    foreach (scandir($this->settings->getDofConfigPath()) as $file) {
+                        if (preg_match('/^directoutputconfig\d+\.ini$/i', $file, $matches)) {
+                            $file_path = $this->settings->getDofConfigPath() . DIRECTORY_SEPARATOR . $matches[0];
+                            $download_files[$file_path] = file_get_contents($file_path);
+                        }
+                    }
+
+                    $workingCopy->checkout($branch);
+                    foreach (scandir($this->settings->getDofConfigPath()) as $file) {
+                        if (preg_match('/^directoutputconfig\d+\.ini$/i', $file, $matches)) {
+                            $file_path = $this->settings->getDofConfigPath() . DIRECTORY_SEPARATOR . $matches[0];
+                            $branch_files[$file_path] = file_get_contents($file_path);
+                        }
+                    }
+
+                    $diffs = Utility::getDiffTables($download_files, $branch_files, $this->settings);
+
+                    $workingCopy->checkout($previous_branch);
+                } else {
+                    $workingCopy->checkout($branch);
+                }
             } catch (GitException $e) {
                 $this->addFlash('warning', $e->getMessage());
+                // We need to redirect to build a new form based on the new branch.
+                return $this->redirectToRoute('day_night');
             }
-            // We need to redirect to build a new form based on the new branch.
-            return $this->redirectToRoute('day_night');
         }
 
         return $this->render('day_night/index.html.twig', [
@@ -63,6 +98,7 @@ class DayNightController extends AbstractSettingsController
             'branch' => $branch,
             'log' => $log,
             'cmd' => $cmd,
+            'diffs' => $diffs,
         ]);
     }
 }

@@ -2,10 +2,10 @@
 
 namespace App\Controller;
 
+use App\Component\Utility;
 use App\Entity\DirectOutputConfig;
 use App\Entity\Tweaks;
 use GitWrapper\GitException;
-use iphis\FineDiff\Diff;
 use Norzechowicz\AceEditorBundle\Form\Extension\AceEditor\Type\AceEditorType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
@@ -136,6 +136,7 @@ class TweakController extends AbstractSettingsController
     public function confirm(Request $request, string $cycle)
     {
         ini_set('set_time_limit', 0);
+        $previous_branch = '';
 
         if (!$this->settings->isVersionControl()) {
             if ('day' !== $cycle) {
@@ -145,6 +146,7 @@ class TweakController extends AbstractSettingsController
         } else {
             try {
                 $workingCopy = $this->getGitWorkingCopy($this->settings->getDofConfigPath());
+                $previous_branch = $this->getCurrentBranch($workingCopy);
                 $workingCopy->checkout('download');
             } catch (GitException $e) {
                 $this->addFlash('warning', $e->getMessage());
@@ -159,7 +161,6 @@ class TweakController extends AbstractSettingsController
         $files = [];
         $rgb_ports = [];
         $colors = [];
-        $devices = [];
         $file = '';
         foreach ($tweaks->getSettingsParsed($cycle) as $section => $adjustments) {
             if (strpos($section, '.ini')) {
@@ -192,7 +193,6 @@ class TweakController extends AbstractSettingsController
                 $files[$file] = $contents;
                 $colors[$file] = $directOutputConfig->getColors();
                 $rgb_ports[$file] = $directOutputConfig->getRgbPorts();
-                $devices[$file] = $directOutputConfig->getDeviceName();
                 $variables = $directOutputConfig->getVariables();
                 $games = [];
 
@@ -471,54 +471,10 @@ class TweakController extends AbstractSettingsController
             }
         }
 
-        $diff = new Diff();
-        $diffs = [];
-        $portAssignments = $this->settings->getPortAssignments();
-        foreach ($modded_files as $file => $content) {
-            $devicdeId = 0;
-            if (preg_match('/directoutputconfig(\d+)\.ini$/i', $file, $matches)) {
-                $deviceId = $matches[1];
-            }
-            $old_lines = explode("\r\n", $files[$file]);
-            $new_lines = explode("\r\n", $content);
-            foreach($old_lines as $number => $line) {
-                if ($line != $new_lines[$number]) {
-                    $old_cells = explode(',', $line);
-                    $new_cells = explode(',', $new_lines[$number]);
-                    $num_cells = count($old_cells);
-                    $diff_cells = [$old_cells[0]];
-                    for ($i = 1; $i < $num_cells; $i++) {
-                        $diff_cells[] = $diff->render($old_cells[$i], $new_cells[$i]);
-                    }
-                    $header = '';
-                    $toy = '';
-                    $data = '';
+        $diffs = Utility::getDiffTables($files, $modded_files, $this->settings);
 
-                    $game_name = $diff_cells[0];
-                    $real_port = 0;
-                    foreach ($diff_cells as $port => $dof_string) {
-                        $dof_string = str_replace(['<ins>', '<del>'], ['<ins class="bg-success">', '<del class="bg-danger">'], $dof_string);
-
-                        $header .= '<th scope="col"' . (in_array($real_port + 1, $rgb_ports[$file][$game_name]) ? ' bgcolor="red">' : '>') . ($real_port ?: 'ROM \ Port');
-                        ++$real_port;
-                        $colspan = 1;
-                        while (in_array($real_port, $rgb_ports[$file][$game_name])) {
-                            ++$colspan;
-                            $header .= '</th><th scope="col" bgcolor="' . (2 == $colspan ? 'green' : 'blue') . '">' .  $real_port++;
-                        }
-                        $header .= '</th>';
-
-                        if ($port) {
-                            $toy .= '<th  scope="col"' . ($colspan > 1 ? ' colspan="' . $colspan . '"' : ''). '>' . ($portAssignments[$deviceId][$real_port] ?? '') . '</th>';
-                            $data .= '<td' . ($colspan > 1 ? ' colspan="' . $colspan . '"' : ''). '>' . $dof_string . '</td>';
-                        } else {
-                            $toy .= '<th scope="row"></th>';
-                            $data .= '<th scope="row">' . $dof_string . '</th>';
-                        }
-                    }
-                    $diffs[$devices[$file] . ': ' . basename($file)][] = '<tr>' . $toy . '</tr><tr>' . $header . '</tr><tr>' . $data . '</tr>';
-                }
-            }
+        if ($previous_branch) {
+            $workingCopy->checkout($previous_branch);
         }
 
         $formBuilder = $this->createFormBuilder()
@@ -642,5 +598,4 @@ class TweakController extends AbstractSettingsController
         }
         return $explanations->get();
     }
-
 }
