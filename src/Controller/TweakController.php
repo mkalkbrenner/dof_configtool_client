@@ -174,6 +174,17 @@ class TweakController extends AbstractSettingsController
             }
         }
 
+        foreach (scandir($this->settings->getDofConfigPath()) as $file) {
+            if (preg_match('/^directoutputconfig\d+\.ini$/i', $file, $matches)) {
+                $file_path = $this->settings->getDofConfigPath() . DIRECTORY_SEPARATOR . $matches[0];
+                if (!isset($mods[$file_path])) {
+                    // Add files which should not be tweaked to update them with the latest download.
+                    $mods[$file_path] = [0 => []];
+                }
+            }
+            // @todo handle XML files, but the detection of manual local changes is not that easy.
+        }
+
         foreach ($mods as $file => $per_game_mods) {
             $directOutputConfig = new DirectOutputConfig($file);
             $contents = $directOutputConfig->load()->getContent();
