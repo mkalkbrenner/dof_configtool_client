@@ -21,6 +21,7 @@ class RegEditController extends AbstractSettingsController
         }
 
         $regEntries = new VPinMameRegEntries();
+        $regEntries->setTableMapping($this->settings->getTableMapping());
         $regEntries->load();
 
         $form = $this->createForm(VPinMameRegEntriesType::class, $regEntries)

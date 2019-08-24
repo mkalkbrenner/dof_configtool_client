@@ -9,6 +9,8 @@ class VPinMameRegEntry
 {
     private $rom;
 
+    private $table;
+
     private $cabinet_mode;
 
     private $ignore_rom_crc;
@@ -58,6 +60,18 @@ class VPinMameRegEntry
     public function setRom(string $rom): self
     {
         $this->rom = $rom;
+
+        return $this;
+    }
+
+    public function getTable(): ?string
+    {
+        return $this->table;
+    }
+
+    public function setTable(string $table): self
+    {
+        $this->table = $table;
 
         return $this;
     }
@@ -275,7 +289,7 @@ class VPinMameRegEntry
         return $this;
     }
 
-    public static function loadAll(): array
+    public static function loadAll(array $tableMapping): array
     {
         $hkcu = self::getCurentUserKey();
         $key = $hkcu->getSubKey("Software\\Freeware\\Visual PinMame");
@@ -284,6 +298,7 @@ class VPinMameRegEntry
         foreach ($key->getSubKeyIterator() as $rom => $subKey) {
             $entries[$rom] = new VPinMameRegEntry($hkcu);
             $entries[$rom]->setRom($rom);
+            $entries[$rom]->setTable($tableMapping[$rom] ?? '');
             self::readValues($entries[$rom], $subKey);
         }
 

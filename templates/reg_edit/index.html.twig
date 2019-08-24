@@ -72,7 +72,7 @@
                 </tr>
             {% endif %}
             <tr{%  if 'default' == roms[romcounter] %} style="background-color: #34ce57"{% endif %}>
-                <td{% if roms[romcounter] not in romfiles and 'default' != roms[romcounter] %} style="background-color: #bd2130"{% endif %}><b>{{ form_label(entry, roms[romcounter]) }}</b>{{ form_widget(entry.rom) }}</td>
+                <td{% if roms[romcounter] not in romfiles and 'default' != roms[romcounter] %} style="background-color: #bd2130"{% endif %}><b>{{ form_label(entry, roms[romcounter]) }}</b>{{ form_widget(entry.rom) }}{{ form_widget(entry.table) }}</td>
                 <td>{{ form_widget(entry.cabinet_mode) }}</td>
                 <td>{{ form_widget(entry.ignore_rom_crc) }}</td>
                 <td>{{ form_widget(entry.sound) }}</td>

@@ -8,6 +8,7 @@ use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -17,6 +18,7 @@ class VPinMameRegEntryType extends AbstractType
     {
         $builder
             ->add('rom', HiddenType::class)
+            ->add('table', TextType::class, ['disabled' => TRUE, 'required' => FALSE, 'attr' => ['size' => '10']])
             ->add('cabinet_mode', CheckboxType::class, ['label' => 'cabinet_mode', 'required' => FALSE])
             ->add('ignore_rom_crc', CheckboxType::class, ['label' => 'ignore_rom_crc', 'required' => FALSE])
             ->add('sound', CheckboxType::class, ['label' => 'sound', 'required' => FALSE])

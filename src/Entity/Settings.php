@@ -197,6 +197,26 @@ class Settings
         return $this->getVisualPinballPath() . DIRECTORY_SEPARATOR . 'Tables';
     }
 
+    public function getTableMapping(): array
+    {
+        $tableMapping = [];
+        $mappingFile = $this->getDofConfigPath() . DIRECTORY_SEPARATOR . 'tablemappings.xml';
+        if (file_exists($mappingFile)) {
+            // Normalize line endings.
+            $mapping = preg_replace('/\R/', "\r\n", file_get_contents($mappingFile));
+            $table = '';
+            foreach (explode("\r\n", $mapping) as $line) {
+                if (preg_match('@<TableName>(.*)</TableName>@', $line, $matches)) {
+                    $table = trim($matches[1]);
+                }
+                elseif (preg_match('@<RomName>(.*)</RomName>@', $line, $matches)) {
+                    $tableMapping[trim($matches[1])] = $table;
+                }
+            }
+        }
+        return $tableMapping;
+    }
+
     public function setVisualPinballPath(string $visualPinballPath): self
     {
         $this->visualPinballPath = $visualPinballPath;

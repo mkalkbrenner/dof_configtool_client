@@ -5,6 +5,7 @@ namespace App\Entity;
 class VPinMameRegEntries implements \IteratorAggregate
 {
     private $entries = [];
+    private $tableMapping = [];
 
     public function getEntries(): ?array
     {
@@ -28,9 +29,16 @@ class VPinMameRegEntries implements \IteratorAggregate
         return $this;
     }
 
+    public function setTableMapping(array $tableMapping): self
+    {
+        $this->tableMapping = $tableMapping;
+
+        return $this;
+    }
+
     public function load(): self
     {
-        $this->setEntries(VPinMameRegEntry::loadAll());
+        $this->setEntries(VPinMameRegEntry::loadAll($this->tableMapping));
         return $this;
     }
 
