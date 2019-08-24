@@ -214,6 +214,18 @@ class Settings
                 }
             }
         }
+
+        foreach ($this->getRoms() as $real_rom) {
+            if (!isset($tableMapping[$real_rom])) {
+                foreach ($tableMapping as $rom => $table) {
+                    if (strpos($real_rom, $rom) === 0) {
+                        $tableMapping[$real_rom] = $table;
+                        break;
+                    }
+                }
+            }
+        }
+
         return $tableMapping;
     }
 
