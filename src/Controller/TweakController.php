@@ -323,11 +323,24 @@ class TweakController extends AbstractSettingsController
                                                 }
                                                 break;
 
+                                            case 'effect_duration':
+                                                if (0 !== $game[$port]) {
+                                                    $triggers = explode('/', $game[$port]);
+                                                    foreach ($triggers as &$trigger) {
+                                                        if (preg_match('/([SWE]\d+)(\s+\d+)?(.*)/', $trigger, $matches)) {
+                                                            $trigger = $matches[1] . ' ' . trim($setting) . ($matches[3] ?? '');
+                                                        }
+                                                    }
+                                                    unset($trigger);
+                                                    $game[$port] = implode('/', $triggers);
+                                                }
+                                                break;
+
                                             case 'default_effect_duration':
                                                 if (0 !== $game[$port]) {
                                                     $triggers = explode('/', $game[$port]);
                                                     foreach ($triggers as &$trigger) {
-                                                        $trigger = preg_replace('/([SWE]\d+$)/', '$1 ' . trim($setting), $trigger);
+                                                        $trigger = preg_replace('/([SWE]\d+)$/', '$1 ' . trim($setting), $trigger);
                                                     }
                                                     unset($trigger);
                                                     $game[$port] = implode('/', $triggers);
@@ -338,10 +351,10 @@ class TweakController extends AbstractSettingsController
                                                 if (0 !== $game[$port]) {
                                                     $triggers = explode('/', $game[$port]);
                                                     foreach ($triggers as &$trigger) {
-                                                        if (preg_match('/([SWE]\d+\s+)(\d+)\s+(\d+)$/', $trigger,$matches)) {
+                                                        if (preg_match('/([SWE]\d+\s+)(\d+)\s+(\d+)/', $trigger,$matches)) {
                                                             $trigger = $matches[1] . (intdiv((((int) $matches[2]) * ((int) $matches[3])), (int) $setting) * (int) $setting);
                                                         }
-                                                        else if (preg_match('/([SWE]\d+\s+)(\d+)$/', $trigger,$matches)) {
+                                                        else if (preg_match('/([SWE]\d+\s+)(\d+)/', $trigger,$matches)) {
                                                             $trigger = $matches[1] . (intdiv(((int) $matches[2]), (int) $setting) * (int) $setting);
                                                         }
                                                     }

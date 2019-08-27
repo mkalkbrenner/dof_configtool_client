@@ -168,8 +168,8 @@ Using the DOF configtool it's impossible to set a different default duration oth
 port. You would have to do that for all tables.
 
 Using this option you can set such a default duration per port for all games at once. But this will only happen if
-there's not yet set an individual duration. To modify some of such individual durations see `target_effect_duration` and
-`drop_target_effect_duration` below.
+there's not yet set an individual duration. To modify some of such individual durations see `effect_duration`,
+`target_effect_duration` and `drop_target_effect_duration` below.
 
 So `default_effect_duration[23] = 100` sets the duration to _100ms_ for all triggers on output _23_ of a given output
 controller if an individual setting doesn't exist already.
@@ -181,6 +181,25 @@ really heavy ones which need a longer trigger to fire correctly, it makes no sen
 for **all** effects just to satisfy these heavy contactors because that will have a negative effect on your force
 feedback toys in general. Your setup will become more _sluggish_.
 Using this tweak you can limit the modification to the ports where you need it.
+
+##### `effect_duration`
+
+The standard DOF configs define global and individual effect durations. Individual durations need to be set per game per
+output controller port per trigger.
+
+Using this option you can set an individual effect duration per port, regardless what duration has been set before.
+
+So `effect_duration[7] = 400` sets the duration to _400ms_ for all triggers on output _7_ of a given output
+controller.
+
+###### Use-cases
+
+If you got a mix of different contactors or solenoids in your cabinet, for example some smaller quick ones and some
+really heavy ones which need a longer trigger to fire correctly, it makes no sense to adjust the global effect duration
+for **all** effects just to satisfy these heavy contactors because that will have a negative effect on your force
+feedback toys in general.
+Another good example a "Ding Dong" door bells which give a "Ding" at the beginning of the effect and "Dong" at the end.
+To get the best sound, you need to adjust the effect duration to the door bells' mechanics.
 
 ##### `target_effect_duration` / `drop_target_effect_duration`
 
