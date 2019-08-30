@@ -23,12 +23,12 @@ class SettingsController extends AbstractSettingsController
     {
         $formBuilder = $this->createFormBuilder($this->settings)
             ->add('lcpApiKey', TextType::class, ['label' => 'LCP_APIKEY'])
-            ->add('dofPath', TextType::class, ['label' => 'DOF Path'])
-            ->add('visualPinballPath', TextType::class, ['label' => 'Visual Pinball Path'])
-            // ->add('visualPinballPath', ElFinderType::class, ['label' => 'Visual Pinball Path', 'instance' => 'form', 'enable' => true])
-            ->add('bsPatchBinary', TextType::class, ['label' => 'pspatch Binary'])
+            ->add('dofPath', ElFinderType::class, ['label' => 'DOF Path', 'instance' => 'form', 'enable' => true])
+            ->add('visualPinballPath', ElFinderType::class, ['label' => 'Visual Pinball Path', 'instance' => 'form', 'enable' => true])
+            ->add('pinballYPath', ElFinderType::class, ['label' => 'PinballY Path', 'instance' => 'form', 'enable' => true])
+            ->add('bsPatchBinary', ElFinderType::class, ['label' => 'pspatch Binary', 'instance' => 'form', 'enable' => true])
             ->add('versionControl', CheckboxType::class, ['label' => 'Enable Version Control via Git'])
-            ->add('gitBinary', TextType::class, ['label' => 'Git Binary'])
+            ->add('gitBinary', ElFinderType::class, ['label' => 'Git Binary', 'instance' => 'form', 'enable' => true])
             ->add('gitUser', TextType::class, ['label' => 'Git User'])
             ->add('gitEmail', TextType::class, ['label' => 'Git Email']);
 

@@ -65,4 +65,93 @@ class Utility
         }
         return $diffs;
     }
+
+    public static function getExistingTablesAndBackglassChoices(Settings $settings): array
+    {
+        $tables = [];
+        $backglasses = [];
+        $tables_path = $settings->getTablesPath();
+        foreach (scandir($tables_path) as $filename) {
+            $basename = preg_replace('/\.vpx/i', '', $filename);
+            if ($basename !== $filename) {
+                $tables[md5($filename)] = $basename;
+                continue;
+            }
+            $basename = preg_replace('/\.directb2s/i', '', $filename);
+            if ($basename !== $filename) {
+                // Use $basename . '.directb2s' instead of $filename to ensure lower case file type.
+                $backglasses[$basename] = $basename . '.directb2s';
+            }
+        }
+        return [$tables, $backglasses];
+    }
+
+    public static function getGroupedBackglassChoices(array $choices, string $basename): array
+    {
+        $group = [
+            'Current' => [],
+            'Suggested' => [],
+            'Enabled' => [],
+            'Disabled'=> [],
+        ];
+
+        foreach ($choices as $key => $value) {
+            if ($key === $basename) {
+                $group['Current'][$key] = $value;
+            } elseif (strtolower(substr(ltrim($key, '_'), 0, 4)) === strtolower(substr($basename, 0, 4))) {
+                $group['Suggested'][$key] = $value;
+            } elseif (0 !== strpos($key, '_')) {
+                $group['Enabled'][$key] = $value;
+            } else {
+                $group['Disabled'][$key] = $value;
+            }
+        }
+
+        return [
+                'No Backglass (or PUP Pack used instead)' => '_',
+            ] + array_filter($group, 'count');
+    }
+
+    public static function getRomsForTable(string $table, Settings $settings): array
+    {
+        $table = trim($table);
+        $table_without_manufacturer = preg_replace('/\s*\([^)]+\)$/', '', $table);
+
+        $roms = [];
+        $tableMapping = $settings->getTableMapping();
+        foreach ($tableMapping as $rom => $table_mapping_name) {
+            if ($table_mapping_name == $table || $table_mapping_name == $table_without_manufacturer) {
+                $roms[] = $rom;
+            }
+        }
+
+        if (!$roms) {
+            $candidates = [];
+            foreach ($tableMapping as $rom => $table_mapping_name) {
+                $distance_table = levenshtein($table_mapping_name, $table);
+                $distance_table_without_manufacturer = levenshtein($table_mapping_name, $table_without_manufacturer);
+                $distance = $distance_table < $distance_table_without_manufacturer ? $distance_table : $distance_table_without_manufacturer;
+                if ($distance < 5) {
+                    $candidates[$rom] = $distance;
+                }
+            }
+            asort($candidates, SORT_NUMERIC);
+            $roms = array_slice(array_keys($candidates), 0, 5);
+        }
+
+        if (!$roms) {
+            $candidates = [];
+            foreach ($tableMapping as $rom => $table_mapping_name) {
+                $distance = levenshtein(substr($table_mapping_name, 0, 6), substr($table, 0, 6));
+                if ($distance <= 2) {
+                    $candidates[$rom] = $distance;
+                }
+            }
+            asort($candidates, SORT_NUMERIC);
+            $roms = array_slice(array_keys($candidates), 0, 5);
+        }
+
+        $real_roms = $settings->getRoms();
+        return array_values($roms ? array_intersect($roms, $real_roms) : array_intersect(array_keys($tableMapping), $real_roms));
+    }
 }

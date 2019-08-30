@@ -1,0 +1,117 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}<link rel="stylesheet" href="{{ asset('css/table.css') }}">{% endblock %}
+
+{% block title %}Assign Backglasses{% endblock %}
+
+{% block body %}
+    {{ form_start(table_form) }}
+    {{ form_errors(table_form) }}
+    <div class="container">
+        <div class="row">
+            <div class="col-8">
+                <table width="100%">
+                    <tr><th colspan="2" style="text-align: center"><hr>Table<hr></th></tr>
+                    <tr><td>Table</td><td>{{ form_widget(table_form.table_name) }}</td></tr>
+                    <tr><td>Manufacturer</td><td>{{ form_widget(table_form.manufacturer) }}</td></tr>
+                    <tr><td>Year</td><td>{{ form_widget(table_form.year) }}</td></tr>
+                    <tr><td>Added</td><td>{{ form_widget(table_form.added) }}</td></tr>
+                    <tr><td>Last Played</td><td>{{ form_widget(table_form.last_played) }}</td></tr>
+                    <tr><td>Table File</td><td>{{ form_widget(table_form.table_file) }}</td></tr>
+                    <tr><td>ROM</td><td>{{ form_widget(table_form.rom) }}</td></tr>
+                    <tr><th colspan="2" style="text-align: center"><hr>Screens<hr></th></tr>
+                    <tr><td>Topper</td><td>{{ form_widget(table_form.topper) }}</td></tr>
+                    <tr><td>Backglass</td><td>{{ form_widget(table_form.backglass) }}</td></tr>
+                    <tr><td>DMD</td><td>{{ form_widget(table_form.dmd) }}</td></tr>
+                    <tr><td>Instruction Card</td><td>{{ form_widget(table_form.instruction) }}</td></tr>
+                    <tr><th colspan="2" style="text-align: center"><hr>B2S<hr></th></tr>
+                    <tr><td>Hide Grill</td><td>{{ form_widget(table_form.b2s_table_setting.HideGrill) }}</td></tr>
+                    <tr><td>Hide B2S DMD</td><td>{{ form_widget(table_form.b2s_table_setting.HideB2SDMD) }}</td></tr>
+                    <tr><td>Hide DMD</td><td>{{ form_widget(table_form.b2s_table_setting.HideDMD) }}</td></tr>
+                    <tr><td>Lamps Skip Frames</td><td>{{ form_widget(table_form.b2s_table_setting.LampsSkipFrames) }}</td></tr>
+                    <tr><td>Solenoids Skip Frames</td><td>{{ form_widget(table_form.b2s_table_setting.SolenoidsSkipFrames) }}</td></tr>
+                    <tr><td>GIStrings Skip Frames</td><td>{{ form_widget(table_form.b2s_table_setting.GIStringsSkipFrames) }}</td></tr>
+                    <tr><td>LEDs Skip Frames</td><td>{{ form_widget(table_form.b2s_table_setting.LEDsSkipFrames) }}</td></tr>
+                    <tr><td>Used LED Type</td><td>{{ form_widget(table_form.b2s_table_setting.UsedLEDType) }}</td></tr>
+                    <tr><td>Is Glow Bulb On</td><td>{{ form_widget(table_form.b2s_table_setting.IsGlowBulbOn) }}</td></tr>
+                    <tr><td>Glow Index</td><td>{{ form_widget(table_form.b2s_table_setting.GlowIndex) }}</td></tr>
+                    <tr><td>Start As EXE</td><td>{{ form_widget(table_form.b2s_table_setting.StartAsEXE) }}</td></tr>
+                    <tr><td>Start Background</td><td>{{ form_widget(table_form.b2s_table_setting.StartBackground) }}</td></tr>
+                    <tr><td>Dual Mode</td><td>{{ form_widget(table_form.b2s_table_setting.DualMode) }}</td></tr>
+                    <tr><th colspan="2" style="text-align: center"><hr>VPinMAME Registry<hr></th></tr>
+                </table>
+            </div>
+            <div class="col-4">
+                <table class="table" width="100%">
+                    {%  if wheel_image %}<tr><td style="position: relative; text-align: center; color: white;"><div class="image-label">Wheel</div><img src="{{ path('binary', {'file': wheel_image}) }}" width="100%"></td></tr>{% endif %}
+                    {%  if backglass_image %}<tr><td style="position: relative; text-align: center; color: white;"><div class="image-label">Backglass</div><img src="{{ path('binary', {'file': backglass_image}) }}" width="100%"></td></tr>{% endif %}
+                    {%  if dmd_image %}<tr><td style="position: relative; text-align: center; color: white;"><div class="image-label">DMD</div><img src="{{ path('binary', {'file': dmd_image}) }}" width="100%"></td></tr>{% endif %}
+                    {%  if table_image %}<tr><td style="position: relative; text-align: center; color: white;"><div class="image-label">Playfield</div><img src="{{ path('binary', {'file': table_image}) }}" width="100%"></td></tr>{% endif %}
+                    {%  if instruction_image %}<tr><td style="position: relative; text-align: center; color: white;"><div class="image-label">Instruction Card</div><img src="{{ path('binary', {'file': instruction_image}) }}" width="100%"></td></tr>{% endif %}
+                    <tr><th style="text-align: center"><hr>VPinMAME<hr></th></tr>
+                    <tr><th style="background-color: #bd2130">ROM zip file not found.</th></tr>
+                    <tr><th style="background-color: #e0a800">Alt sound directory for ROM exists.</th></tr>
+                    <tr><th style="background-color: #9fcdff">Alt color directory for ROM exists.</th></tr>
+                    <tr><th style="background-color: #34ce57">Default values for new ROMs.</th></tr>
+                </table>
+
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <table class="table table-striped" width="100%">
+                    <tr>
+                        <th>ROM \ Key</th>
+                        <th>Cabinet Mode</th>
+                        <th>Ignore ROM CRC errors</th>
+                        <th>Use Sound</th>
+                        <th>Alt Sound Mode</th>
+                        <th>Use Samples</th>
+                        <th>ddraw</th>
+                        <th>Colorize DMD</th>
+                        <th>Use external DMD (dll)</th>
+                        <th>Show DMD/Display window</th>
+                        <th>VP&lt;-&gt;VPM Synclevel<br>(0 => script yieldtime)</th>
+                    </tr>
+                    {% set romcounter = 0 %}
+                    {% for entry in table_form.entries %}
+                        <tr>
+                            <td{% if roms[romcounter] not in romfiles and 'default' != roms[romcounter] %} style="background-color: #bd2130"{% endif %}><b>{{ form_label(entry, roms[romcounter]) }}</b>{{ form_widget(entry.rom) }}<div style="display: none">{{ form_widget(entry.table) }}</div></td>
+                            <td>{{ form_widget(entry.cabinet_mode) }}</td>
+                            <td>{{ form_widget(entry.ignore_rom_crc) }}</td>
+                            <td>{{ form_widget(entry.sound) }}</td>
+                            <td{% if roms[romcounter] in altsound %} style="background-color: #e0a800"{% endif %}>{{ form_widget(entry.sound_mode) }}</td>
+                            <td>{{ form_widget(entry.samples) }}</td>
+                            <td>{{ form_widget(entry.ddraw) }}</td>
+                            <td{% if roms[romcounter] in altcolor %} style="background-color: #9fcdff"{% endif %}>{{ form_widget(entry.dmd_colorize) }}</td>
+                            <td>{{ form_widget(entry.showpindmd) }}</td>
+                            <td>{{ form_widget(entry.showwindmd) }}</td>
+                            <td>{{ form_widget(entry.synclevel) }}</td>
+                        </tr>
+                        {% set romcounter = romcounter + 1 %}
+                    {% endfor %}
+                    <tr><td colspan="11"><hr></td></tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-6">
+        </div>
+        <div class="col-2">
+            {{ form_widget(table_form.save) }}
+        </div>
+        <div class="col-4">
+        </div>
+    </div>
+    {{ form_end(table_form) }}
+
+{% endblock %}
+
+{% block javascripts %}
+    <script lang="js">
+        $(document).ready(function () {
+            bsCustomFileInput.init()
+        })
+    </script>
+{% endblock %}

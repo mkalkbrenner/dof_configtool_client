@@ -1,0 +1,9 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Tables{% endblock %}
+
+{% block body %}
+    {% for hash,table in tables %}
+        <a href="{{ path('table', {'hash': hash}) }}">{{ table }}</a><br>
+    {% endfor %}
+{% endblock %}

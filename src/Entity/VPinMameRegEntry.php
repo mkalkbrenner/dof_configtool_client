@@ -358,7 +358,8 @@ class RegistryKeyDummy
             'aar' => $this,
             'default' => $this,
             'aavenger' => $this,
-            'ACDC' => $this,
+            'acd_170hc' => $this,
+            'acd_168hc' => $this,
             'babypac' => $this,
         ];
     }

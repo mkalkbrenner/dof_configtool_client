@@ -312,17 +312,6 @@ class TweakController extends AbstractSettingsController
                                                 }
                                                 break;
 
-                                            case 'remove':
-                                                if (0 !== $game[$port]) {
-                                                    $setting = trim($setting);
-                                                    if (0 === strpos($setting, '/')) {
-                                                        $game[$port] .= $setting;
-                                                    } else {
-                                                        $game[$port] .= ' ' . $setting;
-                                                    }
-                                                }
-                                                break;
-
                                             case 'effect_duration':
                                                 if (0 !== $game[$port]) {
                                                     $triggers = explode('/', $game[$port]);
