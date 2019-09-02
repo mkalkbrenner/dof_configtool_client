@@ -18,12 +18,13 @@
                     <tr><td>Added</td><td>{{ form_widget(table_form.added) }}</td></tr>
                     <tr><td>Last Played</td><td>{{ form_widget(table_form.last_played) }}</td></tr>
                     <tr><td>Table File</td><td>{{ form_widget(table_form.table_file) }}</td></tr>
-                    <tr><td>ROM</td><td>{{ form_widget(table_form.rom) }}</td></tr>
+                    <tr><td>ROM</td><td>{{ form_widget(table_form.rom) }}{{ form_widget(table_form.select_rom) }}</td></tr>
                     <tr><th colspan="2" style="text-align: center"><hr>Screens<hr></th></tr>
                     <tr><td>Topper</td><td>{{ form_widget(table_form.topper) }}</td></tr>
                     <tr><td>Backglass</td><td>{{ form_widget(table_form.backglass) }}</td></tr>
                     <tr><td>DMD</td><td>{{ form_widget(table_form.dmd) }}</td></tr>
                     <tr><td>Instruction Card</td><td>{{ form_widget(table_form.instruction) }}</td></tr>
+                    <tr><td>Use PUP Pack</td><td>{{ form_widget(table_form.pup_pack) }}</td></tr>
                     <tr><th colspan="2" style="text-align: center"><hr>B2S<hr></th></tr>
                     <tr><td>Hide Grill</td><td>{{ form_widget(table_form.b2s_table_setting.HideGrill) }}</td></tr>
                     <tr><td>Hide B2S DMD</td><td>{{ form_widget(table_form.b2s_table_setting.HideB2SDMD) }}</td></tr>
@@ -32,12 +33,8 @@
                     <tr><td>Solenoids Skip Frames</td><td>{{ form_widget(table_form.b2s_table_setting.SolenoidsSkipFrames) }}</td></tr>
                     <tr><td>GIStrings Skip Frames</td><td>{{ form_widget(table_form.b2s_table_setting.GIStringsSkipFrames) }}</td></tr>
                     <tr><td>LEDs Skip Frames</td><td>{{ form_widget(table_form.b2s_table_setting.LEDsSkipFrames) }}</td></tr>
-                    <tr><td>Used LED Type</td><td>{{ form_widget(table_form.b2s_table_setting.UsedLEDType) }}</td></tr>
-                    <tr><td>Is Glow Bulb On</td><td>{{ form_widget(table_form.b2s_table_setting.IsGlowBulbOn) }}</td></tr>
-                    <tr><td>Glow Index</td><td>{{ form_widget(table_form.b2s_table_setting.GlowIndex) }}</td></tr>
                     <tr><td>Start As EXE</td><td>{{ form_widget(table_form.b2s_table_setting.StartAsEXE) }}</td></tr>
                     <tr><td>Start Background</td><td>{{ form_widget(table_form.b2s_table_setting.StartBackground) }}</td></tr>
-                    <tr><td>Dual Mode</td><td>{{ form_widget(table_form.b2s_table_setting.DualMode) }}</td></tr>
                     <tr><th colspan="2" style="text-align: center"><hr>VPinMAME Registry<hr></th></tr>
                 </table>
             </div>

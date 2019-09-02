@@ -35,6 +35,14 @@ class Settings
      */
     private $pinballYPath = '';
 
+    /**
+     * @var string
+     */
+    private $pinUpSystemPath = '';
+
+    /**
+     * @var array
+     */
     private $portAssignments = [];
 
     /**
@@ -149,6 +157,16 @@ class Settings
         return $this->getPinballYDatabasePath() . DIRECTORY_SEPARATOR . 'Visual Pinball X' . DIRECTORY_SEPARATOR . 'Visual Pinball X.xml';
     }
 
+    public function getPinUpSystemPath(): ?string
+    {
+        return $this->pinUpSystemPath;
+    }
+
+    public function getPinUpPacksPath(): ?string
+    {
+        return $this->pinUpSystemPath . DIRECTORY_SEPARATOR . 'PUPVideos';
+    }
+
     public function getVPinMamePath(): ?string
     {
         return $this->getVisualPinballPath() . DIRECTORY_SEPARATOR . 'VPinMAME';
@@ -217,6 +235,9 @@ class Settings
         return $this->getVisualPinballPath() . DIRECTORY_SEPARATOR . 'Tables';
     }
 
+    /**
+     * @return array [rom => Table]
+     */
     public function getTableMapping(): array
     {
         static $tableMapping = [];
@@ -264,6 +285,13 @@ class Settings
     public function setPinballYPath(string $pinballYPath): self
     {
         $this->pinballYPath = $pinballYPath;
+
+        return $this;
+    }
+
+    public function setPinUpSystemPath(string $pinUpSystemPath): self
+    {
+        $this->pinUpSystemPath = $pinUpSystemPath;
 
         return $this;
     }
@@ -434,6 +462,7 @@ class Settings
             $this->setDofPath($settings['dof']['path']);
             $this->setVisualPinballPath($settings['visualpinball']['path']);
             $this->setPinballYPath($settings['pinbally']['path'] ?? '');
+            $this->setPinUpSystemPath($settings['pinupsystem']['path'] ?? '');
             $this->setVersionControl((bool) ($settings['git']['enabled'] ?? false));
             $this->setGitBinary($settings['git']['binary'] ?? $this->getGitBinary());
             $this->setGitUser($settings['git']['user'] ?? $this->getGitUser());
@@ -463,6 +492,8 @@ class Settings
             'path = "' . addslashes(trim($this->getVisualPinballPath(), '" ')) . '"' . "\r\n" .
             "[pinbally]\r\n" .
             'path = "' . addslashes(trim($this->getPinballYPath(), '" ')) . '"' . "\r\n" .
+            "[pinupsystem]\r\n" .
+            'path = "' . addslashes(trim($this->getPinUpSystemPath(), '" ')) . '"' . "\r\n" .
             "[git]\r\n" .
             'enabled = ' . (int) $this->isVersionControl()  . "\r\n" .
             'binary = "' . addslashes(trim($this->getGitBinary(), '" ')) . '"' . "\r\n" .

@@ -23,12 +23,8 @@ class B2STableSettingDisabledType extends AbstractType
             ->add('SolenoidsSkipFrames', TextType::class, ['disabled' => true, 'label' => false])
             ->add('GIStringsSkipFrames', TextType::class, ['disabled' => true, 'label' => false])
             ->add('LEDsSkipFrames', TextType::class, ['disabled' => true, 'label' => false])
-            ->add('UsedLEDType', TextType::class, ['disabled' => true, 'label' => false])
-            ->add('IsGlowBulbOn', TextType::class, ['disabled' => true, 'label' => false])
-            ->add('GlowIndex', TextType::class, ['disabled' => true, 'label' => false])
             ->add('StartAsEXE', TextType::class, ['disabled' => true, 'label' => false])
-            ->add('StartBackground', TextType::class, ['disabled' => true, 'label' => false])
-            ->add('DualMode', TextType::class, ['disabled' => true, 'label' => false]);
+            ->add('StartBackground', TextType::class, ['disabled' => true, 'label' => false]);
     }
 
     public function configureOptions(OptionsResolver $resolver)

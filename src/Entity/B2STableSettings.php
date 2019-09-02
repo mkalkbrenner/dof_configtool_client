@@ -54,7 +54,7 @@ class B2STableSettings implements \IteratorAggregate
         return $this->tableSettings[$rom] ?? null;
     }
 
-    public function load(): self
+    public function load(?bool $create_new = FALSE): self
     {
         if ($contents = file_get_contents($this->file)) {
             // Normalize line endings.
@@ -88,18 +88,25 @@ class B2STableSettings implements \IteratorAggregate
                         foreach ($this->roms as $rom) {
                             if (strpos($line, '<' . $rom . '>') !== false) {
                                 $b2sTableSetting = new B2STableSetting($rom);
-                                break;
+                            }
+                            elseif ($create_new) {
+                                $this->tableSettings[$rom] = new B2STableSetting($rom);
                             }
                         }
                     } else {
                         $rom = $b2sTableSetting->getRom();
                         if (strpos($line, '</' . $rom . '>') !== false) {
+                            $b2sTableSetting->trackChanges(true);
                             $this->tableSettings[$rom] = $b2sTableSetting;
                             unset($b2sTableSetting);
                             $b2sTableSetting = null;
                         }
                         elseif (preg_match('/<([^>]+)>(\d+)/', $line, $matches)) {
-                            $b2sTableSetting->{'set' . $matches[1]}($matches[2]);
+                            $method = 'set' . $matches[1];
+                            if (method_exists($b2sTableSetting, $method)) {
+                                $b2sTableSetting->{$method}($matches[2]);
+                            }
+                            $b2sTableSetting->addOriginalLine($line);
                         }
                     }
                 }

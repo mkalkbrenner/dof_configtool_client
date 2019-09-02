@@ -10,6 +10,7 @@
     {{ form_row(settings_form.dofPath) }}
     {{ form_row(settings_form.visualPinballPath) }}
     {{ form_row(settings_form.pinballYPath) }}
+    {{ form_row(settings_form.pinUpSystemPath) }}
     {{ form_row(settings_form.bsPatchBinary) }}
     {{ form_row(settings_form.versionControl) }}
     {{ form_row(settings_form.gitBinary) }}
@@ -20,7 +21,7 @@
     <p>
         The port settings are not required to download and tweak your DOF configs. But they will be required if you want
         to create and manage your DOFLinx configuration using the DOF ConfigtoolClient (DOFLinx support is scheduled for
-        the 0.5.0 release). Once you <a href="{{ path('download') }}">downloaded</a> your "DOF Configuration" and the
+        the 0.7.0 release). Once you <a href="{{ path('download') }}">downloaded</a> your "DOF Configuration" and the
         "Database", the auto detection of port assignments should work.
     </p>
     <p>

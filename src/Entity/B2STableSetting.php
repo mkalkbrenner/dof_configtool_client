@@ -10,70 +10,76 @@ class B2STableSetting
     private $rom;
 
     /**
-     * @var int
+     * @var int 0 = Visible
+     *          1 = Hidden
+     *          2 = Standard
      */
-    private $HideGrill;
+    private $HideGrill = 2;
+
+    /**
+     * @var int 0 = Visible
+     *          1 = Hidden
+     */
+    private $HideB2SDMD = 0 ;
+
+    /**
+     * @var int 0 = Visible
+     *          1 = Hidden
+     *          2 = Standard
+     */
+    private $HideDMD = 2;
 
     /**
      * @var int
      */
-    private $HideB2SDMD;
+    private $LampsSkipFrames = 1;
 
     /**
      * @var int
      */
-    private $HideDMD;
+    private $SolenoidsSkipFrames = 3;
 
     /**
      * @var int
      */
-    private $LampsSkipFrames;
+    private $GIStringsSkipFrames = 3;
 
     /**
      * @var int
      */
-    private $SolenoidsSkipFrames;
+    private $LEDsSkipFrames = 0;
 
     /**
      * @var int
      */
-    private $GIStringsSkipFrames;
+    private $UsedLEDType = 2;
 
     /**
      * @var int
      */
-    private $LEDsSkipFrames;
+    private $IsGlowBulbOn = 0;
 
     /**
      * @var int
      */
-    private $UsedLEDType;
+    private $GlowIndex = -1;
 
     /**
      * @var int
      */
-    private $IsGlowBulbOn;
-
-    /**
-     * @var int
-     */
-    private $GlowIndex;
-
-    /**
-     * @var int
-     */
-    private $StartAsEXE;
+    private $StartAsEXE = 1;
 
     /**
     /**
      * @var int
      */
-    private $StartBackground;
+    private $StartBackground = 0;
 
-    /**
-     * @var int
-     */
-    private $DualMode;
+    private $trackChanges = FALSE;
+
+    private $hasChanges;
+
+    private $originalLines = [];
 
     public function __construct(string $rom)
     {
@@ -101,7 +107,7 @@ class B2STableSetting
     /**
      * @return int
      */
-    public function getHideGrill(): ?int
+    public function getHideGrill(): int
     {
         return $this->HideGrill;
     }
@@ -112,6 +118,9 @@ class B2STableSetting
      */
     public function setHideGrill(int $HideGrill): B2STableSetting
     {
+        if ($this->trackChanges && $this->HideGrill != $HideGrill) {
+            $this->hasChanges['HideGrill'] = TRUE;
+        }
         $this->HideGrill = $HideGrill;
         return $this;
     }
@@ -119,7 +128,7 @@ class B2STableSetting
     /**
      * @return int
      */
-    public function getHideB2SDMD(): ?int
+    public function getHideB2SDMD(): int
     {
         return $this->HideB2SDMD;
     }
@@ -130,6 +139,9 @@ class B2STableSetting
      */
     public function setHideB2SDMD(int $HideB2SDMD): B2STableSetting
     {
+        if ($this->trackChanges && $this->HideB2SDMD != $HideB2SDMD) {
+            $this->hasChanges['HideB2SDMD'] = TRUE;
+        }
         $this->HideB2SDMD = $HideB2SDMD;
         return $this;
     }
@@ -137,7 +149,7 @@ class B2STableSetting
     /**
      * @return int
      */
-    public function getHideDMD(): ?int
+    public function getHideDMD(): int
     {
         return $this->HideDMD;
     }
@@ -148,6 +160,9 @@ class B2STableSetting
      */
     public function setHideDMD(int $HideDMD): B2STableSetting
     {
+        if ($this->trackChanges && $this->HideDMD != $HideDMD) {
+            $this->hasChanges['HideDMD'] = TRUE;
+        }
         $this->HideDMD = $HideDMD;
         return $this;
     }
@@ -155,7 +170,7 @@ class B2STableSetting
     /**
      * @return int
      */
-    public function getLampsSkipFrames(): ?int
+    public function getLampsSkipFrames(): int
     {
         return $this->LampsSkipFrames;
     }
@@ -166,6 +181,9 @@ class B2STableSetting
      */
     public function setLampsSkipFrames(int $LampsSkipFrames): B2STableSetting
     {
+        if ($this->trackChanges && $this->LampsSkipFrames != $LampsSkipFrames) {
+            $this->hasChanges['LampsSkipFrames'] = TRUE;
+        }
         $this->LampsSkipFrames = $LampsSkipFrames;
         return $this;
     }
@@ -173,7 +191,7 @@ class B2STableSetting
     /**
      * @return int
      */
-    public function getSolenoidsSkipFrames(): ?int
+    public function getSolenoidsSkipFrames(): int
     {
         return $this->SolenoidsSkipFrames;
     }
@@ -184,6 +202,9 @@ class B2STableSetting
      */
     public function setSolenoidsSkipFrames(int $SolenoidsSkipFrames): B2STableSetting
     {
+        if ($this->trackChanges && $this->SolenoidsSkipFrames != $SolenoidsSkipFrames) {
+            $this->hasChanges['SolenoidsSkipFrames'] = TRUE;
+        }
         $this->SolenoidsSkipFrames = $SolenoidsSkipFrames;
         return $this;
     }
@@ -191,7 +212,7 @@ class B2STableSetting
     /**
      * @return int
      */
-    public function getGIStringsSkipFrames(): ?int
+    public function getGIStringsSkipFrames(): int
     {
         return $this->GIStringsSkipFrames;
     }
@@ -202,6 +223,9 @@ class B2STableSetting
      */
     public function setGIStringsSkipFrames(int $GIStringsSkipFrames): B2STableSetting
     {
+        if ($this->trackChanges && $this->GIStringsSkipFrames != $GIStringsSkipFrames) {
+            $this->hasChanges['GIStringsSkipFrames'] = TRUE;
+        }
         $this->GIStringsSkipFrames = $GIStringsSkipFrames;
         return $this;
     }
@@ -209,7 +233,7 @@ class B2STableSetting
     /**
      * @return int
      */
-    public function getLEDsSkipFrames(): ?int
+    public function getLEDsSkipFrames(): int
     {
         return $this->LEDsSkipFrames;
     }
@@ -220,6 +244,9 @@ class B2STableSetting
      */
     public function setLEDsSkipFrames(int $LEDsSkipFrames): B2STableSetting
     {
+        if ($this->trackChanges && $this->LEDsSkipFrames != $LEDsSkipFrames) {
+            $this->hasChanges['LEDsSkipFrames'] = TRUE;
+        }
         $this->LEDsSkipFrames = $LEDsSkipFrames;
         return $this;
     }
@@ -227,7 +254,7 @@ class B2STableSetting
     /**
      * @return int
      */
-    public function getUsedLEDType(): ?int
+    public function getUsedLEDType(): int
     {
         return $this->UsedLEDType;
     }
@@ -238,6 +265,9 @@ class B2STableSetting
      */
     public function setUsedLEDType(int $UsedLEDType): B2STableSetting
     {
+        if ($this->trackChanges && $this->UsedLEDType != $UsedLEDType) {
+            $this->hasChanges['UsedLEDType'] = TRUE;
+        }
         $this->UsedLEDType = $UsedLEDType;
         return $this;
     }
@@ -245,7 +275,7 @@ class B2STableSetting
     /**
      * @return int
      */
-    public function getIsGlowBulbOn(): ?int
+    public function getIsGlowBulbOn(): int
     {
         return $this->IsGlowBulbOn;
     }
@@ -256,6 +286,9 @@ class B2STableSetting
      */
     public function setIsGlowBulbOn(int $IsGlowBulbOn): B2STableSetting
     {
+        if ($this->trackChanges && $this->IsGlowBulbOn != $IsGlowBulbOn) {
+            $this->hasChanges['IsGlowBulbOn'] = TRUE;
+        }
         $this->IsGlowBulbOn = $IsGlowBulbOn;
         return $this;
     }
@@ -263,7 +296,7 @@ class B2STableSetting
     /**
      * @return int
      */
-    public function getGlowIndex(): ?int
+    public function getGlowIndex(): int
     {
         return $this->GlowIndex;
     }
@@ -274,16 +307,19 @@ class B2STableSetting
      */
     public function setGlowIndex(int $GlowIndex): B2STableSetting
     {
+        if ($this->trackChanges && $this->GlowIndex != $GlowIndex) {
+            $this->hasChanges['GlowIndex'] = TRUE;
+        }
         $this->GlowIndex = $GlowIndex;
         return $this;
     }
 
     /**
-     * @return int
+     * @return bool
      */
-    public function getStartAsEXE(): ?int
+    public function getStartAsEXE(): bool
     {
-        return $this->StartAsEXE;
+        return (bool) $this->StartAsEXE;
     }
 
     /**
@@ -292,6 +328,9 @@ class B2STableSetting
      */
     public function setStartAsEXE(int $StartAsEXE): B2STableSetting
     {
+        if ($this->trackChanges && $this->StartAsEXE != $StartAsEXE) {
+            $this->hasChanges['StartAsEXE'] = TRUE;
+        }
         $this->StartAsEXE = $StartAsEXE;
         return $this;
     }
@@ -299,9 +338,9 @@ class B2STableSetting
     /**
      * @return int
      */
-    public function getStartBackground(): ?int
+    public function getStartBackground(): bool
     {
-        return $this->StartBackground;
+        return (bool) $this->StartBackground;
     }
 
     /**
@@ -310,36 +349,53 @@ class B2STableSetting
      */
     public function setStartBackground(int $StartBackground): B2STableSetting
     {
+        if ($this->trackChanges && $this->StartBackground != $StartBackground) {
+            $this->hasChanges['StartBackground'] = TRUE;
+        }
         $this->StartBackground = $StartBackground;
         return $this;
     }
 
-    /**
-     * @return int
-     */
-    public function getDualMode(): ?int
+    public function trackChanges(bool $track = TRUE): self
     {
-        return $this->DualMode;
+        $this->trackChanges = $track;
+
+        return $this;
     }
 
-    /**
-     * @param int $DualMode
-     * @return B2STableSetting
-     */
-    public function setDualMode(int $DualMode): B2STableSetting
+    public function getChanges(): ?array
     {
-        $this->DualMode = $DualMode;
+        return $this->hasChanges;
+    }
+
+    public function addOriginalLine(string $line): self
+    {
+        $this->originalLines[] = $line;
         return $this;
     }
 
     public function toXML() {
-        $xml = '<' . $this->rom . ">\r\n";
-        foreach (get_class_methods($this) as $getter) {
-            if (strpos($getter, 'get') === 0 && 'getRom' !== $getter) {
-                $property = preg_replace('/^get/', '', $getter);
-                $xml .= '    <' . $property . '>' . $this->{$getter}() . '</' . $property . ">\r\n";
+        $xml = '  <' . $this->rom . ">\r\n";
+
+        if (!$this->originalLines) {
+            foreach (get_class_methods($this) as $getter) {
+                if (strpos($getter, 'get') === 0 && 'getRom' !== $getter && 'getChanges' !== $getter) {
+                    $property = preg_replace('/^get/', '', $getter);
+                    $xml .= '    <' . $property . '>' . ((int) $this->{$getter}()) . '</' . $property . ">\r\n";
+                }
+            }
+            $xml .= '    <Animations />';
+        } else {
+            foreach ($this->originalLines as $line) {
+                if (preg_match('/<([^>]+)>(\d+)/', $line, $matches)) {
+                    if (!empty($this->hasChanges[$matches[1]])) {
+                        $line = '<' . $matches[1] . '>' . ((int) $this->{$matches[1]}) . '</' . $matches[1] . '>';
+                    }
+                }
+                $xml .= '    ' . $line . "\r\n";
             }
         }
-        return $xml . "    <Animations />\r\n  </" . $this->rom . '>';
+
+        return $xml .= "\r\n  </" . $this->rom . '>';
     }
 }

@@ -2,9 +2,11 @@
 
 namespace App\Component;
 
+use App\Controller\AbstractSettingsController;
 use App\Entity\DirectOutputConfig;
 use App\Entity\Settings;
 use iphis\FineDiff\Diff;
+use Symfony\Component\Filesystem\Filesystem;
 
 class Utility
 {
@@ -86,6 +88,36 @@ class Utility
         return [$tables, $backglasses];
     }
 
+    public static function getExistingPupPacks(Settings $settings, ?array $roms = null): array
+    {
+        $pupPacks = [];
+
+        $tableMapping = $settings->getTableMapping();
+        $path = $settings->getPinUpPacksPath();
+        if (file_exists($path) && is_readable($path)) {
+            foreach (scandir($path) as $rom) {
+                $real_rom = ltrim($rom, '_');
+                if ($roms && in_array($real_rom, $roms)) {
+                    if (isset($tableMapping[$real_rom]) && is_dir($rom)) {
+                        $size = Utility::directorySize($rom);
+                        // Require min 2MB to be considered a pack.
+                        if ($size > 1) {
+                            $pupPacks[$real_rom] = $tableMapping[$rom];
+                        }
+                    }
+                }
+            }
+        }
+
+        array_filter($pupPacks, function ($rom) use ($pupPacks) {
+            // Remove inactive packs if a corresponding active pack exists.
+            return strpos($rom, '_') !== 0 || !array_key_exists(ltrim($rom, '_'), $pupPacks);
+        }, ARRAY_FILTER_USE_KEY);
+
+        asort($pupPacks);
+        return $pupPacks;
+    }
+
     public static function getGroupedBackglassChoices(array $choices, string $basename): array
     {
         $group = [
@@ -153,5 +185,18 @@ class Utility
 
         $real_roms = $settings->getRoms();
         return array_values($roms ? array_intersect($roms, $real_roms) : array_intersect(array_keys($tableMapping), $real_roms));
+    }
+
+    /**
+     * @param string $dir
+     * @return int directory size in MB
+     */
+    public static function directorySize(string $dir): int
+    {
+        $size = 0;
+        foreach (glob(rtrim($dir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . '*', GLOB_NOSORT) as $each) {
+            $size += is_file($each) ? filesize($each) : Utility::directorySize($each);
+        }
+        return (int) ($size / 1024 / 1024);
     }
 }

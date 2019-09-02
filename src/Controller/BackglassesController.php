@@ -32,7 +32,7 @@ class BackglassesController extends AbstractSettingsController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $filesystem = new Filesystem();
+            $filesystem = $this->getFilesystem();
             $table_path = $this->settings->getTablesPath() . DIRECTORY_SEPARATOR;
             $data = $form->getData();
             $count = array_count_values($data);

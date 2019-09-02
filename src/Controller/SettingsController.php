@@ -26,6 +26,7 @@ class SettingsController extends AbstractSettingsController
             ->add('dofPath', ElFinderType::class, ['label' => 'DOF Path', 'instance' => 'form', 'enable' => true])
             ->add('visualPinballPath', ElFinderType::class, ['label' => 'Visual Pinball Path', 'instance' => 'form', 'enable' => true])
             ->add('pinballYPath', ElFinderType::class, ['label' => 'PinballY Path', 'instance' => 'form', 'enable' => true])
+            ->add('pinUpSystemPath', ElFinderType::class, ['label' => 'PinUp System Path', 'instance' => 'form', 'enable' => true])
             ->add('bsPatchBinary', ElFinderType::class, ['label' => 'pspatch Binary', 'instance' => 'form', 'enable' => true])
             ->add('versionControl', CheckboxType::class, ['label' => 'Enable Version Control via Git'])
             ->add('gitBinary', ElFinderType::class, ['label' => 'Git Binary', 'instance' => 'form', 'enable' => true])
