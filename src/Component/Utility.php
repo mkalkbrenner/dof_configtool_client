@@ -2,15 +2,13 @@
 
 namespace App\Component;
 
-use App\Controller\AbstractSettingsController;
 use App\Entity\DirectOutputConfig;
 use App\Entity\Settings;
 use iphis\FineDiff\Diff;
-use Symfony\Component\Filesystem\Filesystem;
 
 class Utility
 {
-    public static function getDiffTables(array $old_files, array $new_files, Settings $settings): array
+    public static function getDiffTables(array $old_files, array $new_files, Settings $settings, ?array $synonyms = []): array
     {
         $diff = new Diff();
         $diffs = [];
@@ -18,7 +16,7 @@ class Utility
 
         foreach ($new_files as $file => $content) {
             $directOutputConfig = new DirectOutputConfig($file);
-            $directOutputConfig->load();
+            $directOutputConfig->load()->createSynonymGames($synonyms);
             $rgb_ports = $directOutputConfig->getRgbPorts();
             $devicdeId = 0;
             if (preg_match('/directoutputconfig(\d+)\.ini$/i', $file, $matches)) {
@@ -198,5 +196,17 @@ class Utility
             $size += is_file($each) ? filesize($each) : Utility::directorySize($each);
         }
         return (int) ($size / 1024 / 1024);
+    }
+
+    public static function parseIniString(string $string, ?bool $strip_comments = TRUE): array
+    {
+        $parsed = parse_ini_string($string, TRUE);
+        if ($strip_comments) {
+            return array_filter($parsed, static function ($key) {
+                $key = trim($key);
+                return strpos($key, '#') !== 0;
+            }, ARRAY_FILTER_USE_KEY);
+        }
+        return $parsed;
     }
 }

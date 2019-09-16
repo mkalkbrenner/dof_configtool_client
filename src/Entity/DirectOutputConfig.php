@@ -232,6 +232,37 @@ class DirectOutputConfig
         return $this->deviceId;
     }
 
+    public function createSynonymGames(array $synonyms): self
+    {
+        foreach ($synonyms as $synonym => $original) {
+            $s = trim($synonym);
+            $o = trim($original);
+            if (isset($this->games[$o]) && !isset($this->games[$s])) {
+                $values = array_reverse($this->games);
+                $empty_lines = [];
+                foreach ($values as $key => $value) {
+                    if (!$value) {
+                        $empty_lines[] = $value;
+                        array_pop($this->games);
+                    } else {
+                        break;
+                    }
+                }
+                $this->games[$s] = $this->games[$o];
+                // The ROM name is stored in index 0.
+                $this->games[$s][0] = $s;
+                array_push($this->games, ...$empty_lines);
+                $this->rgbPorts[$s] = $this->rgbPorts[$o];
+
+                if (preg_match("/\r\n" . preg_quote($o, '/') . "(.*?)\r\n/", $this->config, $matches)) {
+                    $this->config = trim($this->config) . "\r\n" . $s .$matches[1] . "\r\n";
+                    $this->content = trim($this->content) . "\r\n" . $s .$matches[1] . "\r\n";
+                }
+            }
+        }
+        return $this;
+    }
+
     public function load(): self
     {
         if ($contents = file_get_contents($this->file)) {
