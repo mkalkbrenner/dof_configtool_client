@@ -18,7 +18,7 @@
                     <tr><td>Added</td><td>{{ form_widget(table_form.added) }}</td></tr>
                     <tr><td>Last Played</td><td>{{ form_widget(table_form.last_played) }}</td></tr>
                     <tr><td>Table File</td><td>{{ form_widget(table_form.table_file) }}</td></tr>
-                    <tr><td>ROM</td><td>{{ form_widget(table_form.rom) }}{{ form_widget(table_form.select_rom) }}</td></tr>
+                    <tr><td>ROM</td><td>{{ form_widget(table_form.rom) }}{% if table_form.select_rom is defined %}{{ form_widget(table_form.select_rom) }}{% endif %}</td></tr>
                     <tr><th colspan="2" style="text-align: center"><hr>Screens<hr></th></tr>
                     <tr><td>Topper</td><td>{{ form_widget(table_form.topper) }}</td></tr>
                     <tr><td>Backglass</td><td>{{ form_widget(table_form.backglass) }}</td></tr>

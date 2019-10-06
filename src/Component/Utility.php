@@ -91,28 +91,31 @@ class Utility
         $pupPacks = [];
 
         $tableMapping = $settings->getTableMapping();
-        $path = $settings->getPinUpPacksPath();
-        if (file_exists($path) && is_readable($path)) {
-            foreach (scandir($path) as $rom) {
-                $real_rom = ltrim($rom, '_');
-                if ($roms && in_array($real_rom, $roms)) {
-                    if (isset($tableMapping[$real_rom]) && is_dir($rom)) {
-                        $size = Utility::directorySize($rom);
-                        // Require min 2MB to be considered a pack.
-                        if ($size > 1) {
-                            $pupPacks[$real_rom] = $tableMapping[$rom];
+        if ($path = $settings->getPinUpPacksPath()) {
+            if (file_exists($path) && is_readable($path)) {
+                foreach (scandir($path) as $rom) {
+                    $real_rom = ltrim($rom, '_');
+                    if (!$roms || in_array($real_rom, $roms)) {
+                        $pup_path = $path . DIRECTORY_SEPARATOR . $rom;
+                        if (is_dir($pup_path)) {
+                            $size = Utility::directorySize($pup_path);
+                            // Require min 2MB to be considered a pack.
+                            if ($size > 1) {
+                                $pupPacks[$rom] = $tableMapping[$real_rom] ?? $real_rom;
+                            }
                         }
                     }
                 }
             }
+
+            array_filter($pupPacks, function ($rom) use ($pupPacks) {
+                // Remove inactive packs if a corresponding active pack exists.
+                return strpos($rom, '_') !== 0 || !array_key_exists(ltrim($rom, '_'), $pupPacks);
+            }, ARRAY_FILTER_USE_KEY);
+
+            asort($pupPacks);
         }
 
-        array_filter($pupPacks, function ($rom) use ($pupPacks) {
-            // Remove inactive packs if a corresponding active pack exists.
-            return strpos($rom, '_') !== 0 || !array_key_exists(ltrim($rom, '_'), $pupPacks);
-        }, ARRAY_FILTER_USE_KEY);
-
-        asort($pupPacks);
         return $pupPacks;
     }
 

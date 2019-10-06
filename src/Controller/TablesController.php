@@ -43,6 +43,13 @@ class TablesController extends AbstractSettingsController
     {
         list($tables, $backglassChoices) = Utility::getExistingTablesAndBackglassChoices($this->settings);
         $table_name = $tables[$hash];
+        $roms = [];
+        $added = '';
+        $last_played = '';
+        $description =
+        $manufacturer =
+        $year =
+            'PinballY required!';
 
         if ($this->settings->getPinballYPath()) {
             $pinballYDatabaseFile = $this->settings->getPinballYVPXDatabaseFile();
@@ -57,10 +64,11 @@ class TablesController extends AbstractSettingsController
                 }
                 $pinballYMedia = new PinballYMedia($pinballYMenuEntry->getDescription());
                 $pinballYMedia->setPath($this->settings->getPinballYPath())->load();
+                $description = $pinballYMenuEntry->getDescription();
+                $roms = Utility::getRomsForTable($description, $this->settings);
             }
         }
 
-        $roms = Utility::getRomsForTable($pinballYMenuEntry->getDescription(), $this->settings);
         $tableMapping = $this->settings->getTableMapping();
         $rom_choices = [];
         $vPinMameRegEntries = new VPinMameRegEntries();
@@ -89,17 +97,17 @@ class TablesController extends AbstractSettingsController
         $formBuilder = $this->createFormBuilder()
             ->add('table_name', TextType::class, [
                 'disabled' => true,
-                'data' => $pinballYMenuEntry->getDescription(),
+                'data' => $description,
                 'label' => false,
             ])
             ->add('manufacturer', TextType::class, [
                 'disabled' => true,
-                'data' => $pinballYMenuEntry->getManufacturer(),
+                'data' => $manufacturer,
                 'label' => false,
             ])
             ->add('year', TextType::class, [
                 'disabled' => true,
-                'data' => $pinballYMenuEntry->getYear(),
+                'data' => $year,
                 'label' => false,
             ])
             ->add('table_file', TextType::class, [
@@ -122,8 +130,11 @@ class TablesController extends AbstractSettingsController
                 'data' => $vPinMameRegEntries->getEntries(),
                 'label' => false,
             ])
-            ->add('select_rom', SubmitType::class, ['label' => 'Select ROM'])
             ->add('save', SubmitType::class, ['label' => 'Save']);
+
+        if (count($roms) > 1) {
+            $formBuilder->add('select_rom', SubmitType::class, ['label' => 'Select ROM']);
+        }
 
         $pupPack = false;
         $disabled_puppack = '';
@@ -262,12 +273,12 @@ class TablesController extends AbstractSettingsController
 
         return $this->render('/tables/table.html.twig', [
             'table_form' => $form->createView(),
-            'wheel_image' => urlencode($pinballYMedia->getWheelImage()),
-            'backglass_image' => urlencode($pinballYMedia->getBackglassImage()),
-            'dmd_image' => urlencode($pinballYMedia->getDmdImage()),
-            'topper_image' => urlencode($pinballYMedia->getTopperImage()),
-            'table_image' => urlencode($pinballYMedia->getTableImage()),
-            'instruction_image' => urlencode($pinballYMedia->getInstructionCardImage()),
+            'wheel_image' => isset($pinballYMedia) ? urlencode($pinballYMedia->getWheelImage()) : null,
+            'backglass_image' => isset($pinballYMedia) ? urlencode($pinballYMedia->getBackglassImage()) : null,
+            'dmd_image' => isset($pinballYMedia) ? urlencode($pinballYMedia->getDmdImage()) : null,
+            'topper_image' => isset($pinballYMedia) ? urlencode($pinballYMedia->getTopperImage()) : null,
+            'table_image' => isset($pinballYMedia) ? urlencode($pinballYMedia->getTableImage()) : null,
+            'instruction_image' => isset($pinballYMedia) ? urlencode($pinballYMedia->getInstructionCardImage()) : null,
             'roms' => $roms,
             'romfiles' => $this->settings->getRoms(),
             'altcolor' => $this->settings->getAltcolorRoms(),
