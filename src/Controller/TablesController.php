@@ -183,7 +183,7 @@ class TablesController extends AbstractSettingsController
                     'label' => false,
                 ])
                 ->add('b2s_table_setting', B2STableSettingType::class, [
-                    'data' => $b2sTableSettings->getTableSetting($roms[0]),
+                    'data' => $b2sTableSettings->getTableSetting($roms[0])->trackChanges(true),
                     'label' => false,
                 ]);
         } else {
@@ -238,6 +238,10 @@ class TablesController extends AbstractSettingsController
 
                 case 'save':
                     $this->saveBackglass($table_name, $data['backglass']);
+
+                    if ($data['b2s_table_setting']->hasChanges()) {
+                        $b2sTableSettings->setTableSetting($data['b2s_table_setting'])->persist();
+                    }
 
                     /** @var VPinMameRegEntry $regEntry */
                     foreach ($data['entries'] as $regEntry) {

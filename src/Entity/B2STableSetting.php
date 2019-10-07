@@ -363,6 +363,11 @@ class B2STableSetting
         return $this;
     }
 
+    public function hasChanges(): bool
+    {
+        return !empty($this->hasChanges);
+    }
+
     public function getChanges(): ?array
     {
         return $this->hasChanges;

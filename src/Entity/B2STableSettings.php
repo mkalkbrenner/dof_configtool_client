@@ -54,6 +54,12 @@ class B2STableSettings implements \IteratorAggregate
         return $this->tableSettings[$rom] ?? null;
     }
 
+    public function SetTableSetting(B2STableSetting $setting): self
+    {
+        $this->tableSettings[$setting->getRom()] = $setting;
+        return $this;
+    }
+
     public function load(?bool $create_new = FALSE): self
     {
         if ($contents = file_get_contents($this->file)) {
@@ -119,7 +125,13 @@ class B2STableSettings implements \IteratorAggregate
     {
         foreach ($this->getTableSettings() as $tableSetting) {
             $rom = preg_quote($tableSetting->getRom(), '@');
-            $this->contents = preg_replace('@<' . $rom . '>.*</' . $rom . '>@ms', $tableSetting->toXML(), $this->contents);
+            if (preg_match('@<' . $rom . '>@', $this->contents)) {
+                // ROM already has an entry.
+                $this->contents = preg_replace('@\s*<' . $rom . '>.*</' . $rom . '>@ms', "\r\n" . $tableSetting->toXML(), $this->contents);
+            } else {
+                // Entry is new.
+                $this->contents = str_replace('</B2STableSettings>', $tableSetting->toXML() . "\r\n</B2STableSettings>", $this->contents);
+            }
         }
 
         if (!file_put_contents($this->file, $this->contents)) {
