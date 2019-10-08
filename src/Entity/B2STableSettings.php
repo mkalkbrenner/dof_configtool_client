@@ -54,7 +54,7 @@ class B2STableSettings implements \IteratorAggregate
         return $this->tableSettings[$rom] ?? null;
     }
 
-    public function SetTableSetting(B2STableSetting $setting): self
+    public function setTableSetting(B2STableSetting $setting): self
     {
         $this->tableSettings[$setting->getRom()] = $setting;
         return $this;

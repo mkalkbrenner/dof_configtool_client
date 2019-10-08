@@ -4,6 +4,8 @@ namespace App\Entity;
 
 class PinballYGameStat
 {
+    use TrackChangesTrait;
+
     /**
      * @var string
      */
@@ -70,6 +72,16 @@ class PinballYGameStat
      */
     private $showWhenRunning;
 
+    /**
+     * @var array
+     */
+    private $showWhenRunningArray = [
+        'bg' => false,
+        'dmd' => false,
+        'topper' => false,
+        'instcard' => false,
+    ];
+
     public function __construct(string $csv)
     {
         list(
@@ -87,6 +99,10 @@ class PinballYGameStat
             $this->markedForCapture,
             $this->showWhenRunning
             ) = array_pad(str_getcsv($csv), 13,'');
+
+        foreach ($this->showWhenRunningArray as $screen => &$value) {
+            $value = strpos($this->showWhenRunning, $screen) !== false;
+        }
     }
 
     /**
@@ -103,6 +119,9 @@ class PinballYGameStat
      */
     public function setGame(string $game): PinballYGameStat
     {
+        if ($this->trackChanges && $this->game != $game) {
+            $this->hasChanges['game'] = TRUE;
+        }
         $this->game = $game;
         return $this;
     }
@@ -143,6 +162,9 @@ class PinballYGameStat
      */
     public function setLastPlayed(string $lastPlayed): PinballYGameStat
     {
+        if ($this->trackChanges && $this->lastPlayed != $lastPlayed) {
+            $this->hasChanges['lastPlayed'] = TRUE;
+        }
         $this->lastPlayed = $lastPlayed;
         return $this;
     }
@@ -169,6 +191,9 @@ class PinballYGameStat
      */
     public function setPlayCount(string $playCount): PinballYGameStat
     {
+        if ($this->trackChanges && $this->playCount != $playCount) {
+            $this->hasChanges['playCount'] = TRUE;
+        }
         $this->playCount = $playCount;
         return $this;
     }
@@ -187,6 +212,9 @@ class PinballYGameStat
      */
     public function setPlayTime(string $playTime): PinballYGameStat
     {
+        if ($this->trackChanges && $this->playTime != $playTime) {
+            $this->hasChanges['playTime'] = TRUE;
+        }
         $this->playTime = $playTime;
         return $this;
     }
@@ -205,6 +233,9 @@ class PinballYGameStat
      */
     public function setIsFavorite(string $isFavorite): PinballYGameStat
     {
+        if ($this->trackChanges && $this->isFavorite != $isFavorite) {
+            $this->hasChanges['isFavorite'] = TRUE;
+        }
         $this->isFavorite = $isFavorite;
         return $this;
     }
@@ -223,6 +254,9 @@ class PinballYGameStat
      */
     public function setRating(string $rating): PinballYGameStat
     {
+        if ($this->trackChanges && $this->rating != $rating) {
+            $this->hasChanges['rating'] = TRUE;
+        }
         $this->rating = $rating;
         return $this;
     }
@@ -241,6 +275,9 @@ class PinballYGameStat
      */
     public function setAudioVolume(string $audioVolume): PinballYGameStat
     {
+        if ($this->trackChanges && $this->audioVolume != $audioVolume) {
+            $this->hasChanges['audioVolume'] = TRUE;
+        }
         $this->audioVolume = $audioVolume;
         return $this;
     }
@@ -259,6 +296,9 @@ class PinballYGameStat
      */
     public function setCategories(string $categories): PinballYGameStat
     {
+        if ($this->trackChanges && $this->categories != $categories) {
+            $this->hasChanges['categories'] = TRUE;
+        }
         $this->categories = $categories;
         return $this;
     }
@@ -277,6 +317,9 @@ class PinballYGameStat
      */
     public function setIsHidden(string $isHidden): PinballYGameStat
     {
+        if ($this->trackChanges && $this->isHidden != $isHidden) {
+            $this->hasChanges['isHidden'] = TRUE;
+        }
         $this->isHidden = $isHidden;
         return $this;
     }
@@ -295,6 +338,9 @@ class PinballYGameStat
      */
     public function setDateAdded(string $dateAdded): PinballYGameStat
     {
+        if ($this->trackChanges && $this->dateAdded != $dateAdded) {
+            $this->hasChanges['dateAdded'] = TRUE;
+        }
         $this->dateAdded = $dateAdded;
         return $this;
     }
@@ -321,6 +367,9 @@ class PinballYGameStat
      */
     public function setHighScore(string $highScoreStyle): PinballYGameStat
     {
+        if ($this->trackChanges && $this->highScoreStyle != $highScoreStyle) {
+            $this->hasChanges['highScoreStyle'] = TRUE;
+        }
         $this->highScoreStyle = $highScoreStyle;
         return $this;
     }
@@ -339,6 +388,9 @@ class PinballYGameStat
      */
     public function setMarkedForCapture(string $markedForCapture): PinballYGameStat
     {
+        if ($this->trackChanges && $this->markedForCapture != $markedForCapture) {
+            $this->hasChanges['markedForCapture'] = TRUE;
+        }
         $this->markedForCapture = $markedForCapture;
         return $this;
     }
@@ -357,8 +409,83 @@ class PinballYGameStat
      */
     public function setShowWhenRunning(string $showWhenRunning): PinballYGameStat
     {
+        if ($this->trackChanges && $this->showWhenRunning != $showWhenRunning) {
+            $this->hasChanges['showWhenRunning'] = TRUE;
+        }
         $this->showWhenRunning = $showWhenRunning;
         return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isDmdShownWhenRunning(): bool
+    {
+        return $this->showWhenRunningArray['dmd'];
+    }
+
+    /**
+     * @param bool $show
+     * @return PinballYGameStat
+     */
+    public function setDmdShownWhenRunning(bool $show): PinballYGameStat
+    {
+        $this->showWhenRunningArray['dmd'] = $show;
+        return $this->setShowWhenRunning(implode(' ', array_keys(array_filter($this->showWhenRunningArray))));
+    }
+
+    /**
+     * @return bool
+     */
+    public function isBackglassShownWhenRunning(): bool
+    {
+        return $this->showWhenRunningArray['bg'];
+    }
+
+    /**
+     * @param bool $show
+     * @return PinballYGameStat
+     */
+    public function setBackglassShownWhenRunning(bool $show): PinballYGameStat
+    {
+        $this->showWhenRunningArray['bg'] = $show;
+        return $this->setShowWhenRunning(implode(' ', array_keys(array_filter($this->showWhenRunningArray))));
+    }
+
+    /**
+     * @return bool
+     */
+    public function isTopperShownWhenRunning(): bool
+    {
+        return $this->showWhenRunningArray['topper'];
+    }
+
+    /**
+     * @param bool $show
+     * @return PinballYGameStat
+     */
+    public function setTopperShownWhenRunning(bool $show): PinballYGameStat
+    {
+        $this->showWhenRunningArray['topper'] = $show;
+        return $this->setShowWhenRunning(implode(' ', array_keys(array_filter($this->showWhenRunningArray))));
+    }
+
+    /**
+     * @return bool
+     */
+    public function isInstructionCardShownWhenRunning(): bool
+    {
+        return $this->showWhenRunningArray['instcard'];
+    }
+
+    /**
+     * @param bool $show
+     * @return PinballYGameStat
+     */
+    public function setInstructionCardShownWhenRunning(bool $show): PinballYGameStat
+    {
+        $this->showWhenRunningArray['instcard'] = $show;
+        return $this->setShowWhenRunning(implode(' ', array_keys(array_filter($this->showWhenRunningArray))));
     }
 
     public function toArray() {
@@ -391,7 +518,7 @@ class PinballYGameStat
             $this->categories . ',' .
             $this->isHidden . ',' .
             $this->dateAdded . ',' .
-            $this->highScore . ',' .
+            $this->highScoreStyle . ',' .
             $this->markedForCapture . ',' .
             $this->showWhenRunning;
     }

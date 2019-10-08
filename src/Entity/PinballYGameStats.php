@@ -44,6 +44,12 @@ class PinballYGameStats implements \IteratorAggregate
         return null;
     }
 
+    public function setStat(PinballYGameStat $stat): self
+    {
+        $this->stats[$stat->getGame()] = $stat;
+        return $this;
+    }
+
     public function load(): self
     {
         if ($contents = file_get_contents($this->file)) {

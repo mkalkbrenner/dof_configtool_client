@@ -50,6 +50,10 @@ class TablesController extends AbstractSettingsController
         $manufacturer =
         $year =
             'PinballY required!';
+        $topper =
+        $dmd =
+        $instcard =
+            'pup';
 
         if ($this->settings->getPinballYPath()) {
             $pinballYDatabaseFile = $this->settings->getPinballYVPXDatabaseFile();
@@ -66,6 +70,9 @@ class TablesController extends AbstractSettingsController
                 $pinballYMedia->setPath($this->settings->getPinballYPath())->load();
                 $description = $pinballYMenuEntry->getDescription();
                 $roms = Utility::getRomsForTable($description, $this->settings);
+                $topper = $pinballYGameStat->isTopperShownWhenRunning() ? 'pinbally' : 'pup';
+                $dmd = $pinballYGameStat->isDmdShownWhenRunning() ? 'pinbally' : 'pup';
+                $instcard = $pinballYGameStat->isInstructionCardShownWhenRunning() ? 'pinbally' : 'pup';
             }
         }
 
@@ -164,7 +171,7 @@ class TablesController extends AbstractSettingsController
                 ])
                 ->add('topper', ChoiceType::class, [
                     'choices' => ['PinballY' => 'pinbally', 'None or PUP Pack' => 'pup'],
-                    'data' => null ?? '_', // @todo
+                    'data' => $topper,
                     'label' => false,
                 ])
                 ->add('backglass', ChoiceType::class, [
@@ -173,13 +180,14 @@ class TablesController extends AbstractSettingsController
                     'label' => false,
                 ])
                 ->add('dmd', ChoiceType::class, [
-                    'choices' => ['VPinMame external (freezy)' => 'external', 'VPinMame' => 'internal', 'B2S' => 'b2s', 'PinballY' => 'pinbally', 'None or PUP Pack' => 'pup'],
-                    'data' => null ?? '_', // @todo
+                    'choices' => ['PinballY' => 'pinbally', 'VPinMame or B2S or PUP Pack or None' => 'pup'],
+                    // 'choices' => ['VPinMame external (freezy)' => 'external', 'VPinMame' => 'internal', 'B2S' => 'b2s', 'PinballY' => 'pinbally', 'None or PUP Pack' => 'pup'],
+                    'data' => $dmd,
                     'label' => false,
                 ])
                 ->add('instruction', ChoiceType::class, [
                     'choices' => ['PinballY' => 'pinbally', 'None or PUP Pack' => 'pup'],
-                    'data' => null ?? '_', // @todo
+                    'data' => $instcard,
                     'label' => false,
                 ])
                 ->add('b2s_table_setting', B2STableSettingType::class, [
@@ -238,6 +246,16 @@ class TablesController extends AbstractSettingsController
 
                 case 'save':
                     $this->saveBackglass($table_name, $data['backglass']);
+
+                    if (isset($pinballYGameStat)) {
+                        $pinballYGameStat->trackChanges(true)
+                            ->setTopperShownWhenRunning('pinbally' === $data['topper'])
+                            ->setDmdShownWhenRunning('pinbally' === $data['dmd'])
+                            ->setInstructionCardShownWhenRunning('pinbally' === $data['instruction']);
+                        if ($pinballYGameStat->hasChanges()) {
+                            $pinballYGameStats->setStat($pinballYGameStat)->persist();
+                        }
+                    }
 
                     if ($data['b2s_table_setting']->hasChanges()) {
                         $b2sTableSettings->setTableSetting($data['b2s_table_setting'])->persist();

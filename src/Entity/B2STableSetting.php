@@ -4,6 +4,8 @@ namespace App\Entity;
 
 class B2STableSetting
 {
+    use TrackChangesTrait;
+
     /**
      * @var string
      */
@@ -74,10 +76,6 @@ class B2STableSetting
      * @var int
      */
     private $StartBackground = 0;
-
-    private $trackChanges = FALSE;
-
-    private $hasChanges;
 
     private $originalLines = [];
 
@@ -354,23 +352,6 @@ class B2STableSetting
         }
         $this->StartBackground = $StartBackground;
         return $this;
-    }
-
-    public function trackChanges(bool $track = TRUE): self
-    {
-        $this->trackChanges = $track;
-
-        return $this;
-    }
-
-    public function hasChanges(): bool
-    {
-        return !empty($this->hasChanges);
-    }
-
-    public function getChanges(): ?array
-    {
-        return $this->hasChanges;
     }
 
     public function addOriginalLine(string $line): self
