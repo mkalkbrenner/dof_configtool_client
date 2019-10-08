@@ -90,6 +90,10 @@ class TweakController extends AbstractSettingsController
                 'label' => 'Night Settings',
                 'required' => false,
             ] + $defaults)
+            ->add('synonymSettings', AceEditorType::class, [
+                    'label' => 'Synonym ROMs',
+                    'required' => false,
+                ] + $defaults)
             ->add('save', SubmitType::class, ['label' => 'Save settings'])
             ->getForm();
 
@@ -188,7 +192,7 @@ class TweakController extends AbstractSettingsController
 
         foreach ($mods as $file => $per_game_mods) {
             $directOutputConfig = new DirectOutputConfig($file);
-            $contents = $directOutputConfig->load()->getContent();
+            $contents = $directOutputConfig->load()->createSynonymGames($tweaks->getSynonymSettingsParsed())->getContent();
             if ($contents) {
                 $files[$file] = $contents;
                 $colors[$file] = $directOutputConfig->getColors();
@@ -302,17 +306,6 @@ class TweakController extends AbstractSettingsController
                                                 break;
 
                                             case 'string_append':
-                                                if (0 !== $game[$port]) {
-                                                    $setting = trim($setting);
-                                                    if (0 === strpos($setting, '/')) {
-                                                        $game[$port] .= $setting;
-                                                    } else {
-                                                        $game[$port] .= ' ' . $setting;
-                                                    }
-                                                }
-                                                break;
-
-                                            case 'remove':
                                                 if (0 !== $game[$port]) {
                                                     $setting = trim($setting);
                                                     if (0 === strpos($setting, '/')) {
@@ -484,7 +477,7 @@ class TweakController extends AbstractSettingsController
             }
         }
 
-        $diffs = Utility::getDiffTables($files, $modded_files, $this->settings);
+        $diffs = Utility::getDiffTables($files, $modded_files, $this->settings, $tweaks->getSynonymSettingsParsed());
 
         if ($previous_branch) {
             $workingCopy->checkout($previous_branch);

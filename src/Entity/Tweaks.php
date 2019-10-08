@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Component\Utility;
 use Symfony\Component\Validator\Constraints as Assert;
 
 class Tweaks
@@ -17,9 +18,16 @@ class Tweaks
      */
     private $nightSettings = '';
 
+    /**
+     * @var string
+     */
+    private $synonymSettings = '';
+
     private $dayIni;
 
     private $nightIni;
+
+    private $synonymsIni;
 
     private $directory;
 
@@ -32,6 +40,7 @@ class Tweaks
 
         $this->dayIni = $this->directory . DIRECTORY_SEPARATOR . 'day.ini';
         $this->nightIni = $this->directory . DIRECTORY_SEPARATOR . 'night.ini';
+        $this->synonymsIni = $this->directory . DIRECTORY_SEPARATOR . 'synonyms.ini';
     }
 
     /**
@@ -57,7 +66,7 @@ class Tweaks
 
     public function getDaySettingsParsed(): ?array
     {
-        return parse_ini_string($this->daySettings, TRUE);
+        return Utility::parseIniString($this->daySettings);
     }
 
     public function setDaySettings(string $settings): self
@@ -82,7 +91,7 @@ class Tweaks
 
     public function getNightSettingsParsed(): ?array
     {
-        return parse_ini_string($this->nightSettings, TRUE);
+        return Utility::parseIniString($this->nightSettings);
     }
 
     public function setNightSettings(string $settings): self
@@ -95,6 +104,31 @@ class Tweaks
     public function getSettingsParsed(string $cycle = 'day'): ?array
     {
         return 'day' == $cycle ? $this->getDaySettingsParsed(): $this->getNightSettingsParsed();
+    }
+
+    /**
+     * @return string
+     */
+    public function getSynonymsIni(): string
+    {
+        return $this->synonymsIni;
+    }
+
+    public function getSynonymSettings(): ?string
+    {
+        return $this->synonymSettings;
+    }
+
+    public function getSynonymSettingsParsed(): ?array
+    {
+        return Utility::parseIniString($this->synonymSettings);
+    }
+
+    public function setSynonymSettings(string $synonymSettings): self
+    {
+        $this->synonymSettings = $synonymSettings;
+
+        return $this;
     }
 
     public function load(): self
@@ -113,6 +147,12 @@ class Tweaks
             $this->nightSettings = file_get_contents($this->nightIni);
         }
 
+        if (file_exists($this->synonymsIni)) {
+            $this->synonymSettings = file_get_contents($this->synonymsIni);
+        } else {
+            $this->synonymSettings = "# Beatles = Seawitch\r\nseawitfp = seawitch\r\n";
+        }
+
         return $this;
     }
 
@@ -124,6 +164,10 @@ class Tweaks
 
         if (!file_put_contents($this->nightIni, $this->nightSettings)) {
             throw new \RuntimeException('Could not write file ' . $this->nightIni);
+        }
+
+        if (!file_put_contents($this->synonymsIni, $this->synonymSettings)) {
+            throw new \RuntimeException('Could not write file ' . $this->synonymsIni);
         }
 
         return $this;

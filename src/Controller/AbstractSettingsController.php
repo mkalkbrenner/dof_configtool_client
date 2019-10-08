@@ -37,6 +37,30 @@ abstract class AbstractSettingsController extends AbstractController
         $this->cache = new FilesystemAdapter();
     }
 
+    /**
+     * @return Settings
+     */
+    public function getSettings(): Settings
+    {
+        return $this->settings;
+    }
+
+    /**
+     * @return Filesystem
+     */
+    public function getFilesystem(): Filesystem
+    {
+        return $this->filesystem;
+    }
+
+    /**
+     * @return FilesystemAdapter
+     */
+    public function getCache(): FilesystemAdapter
+    {
+        return $this->cache;
+    }
+
     protected function getGitWorkingCopy(string $path): GitWorkingCopy
     {
         $gitWrapper = new GitWrapper($this->settings->getGitBinary());

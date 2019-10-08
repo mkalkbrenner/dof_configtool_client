@@ -1,0 +1,11 @@
+.image-label {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgb(233, 236, 239);
+    color: black;
+    border:2px solid black;
+    padding-left: 3px;
+    padding-right: 3px;
+}

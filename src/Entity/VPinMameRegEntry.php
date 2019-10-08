@@ -7,6 +7,8 @@ use Windows\Registry\RegistryKey;
 
 class VPinMameRegEntry
 {
+    use TrackChangesTrait;
+
     private $rom;
 
     private $table;
@@ -30,10 +32,6 @@ class VPinMameRegEntry
     private $showwindmd;
 
     private $synclevel;
-
-    private $trackChanges = FALSE;
-
-    private $hasChanges;
 
     private $hkcu;
 
@@ -227,18 +225,6 @@ class VPinMameRegEntry
         return $this;
     }
 
-    public function trackChanges(bool $track = TRUE): self
-    {
-        $this->trackChanges = $track;
-
-        return $this;
-    }
-
-    public function getChanges(): ?array
-    {
-        return $this->hasChanges;
-    }
-
     public function load(): self
     {
         self::readValues(
@@ -358,7 +344,8 @@ class RegistryKeyDummy
             'aar' => $this,
             'default' => $this,
             'aavenger' => $this,
-            'ACDC' => $this,
+            'acd_170hc' => $this,
+            'acd_168hc' => $this,
             'babypac' => $this,
         ];
     }

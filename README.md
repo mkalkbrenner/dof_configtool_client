@@ -325,6 +325,9 @@ _ON RED_ to port _7_.
 ruleset to better express what you mean: `string_overwrite` to replace a DOF setting, `set` to to add a setting where
 DOF doesn't provide anything.
 
+**_Note:_** This tweak could also be used to entirely remove an effect or disable a toy. Just set the value to _0_:
+`set[38] = 0`.
+
 ###### Use-cases
 
 For example you can use a different color for your flipper buttons. Or you can add effects for your fan or shaker on

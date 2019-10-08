@@ -33,14 +33,14 @@
     </head>
     <body class="bg-light">
         <nav class="navbar fixed-top navbar-expand-md navbar-dark bg-dark">
-            <a class="navbar-brand" href="#"><img src="{{ asset('images/mk47.png') }}" width="30" height="30" alt=""> {{ constant('DOFCTC_VERSION') }}</a>
+            <a class="navbar-brand" href="{{ path('welcome') }}"><img src="{{ asset('images/mk47.png') }}" width="30" height="30" alt=""> {{ constant('DOFCTC_VERSION') }}</a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarCollapse">
                 <ul class="navbar-nav mr-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ path('welcome') }}">Welcome</a>
+                        <a class="nav-link" href="{{ path('tables') }}">Tables</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{{ path('day_night') }}">Day/Night</a>
@@ -67,7 +67,13 @@
                         <a class="nav-link" href="{{ path('backglasses') }}">Backglasses</a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link" href="{{ path('puppacks') }}">PUPPacks</a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link" href="{{ path('settings') }}">Settings</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('about') }}">About/Help</a>
                     </li>
                 </ul>
             </div>

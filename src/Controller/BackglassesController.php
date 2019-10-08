@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Component\Utility;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
@@ -22,7 +23,7 @@ class BackglassesController extends AbstractSettingsController
         foreach ($tables as $key => $basename) {
             $form->add($key, ChoiceType::class, [
                 'label' => $basename,
-                'choices' => $this->getGroupedBackglassChoices($backglassChoices, $basename),
+                'choices' => Utility::getGroupedBackglassChoices($backglassChoices, $basename),
                 'data' => $backglassChoices[$basename] ?? '_',
             ]);
         }
@@ -31,7 +32,7 @@ class BackglassesController extends AbstractSettingsController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $filesystem = new Filesystem();
+            $filesystem = $this->getFilesystem();
             $table_path = $this->settings->getTablesPath() . DIRECTORY_SEPARATOR;
             $data = $form->getData();
             $count = array_count_values($data);
@@ -94,51 +95,10 @@ class BackglassesController extends AbstractSettingsController
 
     private function getExistingTablesAndBackglassChoices(): array
     {
-        $tables = [];
-        $backglasses = [];
         $tables_path = $this->settings->getTablesPath();
-        if (is_writable($tables_path)) {
-            foreach (scandir($tables_path) as $filename) {
-                $basename = preg_replace('/\.vpx/i', '', $filename);
-                if ($basename !== $filename) {
-                    $tables[md5($filename)] = $basename;
-                    continue;
-                }
-                $basename = preg_replace('/\.directb2s/i', '', $filename);
-                if ($basename !== $filename) {
-                    // Use $basename . '.directb2s' instead of $filename to ensure lower case file type.
-                    $backglasses[$basename] = $basename . '.directb2s';
-                }
-            }
-        } else {
+        if (!is_writable($tables_path)) {
             $this->addFlash('error', 'Directory ' . $tables_path . ' is not writable!');
         }
-        return [$tables, $backglasses];
-    }
-
-    private function getGroupedBackglassChoices(array $choices, string $basename): array
-    {
-        $group = [
-            'Current' => [],
-            'Suggested' => [],
-            'Enabled' => [],
-            'Disabled'=> [],
-        ];
-
-        foreach ($choices as $key => $value) {
-            if ($key === $basename) {
-                $group['Current'][$key] = $value;
-            } elseif (strtolower(substr(ltrim($key, '_'), 0, 4)) === strtolower(substr($basename, 0, 4))) {
-                $group['Suggested'][$key] = $value;
-            } elseif (0 !== strpos($key, '_')) {
-                $group['Enabled'][$key] = $value;
-            } else {
-                $group['Disabled'][$key] = $value;
-            }
-        }
-
-        return [
-            'No Backglass (or PUP Pack used instead)' => '_',
-        ] + array_filter($group, 'count');
+        return Utility::getExistingTablesAndBackglassChoices($this->settings);
     }
 }

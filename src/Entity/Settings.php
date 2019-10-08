@@ -30,6 +30,19 @@ class Settings
      */
     private $visualPinballPath = '';
 
+    /**
+     * @var string
+     */
+    private $pinballYPath = '';
+
+    /**
+     * @var string
+     */
+    private $pinUpSystemPath = '';
+
+    /**
+     * @var array
+     */
     private $portAssignments = [];
 
     /**
@@ -129,6 +142,31 @@ class Settings
         return $this->visualPinballPath;
     }
 
+    public function getPinballYPath(): ?string
+    {
+        return $this->pinballYPath;
+    }
+
+    public function getPinballYDatabasePath(): ?string
+    {
+        return $this->pinballYPath . DIRECTORY_SEPARATOR . 'Databases';
+    }
+
+    public function getPinballYVPXDatabaseFile(): ?string
+    {
+        return $this->getPinballYDatabasePath() . DIRECTORY_SEPARATOR . 'Visual Pinball X' . DIRECTORY_SEPARATOR . 'Visual Pinball X.xml';
+    }
+
+    public function getPinUpSystemPath(): ?string
+    {
+        return $this->pinUpSystemPath;
+    }
+
+    public function getPinUpPacksPath(): ?string
+    {
+        return $this->pinUpSystemPath . DIRECTORY_SEPARATOR . 'PUPVideos';
+    }
+
     public function getVPinMamePath(): ?string
     {
         return $this->getVisualPinballPath() . DIRECTORY_SEPARATOR . 'VPinMAME';
@@ -197,41 +235,63 @@ class Settings
         return $this->getVisualPinballPath() . DIRECTORY_SEPARATOR . 'Tables';
     }
 
+    /**
+     * @return array [rom => Table]
+     */
     public function getTableMapping(): array
     {
-        $tableMapping = [];
-        $mappingFile = $this->getDofConfigPath() . DIRECTORY_SEPARATOR . 'tablemappings.xml';
-        if (file_exists($mappingFile)) {
-            // Normalize line endings.
-            $mapping = preg_replace('/\R/', "\r\n", file_get_contents($mappingFile));
-            $table = '';
-            foreach (explode("\r\n", $mapping) as $line) {
-                if (preg_match('@<TableName>(.*)</TableName>@', $line, $matches)) {
-                    $table = trim($matches[1]);
-                }
-                elseif (preg_match('@<RomName>(.*)</RomName>@', $line, $matches)) {
-                    $tableMapping[trim($matches[1])] = $table;
+        static $tableMapping = [];
+        if (!$tableMapping) {
+            $mappingFile = $this->getDofConfigPath() . DIRECTORY_SEPARATOR . 'tablemappings.xml';
+            if (file_exists($mappingFile)) {
+                // Normalize line endings.
+                $mapping = preg_replace('/\R/', "\r\n", file_get_contents($mappingFile));
+                $table = '';
+                foreach (explode("\r\n", $mapping) as $line) {
+                    if (preg_match('@<TableName>(.*)</TableName>@', $line, $matches)) {
+                        $table = html_entity_decode(trim($matches[1]), ENT_QUOTES | ENT_HTML5);
+                    } elseif (preg_match('@<RomName>(.*)</RomName>@', $line, $matches)) {
+                        $tableMapping[trim($matches[1])] = $table;
+                    }
                 }
             }
-        }
 
-        foreach ($this->getRoms() as $real_rom) {
-            if (!isset($tableMapping[$real_rom])) {
-                foreach ($tableMapping as $rom => $table) {
-                    if (strpos($real_rom, $rom) === 0) {
-                        $tableMapping[$real_rom] = $table;
-                        break;
+            foreach ($this->getRoms() as $real_rom) {
+                if (!isset($tableMapping[$real_rom])) {
+                    foreach ($tableMapping as $rom => $table) {
+                        $real_rom_prefix = preg_replace('/_.*/', '', $real_rom);
+                        if ($real_rom_prefix === $rom) {
+                            $tableMapping[$real_rom] = $table;
+                            break;
+                        }
+                        if (strpos($real_rom, $rom) === 0) {
+                            $tableMapping[$real_rom] = $table;
+                            // No break. A later prefix match should be able to overwrite this hit.
+                        }
                     }
                 }
             }
         }
-
         return $tableMapping;
     }
 
     public function setVisualPinballPath(string $visualPinballPath): self
     {
         $this->visualPinballPath = $visualPinballPath;
+
+        return $this;
+    }
+
+    public function setPinballYPath(string $pinballYPath): self
+    {
+        $this->pinballYPath = $pinballYPath;
+
+        return $this;
+    }
+
+    public function setPinUpSystemPath(string $pinUpSystemPath): self
+    {
+        $this->pinUpSystemPath = $pinUpSystemPath;
 
         return $this;
     }
@@ -401,6 +461,8 @@ class Settings
             $this->setLcpApiKey($settings['dof']['LCP_APIKEY']);
             $this->setDofPath($settings['dof']['path']);
             $this->setVisualPinballPath($settings['visualpinball']['path']);
+            $this->setPinballYPath($settings['pinbally']['path'] ?? '');
+            $this->setPinUpSystemPath($settings['pinupsystem']['path'] ?? '');
             $this->setVersionControl((bool) ($settings['git']['enabled'] ?? false));
             $this->setGitBinary($settings['git']['binary'] ?? $this->getGitBinary());
             $this->setGitUser($settings['git']['user'] ?? $this->getGitUser());
@@ -428,6 +490,10 @@ class Settings
             'path = "' . addslashes(trim($this->getDofPath(), '" ')) . '"' . "\r\n".
             "[visualpinball]\r\n" .
             'path = "' . addslashes(trim($this->getVisualPinballPath(), '" ')) . '"' . "\r\n" .
+            "[pinbally]\r\n" .
+            'path = "' . addslashes(trim($this->getPinballYPath(), '" ')) . '"' . "\r\n" .
+            "[pinupsystem]\r\n" .
+            'path = "' . addslashes(trim($this->getPinUpSystemPath(), '" ')) . '"' . "\r\n" .
             "[git]\r\n" .
             'enabled = ' . (int) $this->isVersionControl()  . "\r\n" .
             'binary = "' . addslashes(trim($this->getGitBinary(), '" ')) . '"' . "\r\n" .

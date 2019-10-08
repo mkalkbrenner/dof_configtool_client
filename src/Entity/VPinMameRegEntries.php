@@ -17,6 +17,13 @@ class VPinMameRegEntries implements \IteratorAggregate
         return $this->entries[$key] ?? null;
     }
 
+    public function addEntry(VPinMameRegEntry $entry): self
+    {
+        $this->entries[$entry->getRom()] = $entry;
+
+        return $this;
+    }
+
     public function setEntries(array $entries): self
     {
         // 'default' should be at the end of the list.
