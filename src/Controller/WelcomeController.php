@@ -16,6 +16,15 @@ class WelcomeController extends AbstractSettingsController
         }
 
         return $this->render('welcome/index.html.twig', [
+        ]);
+    }
+
+    /**
+     * @Route("/about", name="about")
+     */
+    public function about()
+    {
+        return $this->render('welcome/about.html.twig', [
             'readme' => $this->getReadme(),
         ]);
     }

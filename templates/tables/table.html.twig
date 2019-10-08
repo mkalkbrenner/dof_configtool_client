@@ -45,17 +45,20 @@
                     {%  if dmd_image %}<tr><td style="position: relative; text-align: center; color: white;"><div class="image-label">DMD</div><img src="{{ path('binary', {'file': dmd_image}) }}" width="100%"></td></tr>{% endif %}
                     {%  if table_image %}<tr><td style="position: relative; text-align: center; color: white;"><div class="image-label">Playfield</div><img src="{{ path('binary', {'file': table_image}) }}" width="100%"></td></tr>{% endif %}
                     {%  if instruction_image %}<tr><td style="position: relative; text-align: center; color: white;"><div class="image-label">Instruction Card</div><img src="{{ path('binary', {'file': instruction_image}) }}" width="100%"></td></tr>{% endif %}
-                    <tr><th style="text-align: center"><hr>VPinMAME<hr></th></tr>
-                    <tr><th style="background-color: #bd2130">ROM zip file not found.</th></tr>
-                    <tr><th style="background-color: #e0a800">Alt sound directory for ROM exists.</th></tr>
-                    <tr><th style="background-color: #9fcdff">Alt color directory for ROM exists.</th></tr>
-                    <tr><th style="background-color: #34ce57">Default values for new ROMs.</th></tr>
                 </table>
 
             </div>
         </div>
         <div class="row">
             <div class="col-12">
+                <table class="table">
+                    <thead>
+                    <th style="background-color: #bd2130">ROM zip file not found.</th>
+                    <th style="background-color: #e0a800">Alt sound directory for ROM exists.</th>
+                    <th style="background-color: #9fcdff">Alt color directory for ROM exists.</th>
+                    <th style="background-color: #34ce57">Default values for new ROMs.</th>
+                    </thead>
+                </table>
                 <table class="table table-striped" width="100%">
                     <tr>
                         <th>ROM \ Key</th>

@@ -30,7 +30,7 @@ class TablesController extends AbstractSettingsController
     public function index(Request $request)
     {
         list($tables, $backglassChoices) = Utility::getExistingTablesAndBackglassChoices($this->settings);
-
+        asort($tables, SORT_NATURAL | SORT_FLAG_CASE);
         return $this->render('tables/index.html.twig', [
             'tables' => $tables,
         ]);
@@ -63,16 +63,18 @@ class TablesController extends AbstractSettingsController
                 $pinballYGameStats = new PinballYGameStats();
                 $pinballYGameStats->setFile($this->settings->getPinballYPath() . DIRECTORY_SEPARATOR . 'GameStats.csv')->load();
                 if ($pinballYGameStat = $pinballYGameStats->getStat($pinballYMenuEntry->getDescription())) {
-                    $added = $pinballYGameStat->getDateAddedDateTime();
-                    $last_played = $pinballYGameStat->getLastPlayedDateTime();
+                    $added = $pinballYGameStat->getDateAddedDateTime() ?? 'unknown';
+                    $last_played = $pinballYGameStat->getLastPlayedDateTime() ?? 'unknown';
+                    $topper = $pinballYGameStat->isTopperShownWhenRunning() ? 'pinbally' : 'pup';
+                    $dmd = $pinballYGameStat->isDmdShownWhenRunning() ? 'pinbally' : 'pup';
+                    $instcard = $pinballYGameStat->isInstructionCardShownWhenRunning() ? 'pinbally' : 'pup';
                 }
                 $pinballYMedia = new PinballYMedia($pinballYMenuEntry->getDescription());
                 $pinballYMedia->setPath($this->settings->getPinballYPath())->load();
                 $description = $pinballYMenuEntry->getDescription();
+                $manufacturer = $pinballYMenuEntry->getManufacturer() ?? 'unknown';
+                $year = $pinballYMenuEntry->getYear() ?? 'unknown';
                 $roms = Utility::getRomsForTable($description, $this->settings);
-                $topper = $pinballYGameStat->isTopperShownWhenRunning() ? 'pinbally' : 'pup';
-                $dmd = $pinballYGameStat->isDmdShownWhenRunning() ? 'pinbally' : 'pup';
-                $instcard = $pinballYGameStat->isInstructionCardShownWhenRunning() ? 'pinbally' : 'pup';
             }
         }
 

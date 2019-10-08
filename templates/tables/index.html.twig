@@ -3,7 +3,9 @@
 {% block title %}Tables{% endblock %}
 
 {% block body %}
+    <ol>
     {% for hash,table in tables %}
-        <a href="{{ path('table', {'hash': hash, 'selected_rom': '_'}) }}">{{ table }}</a><br>
+        <li><a href="{{ path('table', {'hash': hash, 'selected_rom': '_'}) }}">{{ table }}</a></li>
     {% endfor %}
+    </ol>
 {% endblock %}
