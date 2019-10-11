@@ -6,7 +6,34 @@
     <h2>Edit Configuration Files</h2>
     {{ form_start(textedit_form) }}
     {{ form_errors(textedit_form) }}
-    {{ form_widget(textedit_form) }}
+    <table>
+        <tr><th colspan="2"><hr>DMD<hr></th></tr>
+        <tr><td>DmdDevice.ini (freezy's dll)</td><td>{{ form_widget(textedit_form.dmddeviceini_) }}</td></tr>
+        <tr><th colspan="2"><hr>B2S<hr></th></tr>
+        <tr><td>B2STableSettings.xml</td><td>{{ form_widget(textedit_form.b2stablesettingsxml_) }}</td></tr>
+        <tr><td>ScreenRes.txt</td><td>{{ form_widget(textedit_form.screenrestxt_) }}</td></tr>
+    {% if branches %}
+        {% if 'download' in branches %}
+            <tr><th colspan="2"><hr>DOF for <i>downloaded/unmodified</i> Configuration Files<hr></th></tr>
+            <tr><td>Cabinet.xml</td><td>{{ form_widget(textedit_form.cabinetxml_download) }}</td></tr>
+            <tr><td>GlobalConfig_B2SServer.xml</td><td>{{ form_widget(textedit_form.globalconfigb2sserverxml_download) }}</td></tr>
+        {% endif %}
+        {% if 'day' in branches %}
+            <tr><th colspan="2"><hr>DOF for <i>day</i> mode Configuration Files<hr></th></tr>
+            <tr><td>Cabinet.xml</td><td>{{ form_widget(textedit_form.cabinetxml_day) }} {{ form_widget(textedit_form.freshcabinetxml_day) }}{% if 'night' in branches %} {{ form_widget(textedit_form.nightcabinetxml_day) }}{% endif %}</td></tr>
+            <tr><td>GlobalConfig_B2SServer.xml</td><td>{{ form_widget(textedit_form.globalconfigb2sserverxml_day) }} {{ form_widget(textedit_form.freshglobalconfigb2sserverxml_day) }}{% if 'night' in branches %} {{ form_widget(textedit_form.nightglobalconfigb2sserverxml_day) }}{% endif %}</td></tr>
+        {% endif %}
+        {% if 'night' in branches %}
+            <tr><th colspan="2"><hr>DOF for <i>night</i> mode Configuration Files<hr></th></tr>
+            <tr><td>Cabinet.xml</td><td>{{ form_widget(textedit_form.cabinetxml_night) }} {{ form_widget(textedit_form.freshcabinetxml_night) }}{% if 'day' in branches %} {{ form_widget(textedit_form.daycabinetxml_night) }}{% endif %}</td></tr>
+            <tr><td>GlobalConfig_B2SServer.xml</td><td>{{ form_widget(textedit_form.globalconfigb2sserverxml_night) }} {{ form_widget(textedit_form.freshglobalconfigb2sserverxml_night) }}{% if 'day' in branches %} {{ form_widget(textedit_form.dayglobalconfigb2sserverxml_night) }}{% endif %}</td></tr>
+        {% endif %}
+    {% else %}
+        <tr><th colspan="2"><hr>DOF<hr></th></tr>
+        <tr><td>Cabinet.xml</td><td>{{ form_widget(textedit_form.cabinetxml_) }}</td></tr>
+        <tr><td>GlobalConfig_B2SServer.xml</td><td>{{ form_widget(textedit_form.globalconfigb2sserverxml_) }}</td></tr>
+    {% endif %}
+    </table>
     {{ form_end(textedit_form) }}
 
     {% if git_diff|default %}

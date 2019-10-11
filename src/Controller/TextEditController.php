@@ -19,36 +19,49 @@ class TextEditController extends AbstractSettingsController
     {
         $formBuilder = $this->createFormBuilder();
 
+        $branches = [];
         if ($this->settings->isVersionControl()) {
             try {
                 $workingCopy = $this->getGitWorkingCopy($this->settings->getDofConfigPath());
-                $branches = $workingCopy->getBranches();
+                $branches = $workingCopy->getBranches()->all();
                 foreach ($branches as $branch) {
-                    $formBuilder->add('cabinet_xml|' . $branch, SubmitType::class, ['label' => 'Edit Cabinet.xml (DOF) for cycle ' . $branch]);
-                    $formBuilder->add('globalconfig_b2sserver_xml|' . $branch, SubmitType::class, ['label' => 'Edit GlobalConfig_B2SServer.xml (DOF) for cycle ' . $branch]);
+                    $formBuilder->add('cabinetxml_' . $branch, SubmitType::class, ['label' => 'Edit ' . $branch]);
+                    $formBuilder->add('globalconfigb2sserverxml_' . $branch, SubmitType::class, ['label' => 'Edit ' . $branch]);
+                    if ('download' !== $branch) {
+                        $formBuilder->add('freshcabinetxml_' . $branch, SubmitType::class, ['label' => 'Fresh copy from download']);
+                        $formBuilder->add('freshglobalconfigb2sserverxml_' . $branch, SubmitType::class, ['label' => 'Fresh copy from download']);
+                        if ('day' === $branch && in_array('night', $branches)) {
+                            $formBuilder->add('nightcabinetxml_' . $branch, SubmitType::class, ['label' => 'Copy from night']);
+                            $formBuilder->add('nightglobalconfigb2sserverxml_' . $branch, SubmitType::class, ['label' => 'Copy from night']);
+                        }
+                        elseif ('night' === $branch && in_array('day', $branches)) {
+                            $formBuilder->add('daycabinetxml_' . $branch, SubmitType::class, ['label' => 'Copy from day']);
+                            $formBuilder->add('dayglobalconfigb2sserverxml_' . $branch, SubmitType::class, ['label' => 'Copy from day']);
+                        }
+                    }
                 }
             } catch (GitException $e) {
                 $this->addFlash('warning', $e->getMessage());
             }
         } else {
-            $formBuilder->add('cabinet_xml|', SubmitType::class, ['label' => 'Edit Cabinet.xml (DOF)']);
-            $formBuilder->add('globalconfig_b2sserver_xml|', SubmitType::class, ['label' => 'Edit GlobalConfig_B2SServer.xml (DOF)']);
+            $formBuilder->add('cabinetxml_', SubmitType::class, ['label' => 'Edit']);
+            $formBuilder->add('globalconfigb2sserverxml_', SubmitType::class, ['label' => 'Edit']);
         }
 
         $form = $formBuilder
-            ->add('dmddevice_ini|', SubmitType::class, ['label' => 'Edit DmdDevice.ini (freezy\'s dll)'])
-            ->add('b2stablesettings_xml|', SubmitType::class, ['label' => 'Edit B2STableSettings.xml (B2S)'])
-            ->add('screenres_txt|', SubmitType::class, ['label' => 'Edit ScreenRes.txt (B2S)'])
+            ->add('dmddeviceini_', SubmitType::class, ['label' => 'Edit'])
+            ->add('b2stablesettingsxml_', SubmitType::class, ['label' => 'Edit'])
+            ->add('screenrestxt_', SubmitType::class, ['label' => 'Edit'])
             ->getForm();
 
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             /** @var \Symfony\Component\Form\Form $form */
-            list($name, $cycle) = explode('|', $form->getClickedButton()->getConfig()->getName());
+            list($name, $cycle) = explode('_', $form->getClickedButton()->getConfig()->getName());
 
             switch ($name) {
-                case 'cabinet_xml':
+                case 'cabinetxml':
                     return $this->redirectToRoute('textedit_editor', [
                         'directory' => $this->settings->getDofConfigPath(),
                         'file' => 'Cabinet.xml',
@@ -56,7 +69,34 @@ class TextEditController extends AbstractSettingsController
                         'cycle' => $cycle,
                     ]);
 
-                case 'globalconfig_b2sserver_xml':
+                case 'freshcabinetxml':
+                    return $this->redirectToRoute('textedit_editor', [
+                        'directory' => $this->settings->getDofConfigPath(),
+                        'file' => 'Cabinet.xml',
+                        'mode' => 'ace/mode/xml',
+                        'cycle' => $cycle,
+                        'source' => 'download',
+                    ]);
+
+                case 'nightcabinetxml':
+                    return $this->redirectToRoute('textedit_editor', [
+                        'directory' => $this->settings->getDofConfigPath(),
+                        'file' => 'Cabinet.xml',
+                        'mode' => 'ace/mode/xml',
+                        'cycle' => $cycle,
+                        'source' => 'night',
+                    ]);
+
+                case 'daycabinetxml':
+                    return $this->redirectToRoute('textedit_editor', [
+                        'directory' => $this->settings->getDofConfigPath(),
+                        'file' => 'Cabinet.xml',
+                        'mode' => 'ace/mode/xml',
+                        'cycle' => $cycle,
+                        'source' => 'day',
+                    ]);
+
+                case 'globalconfigb2sserverxml':
                     return $this->redirectToRoute('textedit_editor', [
                         'directory' => $this->settings->getDofConfigPath(),
                         'file' => 'GlobalConfig_B2SServer.xml',
@@ -64,21 +104,48 @@ class TextEditController extends AbstractSettingsController
                         'cycle' => $cycle,
                     ]);
 
-                case 'dmddevice_ini':
+                case 'freshglobalconfigb2sserverxml':
+                    return $this->redirectToRoute('textedit_editor', [
+                        'directory' => $this->settings->getDofConfigPath(),
+                        'file' => 'GlobalConfig_B2SServer.xml',
+                        'mode' => 'ace/mode/xml',
+                        'cycle' => $cycle,
+                        'source' => 'download',
+                    ]);
+
+                case 'nightglobalconfigb2sserverxml':
+                    return $this->redirectToRoute('textedit_editor', [
+                        'directory' => $this->settings->getDofConfigPath(),
+                        'file' => 'GlobalConfig_B2SServer.xml',
+                        'mode' => 'ace/mode/xml',
+                        'cycle' => $cycle,
+                        'source' => 'night',
+                    ]);
+
+                case 'dayglobalconfigb2sserverxml':
+                    return $this->redirectToRoute('textedit_editor', [
+                        'directory' => $this->settings->getDofConfigPath(),
+                        'file' => 'GlobalConfig_B2SServer.xml',
+                        'mode' => 'ace/mode/xml',
+                        'cycle' => $cycle,
+                        'source' => 'day',
+                    ]);
+
+                case 'dmddeviceini':
                     return $this->redirectToRoute('textedit_editor', [
                         'directory' => $this->settings->getVPinMamePath(),
                         'file' => 'DmdDevice.ini',
                         'mode' => 'ace/mode/properties',
                     ]);
 
-                case 'b2stablesettings_xml':
+                case 'b2stablesettingsxml':
                     return $this->redirectToRoute('textedit_editor', [
                         'directory' => $this->settings->getTablesPath(),
                         'file' => 'B2STableSettings.xml',
                         'mode' => 'ace/mode/xml',
                     ]);
 
-                case 'screenres_txt':
+                case 'screenrestxt':
                     return $this->redirectToRoute('textedit_editor', [
                         'directory' => $this->settings->getTablesPath(),
                         'file' => 'ScreenRes.txt',
@@ -95,6 +162,7 @@ class TextEditController extends AbstractSettingsController
         return $this->render('textedit/index.html.twig', [
             'textedit_form' => $form->createView(),
             'git_diff' => nl2br($changes),
+            'branches' => $branches,
         ]);
     }
 
@@ -107,20 +175,22 @@ class TextEditController extends AbstractSettingsController
         $file = $request->query->get('file');
         $mode = $request->query->get('mode');
         $cycle = $request->query->get('cycle');
+        $source = $request->query->get('source');
         $previous_branch = '';
         $workingCopy = null;
+        $branch = $source ?? $cycle;
 
         try {
             if ($cycle && $this->settings->isVersionControl()) {
                 $workingCopy = $this->getGitWorkingCopy($directory);
                 $previous_branch = $this->getCurrentBranch($workingCopy);
-                $workingCopy->checkout($cycle);
+                $workingCopy->checkout($branch);
             }
 
             $textFile = new TextFile($directory, $file);
             $textFile->load();
 
-            if ($previous_branch && $cycle !== $previous_branch) {
+            if ($previous_branch && $branch !== $previous_branch) {
                 $workingCopy->checkout($previous_branch);
             }
         } catch (GitException $e) {
@@ -213,6 +283,7 @@ class TextEditController extends AbstractSettingsController
             'textedit_form' => $form->createView(),
             'file' => $file,
             'git_diff' => nl2br($changes),
+            'cycle' => $cycle,
         ]);
     }
 }
