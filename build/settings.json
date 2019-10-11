@@ -27,7 +27,7 @@
         "icon": "",
         "fixed_title": "",
         "center_relative_to_parent": true,
-        "default_size": [800, 600]
+        "default_size": [1024, 800]
     },
     "web_server": {
         "listen_on": ["127.0.0.1", 0],
