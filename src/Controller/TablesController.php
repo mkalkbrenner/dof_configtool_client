@@ -21,6 +21,7 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
+use Windows\Registry\KeyNotFoundException;
 
 class TablesController extends AbstractSettingsController
 {
@@ -91,8 +92,13 @@ class TablesController extends AbstractSettingsController
 
         foreach ($roms as $rom) {
             $vPinMameRegEntry = new VPinMameRegEntry();
-            $vPinMameRegEntry->setRom($rom)->setTable($tableMapping[$rom] ?? '')->load();
-            $vPinMameRegEntries->addEntry($vPinMameRegEntry);
+            try {
+                $vPinMameRegEntry->setRom($rom)->setTable($tableMapping[$rom] ?? '')->load();
+                $vPinMameRegEntries->addEntry($vPinMameRegEntry);
+            }
+            catch (KeyNotFoundException $e) {
+                $this->addFlash('warning', 'Registry: ' . $e->getMessage());
+            }
         }
 
         $b2sTableSettings = new B2STableSettings();

@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use Windows\Registry\KeyNotFoundException;
 use Windows\Registry\Registry;
 use Windows\Registry\RegistryKey;
 
@@ -225,6 +226,11 @@ class VPinMameRegEntry
         return $this;
     }
 
+    /**
+     * @return $this
+     *
+     * @throws KeyNotFoundException
+     */
     public function load(): self
     {
         self::readValues(
