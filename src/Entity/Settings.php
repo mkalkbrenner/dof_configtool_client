@@ -8,6 +8,8 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 class Settings
 {
+    const DEV_TXT = __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' .  DIRECTORY_SEPARATOR . 'public' . DIRECTORY_SEPARATOR . 'dev.txt';
+
     /**
      * @Assert\NotBlank()
      * @var string
@@ -74,6 +76,8 @@ class Settings
      * @var string
      */
     private $gitEmail = 'mk47@localhost';
+
+    private $debug = false;
 
     private $ini;
 
@@ -465,6 +469,24 @@ class Settings
         return $this;
     }
 
+    /**
+     * @return bool
+     */
+    public function isDebug(): bool
+    {
+        return $this->debug;
+    }
+
+    /**
+     * @param bool $debug
+     * @return self
+     */
+    public function setDebug(bool $debug): self
+    {
+        $this->debug = $debug;
+        return $this;
+    }
+
     public function load(): self
     {
         if (file_exists($this->ini)) {
@@ -490,6 +512,8 @@ class Settings
                 $this->setDofPath($settings['download']['DOF_CONFIG_PATH']);
             }
         }
+
+        $this->setDebug(file_exists(self::DEV_TXT));
 
         return $this;
     }
@@ -530,6 +554,12 @@ class Settings
 
         if (is_writable($this->getDofPath()) && !is_dir($this->getDofConfigPath())) {
             mkdir($this->getDofConfigPath());
+        }
+
+        if ($this->isDebug()) {
+            file_put_contents(self::DEV_TXT, DOFCTC_VERSION);
+        } else {
+            @unlink(self::DEV_TXT);
         }
 
         return $this;

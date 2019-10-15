@@ -32,7 +32,8 @@ class SettingsController extends AbstractSettingsController
             ->add('versionControl', CheckboxType::class, ['label' => 'Enable Version Control via Git', 'required' => false])
             ->add('gitBinary', ElFinderType::class, ['label' => 'Git Binary', 'instance' => 'form', 'enable' => true, 'required' => false])
             ->add('gitUser', TextType::class, ['label' => 'Git User', 'required' => false])
-            ->add('gitEmail', TextType::class, ['label' => 'Git Email', 'required' => false]);
+            ->add('gitEmail', TextType::class, ['label' => 'Git Email', 'required' => false])
+            ->add('debug', CheckboxType::class, ['label' => 'Debug Mode', 'required' => false, 'help' => 'Handle with care! Don\'t enable the debug mode unless mk47 advices you to do so ;-)']);
 
         $rgbToys = $this->settings->getRgbToys();
         $dofConfigPath = $this->settings->getDofConfigPath();
