@@ -12,7 +12,7 @@ class BinaryController extends AbstractController
     /**
      * @Route("/binary/{file}", name="binary")
      */
-    public function index(Request $request, string $file)
+    public function index(?Request $request, string $file)
     {
         return new BinaryFileResponse(base64_decode($file));
     }

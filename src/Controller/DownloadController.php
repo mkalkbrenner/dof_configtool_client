@@ -17,7 +17,7 @@ class DownloadController extends AbstractSettingsController
     public function index(Request $request)
     {
         $form = $this->createFormBuilder()
-            ->add('download|database', SubmitType::class, ['label' => 'Download your config files & DOF database config files'])
+            ->add('download_database', SubmitType::class, ['label' => 'Download your config files & DOF database config files'])
             ->add('download', SubmitType::class, ['label' => 'Download your config files only'])
             ->add('database', SubmitType::class, ['label' => 'Download DOF database config files only'])
             ->getForm();
@@ -27,7 +27,7 @@ class DownloadController extends AbstractSettingsController
         $changes = '';
         if ($form->isSubmitted() && $form->isValid()) {
             /** @var \Symfony\Component\Form\Form $form */
-            $names = explode('|', $form->getClickedButton()->getConfig()->getName());
+            $names = explode('_', $form->getClickedButton()->getConfig()->getName());
             foreach ($names as $name) {
                 switch ($name) {
                     case 'database':
