@@ -326,7 +326,7 @@ class Settings
     /**
      * @return string
      */
-    public function getGitBinary(): string
+    public function getGitBinary(): ?string
     {
         return $this->gitBinary;
     }
@@ -344,7 +344,7 @@ class Settings
     /**
      * @return string
      */
-    public function getGitUser(): string
+    public function getGitUser(): ?string
     {
         return $this->gitUser;
     }
@@ -362,7 +362,7 @@ class Settings
     /**
      * @return string
      */
-    public function getGitEmail(): string
+    public function getGitEmail(): ?string
     {
         return $this->gitEmail;
     }
@@ -380,7 +380,7 @@ class Settings
     /**
      * @return string
      */
-    public function getBsPatchBinary(): string
+    public function getBsPatchBinary(): ?string
     {
         return $this->bsPatchBinary;
     }
@@ -389,7 +389,7 @@ class Settings
      * @param string $bsPatchBinary
      * @return self
      */
-    public function setBsPatchBinary(string $bsPatchBinary): self
+    public function setBsPatchBinary(?string $bsPatchBinary): self
     {
         $this->bsPatchBinary = $bsPatchBinary;
         return $this;
