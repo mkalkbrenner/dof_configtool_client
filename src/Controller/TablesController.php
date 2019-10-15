@@ -297,12 +297,12 @@ class TablesController extends AbstractSettingsController
 
         return $this->render('/tables/table.html.twig', [
             'table_form' => $form->createView(),
-            'wheel_image' => isset($pinballYMedia) ? urlencode($pinballYMedia->getWheelImage()) : null,
-            'backglass_image' => isset($pinballYMedia) ? urlencode($pinballYMedia->getBackglassImage()) : null,
-            'dmd_image' => isset($pinballYMedia) ? urlencode($pinballYMedia->getDmdImage()) : null,
-            'topper_image' => isset($pinballYMedia) ? urlencode($pinballYMedia->getTopperImage()) : null,
-            'table_image' => isset($pinballYMedia) ? urlencode($pinballYMedia->getTableImage()) : null,
-            'instruction_image' => isset($pinballYMedia) ? urlencode($pinballYMedia->getInstructionCardImage()) : null,
+            'wheel_image' => isset($pinballYMedia) ? base64_encode($pinballYMedia->getWheelImage()) : null,
+            'backglass_image' => isset($pinballYMedia) ? base64_encode($pinballYMedia->getBackglassImage()) : null,
+            'dmd_image' => isset($pinballYMedia) ? base64_encode($pinballYMedia->getDmdImage()) : null,
+            'topper_image' => isset($pinballYMedia) ? base64_encode($pinballYMedia->getTopperImage()) : null,
+            'table_image' => isset($pinballYMedia) ? base64_encode($pinballYMedia->getTableImage()) : null,
+            'instruction_image' => isset($pinballYMedia) ? base64_encode($pinballYMedia->getInstructionCardImage()) : null,
             'roms' => $roms,
             'romfiles' => $this->settings->getRoms(),
             'altcolor' => $this->settings->getAltcolorRoms(),

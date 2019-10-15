@@ -25,13 +25,14 @@ class SettingsController extends AbstractSettingsController
             ->add('lcpApiKey', TextType::class, ['label' => 'LCP_APIKEY'])
             ->add('dofPath', ElFinderType::class, ['label' => 'DOF Path', 'instance' => 'form', 'enable' => true])
             ->add('visualPinballPath', ElFinderType::class, ['label' => 'Visual Pinball Path', 'instance' => 'form', 'enable' => true])
-            ->add('pinballYPath', ElFinderType::class, ['label' => 'PinballY Path', 'instance' => 'form', 'enable' => true])
-            ->add('pinUpSystemPath', ElFinderType::class, ['label' => 'PinUp System Path', 'instance' => 'form', 'enable' => true])
-            ->add('bsPatchBinary', ElFinderType::class, ['label' => 'pspatch Binary', 'instance' => 'form', 'enable' => true])
-            ->add('versionControl', CheckboxType::class, ['label' => 'Enable Version Control via Git'])
-            ->add('gitBinary', ElFinderType::class, ['label' => 'Git Binary', 'instance' => 'form', 'enable' => true])
-            ->add('gitUser', TextType::class, ['label' => 'Git User'])
-            ->add('gitEmail', TextType::class, ['label' => 'Git Email']);
+            ->add('tablesPath', ElFinderType::class, ['label' => 'Visual Pinball Tables Path', 'instance' => 'form', 'enable' => true, 'help' => 'Only required if non standard!', 'required' => false])
+            ->add('pinballYPath', ElFinderType::class, ['label' => 'PinballY Path', 'instance' => 'form', 'enable' => true, 'required' => false])
+            ->add('pinUpSystemPath', ElFinderType::class, ['label' => 'PinUp System Path', 'instance' => 'form', 'enable' => true, 'required' => false])
+            ->add('bsPatchBinary', ElFinderType::class, ['label' => 'pspatch Binary', 'instance' => 'form', 'enable' => true, 'required' => false])
+            ->add('versionControl', CheckboxType::class, ['label' => 'Enable Version Control via Git', 'required' => false])
+            ->add('gitBinary', ElFinderType::class, ['label' => 'Git Binary', 'instance' => 'form', 'enable' => true, 'required' => false])
+            ->add('gitUser', TextType::class, ['label' => 'Git User', 'required' => false])
+            ->add('gitEmail', TextType::class, ['label' => 'Git Email', 'required' => false]);
 
         $rgbToys = $this->settings->getRgbToys();
         $dofConfigPath = $this->settings->getDofConfigPath();

@@ -94,14 +94,17 @@ class Utility
         if ($path = $settings->getPinUpPacksPath()) {
             if (file_exists($path) && is_readable($path)) {
                 foreach (scandir($path) as $rom) {
-                    $real_rom = ltrim($rom, '_');
-                    if (!$roms || in_array($real_rom, $roms)) {
-                        $pup_path = $path . DIRECTORY_SEPARATOR . $rom;
-                        if (is_dir($pup_path)) {
-                            $size = Utility::directorySize($pup_path);
-                            // Require min 2MB to be considered a pack.
-                            if ($size > 1) {
-                                $pupPacks[$rom] = $tableMapping[$real_rom] ?? $real_rom;
+                    if (strpos($rom, '.') !== 0) {
+                        $real_rom = ltrim($rom, '_');
+                        if (!$roms || in_array($real_rom, $roms)) {
+                            $pup_path = $path . DIRECTORY_SEPARATOR . $rom;
+                            if (is_dir($pup_path)) {
+                                $size = Utility::directorySize($pup_path);
+                                dump($pup_path, $size);
+                                // Require min 2MB to be considered a pack.
+                                if ($size > 1) {
+                                    $pupPacks[$rom] = $tableMapping[$real_rom] ?? $real_rom;
+                                }
                             }
                         }
                     }

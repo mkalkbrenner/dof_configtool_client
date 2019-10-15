@@ -14,6 +14,6 @@ class BinaryController extends AbstractController
      */
     public function index(Request $request, string $file)
     {
-        return new BinaryFileResponse(urldecode($file));
+        return new BinaryFileResponse(base64_decode($file));
     }
 }

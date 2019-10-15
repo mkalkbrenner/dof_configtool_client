@@ -25,18 +25,19 @@ class TextEditController extends AbstractSettingsController
                 $workingCopy = $this->getGitWorkingCopy($this->settings->getDofConfigPath());
                 $branches = $workingCopy->getBranches()->all();
                 foreach ($branches as $branch) {
-                    $formBuilder->add('cabinetxml_' . $branch, SubmitType::class, ['label' => 'Edit ' . $branch]);
-                    $formBuilder->add('globalconfigb2sserverxml_' . $branch, SubmitType::class, ['label' => 'Edit ' . $branch]);
-                    if ('download' !== $branch) {
-                        $formBuilder->add('freshcabinetxml_' . $branch, SubmitType::class, ['label' => 'Fresh copy from download']);
-                        $formBuilder->add('freshglobalconfigb2sserverxml_' . $branch, SubmitType::class, ['label' => 'Fresh copy from download']);
-                        if ('day' === $branch && in_array('night', $branches)) {
-                            $formBuilder->add('nightcabinetxml_' . $branch, SubmitType::class, ['label' => 'Copy from night']);
-                            $formBuilder->add('nightglobalconfigb2sserverxml_' . $branch, SubmitType::class, ['label' => 'Copy from night']);
-                        }
-                        elseif ('night' === $branch && in_array('day', $branches)) {
-                            $formBuilder->add('daycabinetxml_' . $branch, SubmitType::class, ['label' => 'Copy from day']);
-                            $formBuilder->add('dayglobalconfigb2sserverxml_' . $branch, SubmitType::class, ['label' => 'Copy from day']);
+                    if ('master' !== $branch) {
+                        $formBuilder->add('cabinetxml_' . $branch, SubmitType::class, ['label' => 'Edit ' . $branch]);
+                        $formBuilder->add('globalconfigb2sserverxml_' . $branch, SubmitType::class, ['label' => 'Edit ' . $branch]);
+                        if ('download' !== $branch) {
+                            $formBuilder->add('freshcabinetxml_' . $branch, SubmitType::class, ['label' => 'Fresh copy from download']);
+                            $formBuilder->add('freshglobalconfigb2sserverxml_' . $branch, SubmitType::class, ['label' => 'Fresh copy from download']);
+                            if ('day' === $branch && in_array('night', $branches)) {
+                                $formBuilder->add('nightcabinetxml_' . $branch, SubmitType::class, ['label' => 'Copy from night']);
+                                $formBuilder->add('nightglobalconfigb2sserverxml_' . $branch, SubmitType::class, ['label' => 'Copy from night']);
+                            } elseif ('night' === $branch && in_array('day', $branches)) {
+                                $formBuilder->add('daycabinetxml_' . $branch, SubmitType::class, ['label' => 'Copy from day']);
+                                $formBuilder->add('dayglobalconfigb2sserverxml_' . $branch, SubmitType::class, ['label' => 'Copy from day']);
+                            }
                         }
                     }
                 }

@@ -33,6 +33,11 @@ class Settings
     /**
      * @var string
      */
+    private $tablesPath = '';
+
+    /**
+     * @var string
+     */
     private $pinballYPath = '';
 
     /**
@@ -232,7 +237,7 @@ class Settings
 
     public function getTablesPath(): ?string
     {
-        return $this->getVisualPinballPath() . DIRECTORY_SEPARATOR . 'Tables';
+        return !empty($this->tablesPath) ? $this->tablesPath : $this->getVisualPinballPath() . DIRECTORY_SEPARATOR . 'Tables';
     }
 
     /**
@@ -282,14 +287,20 @@ class Settings
         return $this;
     }
 
-    public function setPinballYPath(string $pinballYPath): self
+    public function setTablesPath(?string $tables): self
+    {
+        $this->tablesPath = $tables;
+        return $this;
+    }
+
+    public function setPinballYPath(?string $pinballYPath): self
     {
         $this->pinballYPath = $pinballYPath;
 
         return $this;
     }
 
-    public function setPinUpSystemPath(string $pinUpSystemPath): self
+    public function setPinUpSystemPath(?string $pinUpSystemPath): self
     {
         $this->pinUpSystemPath = $pinUpSystemPath;
 
@@ -320,7 +331,7 @@ class Settings
      * @param string $gitBinary
      * @return self
      */
-    public function setGitBinary(string $gitBinary): self
+    public function setGitBinary(?string $gitBinary): self
     {
         $this->gitBinary = $gitBinary;
         return $this;
@@ -338,7 +349,7 @@ class Settings
      * @param string $gitUser
      * @return self
      */
-    public function setGitUser(string $gitUser): self
+    public function setGitUser(?string $gitUser): self
     {
         $this->gitUser = $gitUser;
         return $this;
@@ -356,7 +367,7 @@ class Settings
      * @param string $gitEmail
      * @return self
      */
-    public function setGitEmail(string $gitEmail): self
+    public function setGitEmail(?string $gitEmail): self
     {
         $this->gitEmail = $gitEmail;
         return $this;
@@ -461,6 +472,7 @@ class Settings
             $this->setLcpApiKey($settings['dof']['LCP_APIKEY']);
             $this->setDofPath($settings['dof']['path']);
             $this->setVisualPinballPath($settings['visualpinball']['path']);
+            $this->setTablesPath($settings['visualpinball']['tables_path'] ?? '');
             $this->setPinballYPath($settings['pinbally']['path'] ?? '');
             $this->setPinUpSystemPath($settings['pinupsystem']['path'] ?? '');
             $this->setVersionControl((bool) ($settings['git']['enabled'] ?? false));
@@ -490,6 +502,7 @@ class Settings
             'path = "' . addslashes(trim($this->getDofPath(), '" ')) . '"' . "\r\n".
             "[visualpinball]\r\n" .
             'path = "' . addslashes(trim($this->getVisualPinballPath(), '" ')) . '"' . "\r\n" .
+            'tables_path = "' . addslashes(trim($this->getTablesPath(), '" ')) . '"' . "\r\n" .
             "[pinbally]\r\n" .
             'path = "' . addslashes(trim($this->getPinballYPath(), '" ')) . '"' . "\r\n" .
             "[pinupsystem]\r\n" .

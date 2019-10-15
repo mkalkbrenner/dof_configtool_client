@@ -1,9 +1,8 @@
 {% block elfinder_widget %}
-    <input type="text" {{ block('widget_attributes') }} {% if value is not empty %}value="{{ value }}" {% endif %} data-type="elfinder-input-field" />
+    <input type="text" {{ block('widget_attributes') }} class="form-control" {% if value is not empty %}value="{{ value }}" {% endif %} data-type="elfinder-input-field" />
     {% if enable and instance is defined %}
         <script type="text/javascript" charset="utf-8">
             live('click', '[data-type="elfinder-input-field"][id="{{ id }}"]', function (event) {
-                console.warn('Test');
                 var childWin = window.open("{{path('elfinder', {'instance': instance, 'homeFolder': homeFolder })}}?id={{ id }}", "popupWindow", "height=450, width=900");
             });
             function live (eventType, elementQuerySelector, cb) {
@@ -21,7 +20,7 @@
                 })
             }
             function setValue(value, element_id) {
-                document.querySelector('[data-type="elfinder-input-field"]' + (element_id ? '[id="'+ element_id +'"]': '')).value = value;
+                document.querySelector('[data-type="elfinder-input-field"]' + (element_id ? '[id="'+ element_id +'"]': '')).value = decodeURI(value.replace(/\/([A-Z]:\\)\/(.*)/, "$1$2").replace(/\//g, "\\"));
             }
         </script>
     {% endif %}
