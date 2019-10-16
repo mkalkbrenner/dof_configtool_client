@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Validator\Exists;
 use App\Validator\Writable;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Validator\Constraints as Assert;
 
 class Settings
@@ -85,14 +86,7 @@ class Settings
     {
         $this->ini = ($_SERVER['PROGRAM_DATA'] ?? (__DIR__ . '/../../ini')) . '/settings.ini';
 
-        // Default for Unix and Windows custom installs, where the binaries should be in PATH.
-        $this->gitBinary = 'git';
-        $this->bsPatchBinary = 'bspatch';
-
         if (extension_loaded('com_dotnet')) {
-            $this->gitBinary .= '.exe';
-            $this->bsPatchBinary .= '.exe';
-
             $gitBinary = dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'bin' . DIRECTORY_SEPARATOR . 'PortableGit' . DIRECTORY_SEPARATOR. 'bin' . DIRECTORY_SEPARATOR . 'git.exe';
             if (file_exists($gitBinary)) {
                 $this->gitBinary = $gitBinary;
@@ -102,6 +96,10 @@ class Settings
             if (file_exists($bsPatchBinary)) {
                 $this->bsPatchBinary = $bsPatchBinary;
             }
+        } else {
+            // Default for Unix where the binaries should be in PATH.
+            $this->gitBinary = 'git';
+            $this->bsPatchBinary = 'bspatch';
         }
     }
 
@@ -132,9 +130,12 @@ class Settings
 
     public function getDofConfigPath(): ?string
     {
-        $config_path = $this->getDofPath() . DIRECTORY_SEPARATOR . 'Config';
-        if (!is_dir($config_path)) {
-            mkdir($config_path);
+        $path = $this->getDofPath();
+        if ($path && is_dir($path)) {
+            $config_path = $path . DIRECTORY_SEPARATOR . 'Config';
+            if (!is_dir($config_path)) {
+                mkdir($config_path);
+            }
         }
         return $config_path;
     }
@@ -199,9 +200,12 @@ class Settings
 
     public function getAltcolorPath(): ?string
     {
-        $altcolor_dir = $this->getVPinMamePath() . DIRECTORY_SEPARATOR . 'altcolor';
-        if (!is_dir($altcolor_dir)) {
-            mkdir($altcolor_dir);
+        $path = $this->getVPinMamePath();
+        if ($path && is_dir($path)) {
+            $altcolor_dir = $path . DIRECTORY_SEPARATOR . 'altcolor';
+            if (!is_dir($altcolor_dir)) {
+                mkdir($altcolor_dir);
+            }
         }
         return $altcolor_dir;
     }
@@ -220,9 +224,12 @@ class Settings
 
     public function getAltsoundPath(): ?string
     {
-        $altsound_dir = $this->getVPinMamePath() . DIRECTORY_SEPARATOR . 'altsound';
-        if (!is_dir($altsound_dir)) {
-            mkdir($altsound_dir);
+        $path = $this->getVPinMamePath();
+        if ($path && is_dir($path)) {
+            $altsound_dir = $path . DIRECTORY_SEPARATOR . 'altsound';
+            if (!is_dir($altsound_dir)) {
+                mkdir($altsound_dir);
+            }
         }
         return $altsound_dir;
     }
@@ -498,10 +505,10 @@ class Settings
             $this->setPinballYPath($settings['pinbally']['path'] ?? '');
             $this->setPinUpSystemPath($settings['pinupsystem']['path'] ?? '');
             $this->setVersionControl((bool) ($settings['git']['enabled'] ?? false));
-            $this->setGitBinary($settings['git']['binary'] ?? $this->getGitBinary());
+            $this->setGitBinary(!empty($settings['git']['binary']) ? $settings['git']['binary'] : $this->getGitBinary());
             $this->setGitUser($settings['git']['user'] ?? $this->getGitUser());
             $this->setGitEmail($settings['git']['email'] ?? $this->getGitEmail());
-            $this->setBsPatchBinary($settings['bsdiff']['bspatch_binary'] ?? $this->getBsPatchBinary());
+            $this->setBsPatchBinary(!empty($settings['bsdiff']['bspatch_binary']) ? $settings['bsdiff']['bspatch_binary'] : $this->getBsPatchBinary());
             $this->setPortAssignments($settings['portassignments'] ?? []);
         } else {
             // 0.1.x backward compatibility

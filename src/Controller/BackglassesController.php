@@ -97,7 +97,7 @@ class BackglassesController extends AbstractSettingsController
     {
         $tables_path = $this->settings->getTablesPath();
         if (!is_writable($tables_path)) {
-            $this->addFlash('error', 'Directory ' . $tables_path . ' is not writable!');
+            $this->addFlash('danger', 'Directory ' . $tables_path . ' is not writable!');
         }
         return Utility::getExistingTablesAndBackglassChoices($this->settings);
     }

@@ -45,8 +45,9 @@ class TablesController extends AbstractSettingsController
         list($tables, $backglassChoices) = Utility::getExistingTablesAndBackglassChoices($this->settings);
         $table_name = $tables[$hash];
         $roms = [];
-        $added = '';
-        $last_played = '';
+        $added =
+        $last_played =
+            null;
         $description =
         $manufacturer =
         $year =
@@ -64,8 +65,12 @@ class TablesController extends AbstractSettingsController
                 $pinballYGameStats = new PinballYGameStats();
                 $pinballYGameStats->setFile($this->settings->getPinballYPath() . DIRECTORY_SEPARATOR . 'GameStats.csv')->load();
                 if ($pinballYGameStat = $pinballYGameStats->getStat($pinballYMenuEntry->getDescription())) {
-                    $added = $pinballYGameStat->getDateAddedDateTime() ?? 'unknown';
-                    $last_played = $pinballYGameStat->getLastPlayedDateTime() ?? 'unknown';
+                    if ($date = $pinballYGameStat->getDateAddedDateTime()) {
+                        $added = $date->format('Y-m-d H:i:s');
+                    }
+                    if ($date = $pinballYGameStat->getLastPlayedDateTime()) {
+                        $last_played = $date->format('Y-m-d H:i:s');
+                    }
                     $topper = $pinballYGameStat->isTopperShownWhenRunning() ? 'pinbally' : 'pup';
                     $dmd = $pinballYGameStat->isDmdShownWhenRunning() ? 'pinbally' : 'pup';
                     $instcard = $pinballYGameStat->isInstructionCardShownWhenRunning() ? 'pinbally' : 'pup';
@@ -132,12 +137,12 @@ class TablesController extends AbstractSettingsController
             ])
             ->add('added', TextType::class, [
                 'disabled' => true,
-                'data' => $added ? $added->format('Y-m-d H:i:s') : 'unknown',
+                'data' => $added ?? 'unknown',
                 'label' => false,
             ])
             ->add('last_played', TextType::class, [
                 'disabled' => true,
-                'data' => $last_played ? $last_played->format('Y-m-d H:i:s') : 'never',
+                'data' => $last_played ?? 'never',
                 'label' => false,
             ])
             ->add('entries', CollectionType::class, [

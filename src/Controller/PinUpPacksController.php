@@ -27,7 +27,7 @@ class PinUpPacksController extends AbstractSettingsController
 
         foreach ($pupPacks as $rom => $table) {
             $real_rom = ltrim($rom, '_');
-            $form->add($real_rom, CheckboxType::class, [
+            $form->add(md5($real_rom), CheckboxType::class, [
                 'label' => $real_rom . ' >>> DOF: ' . $table,
                 'data' => $real_rom === $rom,
                 'required' => false,
@@ -44,7 +44,8 @@ class PinUpPacksController extends AbstractSettingsController
 
             foreach (array_keys($pupPacks) as $rom) {
                 $real_rom = ltrim($rom, '_');
-                if (!empty($data[$real_rom]) && $real_rom !== $rom) {
+                $md5_real_rom = md5($real_rom);
+                if (!empty($data[$md5_real_rom]) && $real_rom !== $rom) {
                     // Activate PUPPack.
                     if ($filesystem->exists($path . $rom)) {
                         try {
@@ -54,7 +55,7 @@ class PinUpPacksController extends AbstractSettingsController
                         }
                     }
                 }
-                elseif (empty($data[$real_rom]) && $real_rom === $rom) {
+                elseif (empty($data[$md5_real_rom]) && $real_rom === $rom) {
                     // Deactivate PUPPack.
                     if ($filesystem->exists($path . $real_rom)) {
                         try {

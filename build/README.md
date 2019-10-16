@@ -10,7 +10,8 @@ https://git-scm.com/download/win
 
 PHP:
 https://windows.php.net/download
-7.3 VC15 x86 Non Thread Safe (2019-Sep-25 18:00:14)
+7.3 VC15 x86 Thread Safe (2019-Sep-25 18:00:14)
 
+APCu causes issues on parallel requests!
 https://pecl.php.net/package/APCu
-7.3 Non Thread Safe (NTS) x86
+7.3 Thread Safe (NTS) x86

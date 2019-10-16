@@ -94,15 +94,14 @@ class Utility
         if ($path = $settings->getPinUpPacksPath()) {
             if (file_exists($path) && is_readable($path)) {
                 foreach (scandir($path) as $rom) {
-                    if (strpos($rom, '.') !== 0) {
+                    if (strpos($rom, '.') !== 0 && stripos($rom, 'PinUpMenu') === false) {
                         $real_rom = ltrim($rom, '_');
                         if (!$roms || in_array($real_rom, $roms)) {
                             $pup_path = $path . DIRECTORY_SEPARATOR . $rom;
                             if (is_dir($pup_path)) {
-                                $size = Utility::directorySize($pup_path);
-                                dump($pup_path, $size);
                                 // Require min 2MB to be considered a pack.
-                                if ($size > 1) {
+                                $size = Utility::directorySize($pup_path, 2);
+                                if ($size >= (2 * 1024 * 1024)) {
                                     $pupPacks[$rom] = $tableMapping[$real_rom] ?? $real_rom;
                                 }
                             }
@@ -193,15 +192,29 @@ class Utility
 
     /**
      * @param string $dir
-     * @return int directory size in MB
+     * @param int    $min_mb
+     *
+     * @return int directory size in Byte
      */
-    public static function directorySize(string $dir): int
+    public static function directorySize(string $dir, ?int $min_mb = null): int
     {
         $size = 0;
-        foreach (glob(rtrim($dir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . '*', GLOB_NOSORT) as $each) {
-            $size += is_file($each) ? filesize($each) : Utility::directorySize($each);
+
+        foreach (scandir($dir) as $file) {
+            if (strpos($file, '.') !== 0) {
+                $file_path = $dir . DIRECTORY_SEPARATOR . $file;
+                if (is_dir($file_path)) {
+                    $size += (Utility::directorySize($file_path, $min_mb));
+                } elseif (is_file($file_path)) {
+                    $size += (filesize($file_path));
+                }
+                if ($min_mb && $size >= ($min_mb * 1024 * 1024)) {
+                    break;
+                }
+            }
         }
-        return (int) ($size / 1024 / 1024);
+
+        return $size;
     }
 
     public static function parseIniString(string $string, ?bool $strip_comments = TRUE): array
