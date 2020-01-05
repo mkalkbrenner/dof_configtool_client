@@ -204,6 +204,7 @@ class SettingsController extends AbstractSettingsController
                             }
                         }
                         $this->settings->setPortAssignments($newPortAssignments);
+                        $this->addFlash('success', 'Autodetection completed. Verify the port assignments.');
                     }
                     #break;
 

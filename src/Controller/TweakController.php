@@ -166,7 +166,8 @@ class TweakController extends AbstractSettingsController
         $rgb_ports = [];
         $colors = [];
         $file = '';
-        foreach ($tweaks->getSettingsParsed($cycle) as $section => $adjustments) {
+        $settings_parsed = $tweaks->getSettingsParsed($cycle) ?? [];
+        foreach ($settings_parsed as $section => $adjustments) {
             if (strpos($section, '.ini')) {
                 $file = $this->settings->getDofConfigPath() . DIRECTORY_SEPARATOR . $section;
                 if (file_exists($file)) {

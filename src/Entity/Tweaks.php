@@ -3,12 +3,10 @@
 namespace App\Entity;
 
 use App\Component\Utility;
-use Symfony\Component\Validator\Constraints as Assert;
 
 class Tweaks
 {
     /**
-     * @Assert\NotBlank()
      * @var string
      */
     private $daySettings = '';
@@ -66,7 +64,10 @@ class Tweaks
 
     public function getDaySettingsParsed(): ?array
     {
-        return Utility::parseIniString($this->daySettings);
+        if ($this->daySettings) {
+            return Utility::parseIniString($this->daySettings);
+        }
+        return null;
     }
 
     public function setDaySettings(string $settings): self
@@ -91,7 +92,10 @@ class Tweaks
 
     public function getNightSettingsParsed(): ?array
     {
-        return Utility::parseIniString($this->nightSettings);
+        if ($this->nightSettings) {
+            return Utility::parseIniString($this->nightSettings);
+        }
+        return null;
     }
 
     public function setNightSettings(string $settings): self
@@ -103,7 +107,7 @@ class Tweaks
 
     public function getSettingsParsed(string $cycle = 'day'): ?array
     {
-        return 'day' == $cycle ? $this->getDaySettingsParsed(): $this->getNightSettingsParsed();
+        return 'day' === $cycle ? $this->getDaySettingsParsed(): $this->getNightSettingsParsed();
     }
 
     /**
