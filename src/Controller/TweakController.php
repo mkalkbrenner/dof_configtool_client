@@ -15,6 +15,21 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class TweakController extends AbstractSettingsController
 {
+    /** @var Tweaks */
+    protected $tweaks;
+
+    /**
+     * @return Tweaks
+     */
+    public function getTweaks(): Tweaks
+    {
+        if (!$this->tweaks) {
+            $this->tweaks = new Tweaks();
+            $this->tweaks->load();
+        }
+        return $this->tweaks;
+    }
+
     /**
      * @Route("/tweak", name="tweak")
      */
@@ -48,8 +63,15 @@ class TweakController extends AbstractSettingsController
             $session->remove('git_diff');
         }
 
+        $dir = explode(DIRECTORY_SEPARATOR, __DIR__);
+        array_pop($dir);
+        array_pop($dir);
+        $console = implode(DIRECTORY_SEPARATOR, $dir) . DIRECTORY_SEPARATOR . 'bin' . DIRECTORY_SEPARATOR . 'console ';
+        $cmd = $console . 'dof:download-and-tweak';
+
         return $this->render('tweak/index.html.twig', [
             'tweak_form' => $form->createView(),
+            'cmd' => $cmd,
             'git_diff' => nl2br($changes),
         ]);
     }
@@ -59,8 +81,7 @@ class TweakController extends AbstractSettingsController
      */
     public function settings(Request $request, SessionInterface $session)
     {
-        $tweaks = new Tweaks();
-        $tweaks->load();
+        $tweaks = $this->getTweaks();
 
         $defaults = [
             'mode' => 'ace/mode/properties',
@@ -139,6 +160,29 @@ class TweakController extends AbstractSettingsController
      */
     public function confirm(Request $request, string $cycle)
     {
+        $tweaks = $this->getTweaks();
+        list($files, $modded_files) = $this->modFiles($cycle);
+        $diffs = Utility::getDiffTables($files, $modded_files, $this->settings, $tweaks->getSynonymSettingsParsed());
+
+        $formBuilder = $this->createFormBuilder()
+            ->add('cancel', SubmitType::class, ['label' => 'Cancel']);
+        if ($diffs) {
+            $formBuilder->add('save', SubmitType::class, ['label' => 'Save']);
+        }
+        $form = $formBuilder
+            ->add('files', HiddenType::class, ['data' => base64_encode(serialize($modded_files))])
+            ->setAction($this->generateUrl('tweak_do', ['cycle' => $cycle]))
+            ->getForm();
+
+        return $this->render('tweak/confirm.html.twig', [
+            'confirm_form' => $form->createView(),
+            'diffs' => $diffs,
+            'dof_explanation' => $this->getDofExplanation(),
+        ]);
+    }
+
+    public function modFiles(string $cycle): array
+    {
         ini_set('set_time_limit', 0);
         $previous_branch = '';
 
@@ -157,9 +201,7 @@ class TweakController extends AbstractSettingsController
             }
         }
 
-        $tweaks = new Tweaks();
-        $tweaks->load();
-
+        $tweaks = $this->getTweaks();
         $mods = [];
         $modded_files = [];
         $files = [];
@@ -478,27 +520,11 @@ class TweakController extends AbstractSettingsController
             }
         }
 
-        $diffs = Utility::getDiffTables($files, $modded_files, $this->settings, $tweaks->getSynonymSettingsParsed());
-
         if ($previous_branch) {
             $workingCopy->checkout($previous_branch);
         }
 
-        $formBuilder = $this->createFormBuilder()
-            ->add('cancel', SubmitType::class, ['label' => 'Cancel']);
-        if ($diffs) {
-            $formBuilder->add('save', SubmitType::class, ['label' => 'Save']);
-        }
-        $form = $formBuilder
-            ->add('files', HiddenType::class, ['data' => base64_encode(serialize($modded_files))])
-            ->setAction($this->generateUrl('tweak_do', ['cycle' => $cycle]))
-            ->getForm();
-
-        return $this->render('tweak/confirm.html.twig', [
-            'confirm_form' => $form->createView(),
-            'diffs' => $diffs,
-            'dof_explanation' => $this->getDofExplanation(),
-        ]);
+        return [$files, $modded_files];
     }
 
     /**
@@ -520,61 +546,69 @@ class TweakController extends AbstractSettingsController
             $name = $form->getClickedButton()->getConfig()->getName();
             switch ($name) {
                 case 'save':
-                    $previous_branch = $cycle;
-                    if ($this->settings->isVersionControl()) {
-                        try {
-                            $workingCopy = $this->getGitWorkingCopy($this->settings->getDofConfigPath());
-                            $branches = $workingCopy->getBranches();
-                            if (!in_array($cycle, $branches->all())) {
-                                $workingCopy->checkoutNewBranch($cycle);
-                            } else {
-                                $previous_branch = $this->getCurrentBranch($workingCopy);
-                                $workingCopy->checkout($cycle);
-                            }
-                        } catch (GitException $e) {
-                            $this->addFlash('warning', $e->getMessage());
-                        }
-                    }
-
-                    try {
-                        $version = 0;
-
-                        $files = unserialize(base64_decode($form->getData()['files']), [false]);
-                        foreach ($files as $file => $content) {
-                            if (file_put_contents($file, $content)) {
-                                $this->addFlash('success', 'Saved tweaked version of ' . $file . '.');
-                                if (!$version && preg_match(DirectOutputConfig::FILE_PATERN, $file, $matches)) {
-                                    $directOutputConfig = new DirectOutputConfig($file);
-                                    $directOutputConfig->load();
-                                    $version = $directOutputConfig->getVersion();
-                                }
-                            } else {
-                                $this->addFlash('danger', 'Failed to save tweaked version of' . $file . '.');
-                            }
-                        }
-                        if ($this->settings->isVersionControl() && $workingCopy->hasChanges()) {
-                            try {
-                                $workingCopy->add('*.ini');
-                                $workingCopy->add('*.xml');
-                                $workingCopy->add('*.png');
-                                $workingCopy->commit('Version ' . $version . ' | applied ' . $cycle . ' tweaks');
-                                $changes = nl2br($workingCopy->run('show'));
-                                if ($cycle !== $previous_branch) {
-                                    $workingCopy->checkout($previous_branch);
-                                }
-                            } catch (GitException $e) {
-                                $this->addFlash('warning', $e->getMessage());
-                            }
-                        }
-                    } catch (\Exception $e) {
-                        $this->addFlash('warning', $e->getMessage());
-                    }
+                    $files = unserialize(base64_decode($form->getData()['files']), [false]);
+                    $changes = $this->persistFiles($cycle, $files);
                     break;
             }
         }
         $session->set('git_diff', $changes);
 
         return $this->redirectToRoute('tweak');
+    }
+
+    public function persistFiles(string $cycle, array $files): string
+    {
+        $changes = '';
+        $previous_branch = $cycle;
+        if ($this->settings->isVersionControl()) {
+            try {
+                $workingCopy = $this->getGitWorkingCopy($this->settings->getDofConfigPath());
+                $branches = $workingCopy->getBranches();
+                if (!in_array($cycle, $branches->all())) {
+                    $workingCopy->checkoutNewBranch($cycle);
+                } else {
+                    $previous_branch = $this->getCurrentBranch($workingCopy);
+                    $workingCopy->checkout($cycle);
+                }
+            } catch (GitException $e) {
+                $this->addFlash('warning', $e->getMessage());
+            }
+        }
+
+        try {
+            $version = 0;
+
+            foreach ($files as $file => $content) {
+                if (file_put_contents($file, $content)) {
+                    $this->addFlash('success', 'Saved tweaked version of ' . $file . ' for mode ' . $cycle . '.');
+                    if (!$version && preg_match(DirectOutputConfig::FILE_PATERN, $file, $matches)) {
+                        $directOutputConfig = new DirectOutputConfig($file);
+                        $directOutputConfig->load();
+                        $version = $directOutputConfig->getVersion();
+                    }
+                } else {
+                    $this->addFlash('danger', 'Failed to save tweaked version of' . $file . '.');
+                }
+            }
+            if ($this->settings->isVersionControl() && $workingCopy->hasChanges()) {
+                try {
+                    $workingCopy->add('*.ini');
+                    $workingCopy->add('*.xml');
+                    $workingCopy->add('*.png');
+                    $workingCopy->commit('Version ' . $version . ' | applied ' . $cycle . ' tweaks');
+                    $changes = nl2br($workingCopy->run('show'));
+                    if ($cycle !== $previous_branch) {
+                        $workingCopy->checkout($previous_branch);
+                    }
+                } catch (GitException $e) {
+                    $this->addFlash('warning', $e->getMessage());
+                }
+            }
+        } catch (\Exception $e) {
+            $this->addFlash('warning', $e->getMessage());
+        }
+
+        return $changes;
     }
 
     /**

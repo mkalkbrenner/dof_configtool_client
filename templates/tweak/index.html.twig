@@ -9,6 +9,12 @@
     {{ form_widget(tweak_form) }}
     {{ form_end(tweak_form) }}
 
+    {% if cmd %}
+        <hr>
+        <h3>Command line to download and tweak your config files from your prefered frontend:</h3>
+        <pre><kbd>{{ cmd|raw }}</kbd></pre>
+    {% endif %}
+
     {% if git_diff|default %}
         <hr>
         {% include 'git_diff.html.twig' %}
