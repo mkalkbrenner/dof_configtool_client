@@ -44,7 +44,7 @@ Name: "bsdiff"; Description: "bsdiff/bspatch"; Types: full
 
 [Files]
 Source: "C:\Users\Markus\Documents\DOFConfigtoolClient\DOFConfigtoolClient.exe"; DestDir: "{app}"; Components: program; Flags: ignoreversion
-Source: "C:\Users\Markus\Documents\DOFConfigtoolClient\*"; DestDir: "{app}"; Components: program; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: ".git,.gitignore,.github,.idea,dev.txt,composer*,www\ini,www\System*,www\build,www\var,www\public\ace\demo,www\public\ace\src,www\public\ace\src-min,phpunit,tests,webcache\*,\debug,*.log,directoutputconfig*.ini,DirectOutputShapes*,tablemappings*,PortableGit,bsdiff_win_exe"
+Source: "C:\Users\Markus\Documents\DOFConfigtoolClient\*"; DestDir: "{app}"; Components: program; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: ".git,.gitignore,.github,.idea,dev.txt,composer.json,composer.lock,composer.phar,www\ini,www\System*,www\build,www\var,www\public\ace\demo,www\public\ace\src,www\public\ace\src-min,phpunit,tests,webcache\*,\debug,*.log,directoutputconfig*.ini,DirectOutputShapes*,tablemappings*,PortableGit,bsdiff_win_exe"
 Source: "C:\Users\Markus\Documents\DOFConfigtoolClient\www\bin\PortableGit\*"; DestDir: "{app}\www\bin\PortableGit"; Components: git; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: ".git,.gitignore"
 Source: "C:\Users\Markus\Documents\DOFConfigtoolClient\www\bin\bsdiff_win_exe\*"; DestDir: "{app}\www\bin\bsdiff_win_exe"; Components: bsdiff; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: ".git,.gitignore"
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files

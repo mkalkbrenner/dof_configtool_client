@@ -31,3 +31,4 @@ settings.ini
 /bin/
 /ini/tweaks/
 /composer.phar
+/.env

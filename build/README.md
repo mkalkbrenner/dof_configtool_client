@@ -1,7 +1,12 @@
 Set Version number in DOFConfigtoolClient.iss and index.php
 
+Unix:
 ```
 composer update --ignore-platform-reqs --no-dev
+```
+Windows:
+```
+C:\Users\Markus\Documents\DOFConfigtoolClient\www>..\php\php composer.phar update --no-dev
 ```
 
 Portable git:
