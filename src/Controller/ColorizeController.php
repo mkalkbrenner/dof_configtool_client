@@ -24,23 +24,26 @@ class ColorizeController extends AbstractSettingsController
 
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $data = $form->getData();
+        if ($form->isSubmitted()) {
+            if ($form->isValid()) {
+                $data = $form->getData();
 
-            /** @var UploadedFile $patch */
-            $patch = $data['patch'];
-            $files = $this->getPatchFiles($patch->getPathname());
+                /** @var UploadedFile $patch */
+                if ($patch = $data['patch']) {
+                    $files = $this->getPatchFiles($patch->getPathname());
 
-            if (!empty($files['txt'])) {
-                $this->addFlash('info', nl2br($files['txt']));
-            }
-            if (isset($files['diff'])) {
-                $this->addFlash('success', 'Detected patch.');
-                return $this->redirectToRoute('colorize_patch', ['patch_path' => $files['dir']]);
-            }
-            if (isset($files['vni'])) {
-                $this->addFlash('success', 'Detected vni file.');
-                return $this->redirectToRoute('colorize_extract', ['patch_path' => $files['dir']]);
+                    if (!empty($files['txt'])) {
+                        $this->addFlash('info', nl2br($files['txt']));
+                    }
+                    if (isset($files['diff'])) {
+                        $this->addFlash('success', 'Detected patch.');
+                        return $this->redirectToRoute('colorize_patch', ['patch_path' => $files['dir']]);
+                    }
+                    if (isset($files['vni'])) {
+                        $this->addFlash('success', 'Detected vni file.');
+                        return $this->redirectToRoute('colorize_extract', ['patch_path' => $files['dir']]);
+                    }
+                }
             }
             $this->addFlash('warning', 'The patch zip file is invalid.');
         }

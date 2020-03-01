@@ -173,6 +173,10 @@ class TextEditController extends AbstractSettingsController
     public function edit(Request $request, SessionInterface $session)
     {
         $directory = $request->query->get('directory');
+        if (!$directory) {
+            $this->addFlash('danger', 'The settings are incomplete or the directory could not be found.');
+            return $this->redirectToRoute('textedit');
+        }
         $file = $request->query->get('file');
         $mode = $request->query->get('mode');
         $cycle = $request->query->get('cycle');

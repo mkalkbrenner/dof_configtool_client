@@ -70,17 +70,18 @@ class Utility
     {
         $tables = [];
         $backglasses = [];
-        $tables_path = $settings->getTablesPath();
-        foreach (scandir($tables_path) as $filename) {
-            $basename = preg_replace('/\.vpx/i', '', $filename);
-            if ($basename !== $filename) {
-                $tables[md5($filename)] = $basename;
-                continue;
-            }
-            $basename = preg_replace('/\.directb2s/i', '', $filename);
-            if ($basename !== $filename) {
-                // Use $basename . '.directb2s' instead of $filename to ensure lower case file type.
-                $backglasses[$basename] = $basename . '.directb2s';
+        if ($tables_path = $settings->getTablesPath()) {
+            foreach (scandir($tables_path) as $filename) {
+                $basename = preg_replace('/\.vpx/i', '', $filename);
+                if ($basename !== $filename) {
+                    $tables[md5($filename)] = $basename;
+                    continue;
+                }
+                $basename = preg_replace('/\.directb2s/i', '', $filename);
+                if ($basename !== $filename) {
+                    // Use $basename . '.directb2s' instead of $filename to ensure lower case file type.
+                    $backglasses[$basename] = $basename . '.directb2s';
+                }
             }
         }
         return [$tables, $backglasses];

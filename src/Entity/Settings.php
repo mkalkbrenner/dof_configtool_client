@@ -130,7 +130,7 @@ class Settings
 
     public function getDofConfigPath(): ?string
     {
-        $config_path = '';
+        $config_path = null;
         $path = $this->getDofPath();
         if ($path && is_dir($path)) {
             $config_path = $path . DIRECTORY_SEPARATOR . 'Config';
@@ -160,12 +160,13 @@ class Settings
 
     public function getPinballYDatabasePath(): ?string
     {
-        return $this->pinballYPath . DIRECTORY_SEPARATOR . 'Databases';
+        return $this->pinballYPath ? $this->pinballYPath . DIRECTORY_SEPARATOR . 'Databases' : null;
     }
 
     public function getPinballYVPXDatabaseFile(): ?string
     {
-        return $this->getPinballYDatabasePath() . DIRECTORY_SEPARATOR . 'Visual Pinball X' . DIRECTORY_SEPARATOR . 'Visual Pinball X.xml';
+        $path = $this->getPinballYDatabasePath();
+        return $path ? $path . DIRECTORY_SEPARATOR . 'Visual Pinball X' . DIRECTORY_SEPARATOR . 'Visual Pinball X.xml' : null;
     }
 
     public function getPinUpSystemPath(): ?string
@@ -175,25 +176,29 @@ class Settings
 
     public function getPinUpPacksPath(): ?string
     {
-        return $this->pinUpSystemPath . DIRECTORY_SEPARATOR . 'PUPVideos';
+        return $this->pinUpSystemPath ? $this->pinUpSystemPath . DIRECTORY_SEPARATOR . 'PUPVideos' : null;
     }
 
     public function getVPinMamePath(): ?string
     {
-        return $this->getVisualPinballPath() . DIRECTORY_SEPARATOR . 'VPinMAME';
+        $path = $this->getVisualPinballPath();
+        return $path ? $path . DIRECTORY_SEPARATOR . 'VPinMAME': null;
     }
 
     public function getRomsPath(): ?string
     {
-        return $this->getVPinMamePath() . DIRECTORY_SEPARATOR . 'roms';
+        $path = $this->getVPinMamePath();
+        return $path ? $path . DIRECTORY_SEPARATOR . 'roms' : null;
     }
 
     public function getRoms(): array
     {
         $roms = [];
-        foreach (scandir($this->getRomsPath()) as $filename) {
-            if (preg_match('/(.+)\.zip$/i', $filename, $matches)) {
-                $roms[] = strtolower($matches[1]);
+        if ($path = $this->getRomsPath()) {
+            foreach (scandir($path) as $filename) {
+                if (preg_match('/(.+)\.zip$/i', $filename, $matches)) {
+                    $roms[] = strtolower($matches[1]);
+                }
             }
         }
         return $roms;
@@ -201,6 +206,7 @@ class Settings
 
     public function getAltcolorPath(): ?string
     {
+        $altcolor_dir = null;
         $path = $this->getVPinMamePath();
         if ($path && is_dir($path)) {
             $altcolor_dir = $path . DIRECTORY_SEPARATOR . 'altcolor';
@@ -215,9 +221,11 @@ class Settings
     public function getAltcolorRoms(): array
     {
         $roms = [];
-        foreach (scandir($this->getAltcolorPath()) as $filename) {
-            if (is_dir($this->getAltcolorPath() . DIRECTORY_SEPARATOR . $filename)) {
-                $roms[] = strtolower($filename);
+        if ($path = $this->getAltcolorPath()) {
+            foreach (scandir($path) as $filename) {
+                if (is_dir($this->getAltcolorPath() . DIRECTORY_SEPARATOR . $filename)) {
+                    $roms[] = strtolower($filename);
+                }
             }
         }
         return $roms;
@@ -225,6 +233,7 @@ class Settings
 
     public function getAltsoundPath(): ?string
     {
+        $altsound_dir = null;
         $path = $this->getVPinMamePath();
         if ($path && is_dir($path)) {
             $altsound_dir = $path . DIRECTORY_SEPARATOR . 'altsound';
@@ -239,9 +248,11 @@ class Settings
     public function getAltsoundRoms(): array
     {
         $roms = [];
-        foreach (scandir($this->getAltsoundPath()) as $filename) {
-            if (is_dir($this->getAltsoundPath() . DIRECTORY_SEPARATOR . $filename)) {
-                $roms[] = strtolower($filename);
+        if ($path = $this->getAltsoundPath()) {
+            foreach (scandir($path) as $filename) {
+                if (is_dir($this->getAltsoundPath() . DIRECTORY_SEPARATOR . $filename)) {
+                    $roms[] = strtolower($filename);
+                }
             }
         }
         return $roms;

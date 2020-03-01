@@ -189,7 +189,7 @@ class TweakController extends AbstractSettingsController
         if (!$this->settings->isVersionControl()) {
             if ('day' !== $cycle) {
                 $this->addFlash('warning', 'Day night cycle requires version control to be enabled. Check your settings.');
-                return $this->redirectToRoute('tweak');
+                return [[], []];
             }
         } else {
             try {
@@ -222,15 +222,17 @@ class TweakController extends AbstractSettingsController
             }
         }
 
-        foreach (scandir($this->settings->getDofConfigPath()) as $file) {
-            if (preg_match('/^directoutputconfig\d+\.ini$/i', $file, $matches)) {
-                $file_path = $this->settings->getDofConfigPath() . DIRECTORY_SEPARATOR . $matches[0];
-                if (!isset($mods[$file_path])) {
-                    // Add files which should not be tweaked to update them with the latest download.
-                    $mods[$file_path] = [0 => []];
+        if ($dof_config_path = $this->settings->getDofConfigPath()) {
+            foreach (scandir($dof_config_path) as $file) {
+                if (preg_match('/^directoutputconfig\d+\.ini$/i', $file, $matches)) {
+                    $file_path = $this->settings->getDofConfigPath() . DIRECTORY_SEPARATOR . $matches[0];
+                    if (!isset($mods[$file_path])) {
+                        // Add files which should not be tweaked to update them with the latest download.
+                        $mods[$file_path] = [0 => []];
+                    }
                 }
+                // @todo handle XML files, but the detection of manual local changes is not that easy.
             }
-            // @todo handle XML files, but the detection of manual local changes is not that easy.
         }
 
         foreach ($mods as $file => $per_game_mods) {

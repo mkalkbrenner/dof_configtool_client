@@ -37,8 +37,7 @@
         "symfony/debug-pack": "*",
         "symfony/maker-bundle": "^1.0",
         "symfony/profiler-pack": "*",
-        "symfony/test-pack": "*",
-        "twbs/bootstrap": "4.3.1"
+        "symfony/test-pack": "*"
     },
     "config": {
         "preferred-install": {

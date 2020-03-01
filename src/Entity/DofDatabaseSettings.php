@@ -11,9 +11,12 @@ class DofDatabaseSettings extends Settings
 
     public function getDofConfigPath(): ?string
     {
-        $config_path = $this->getDofPath() . DIRECTORY_SEPARATOR . 'DofDatabase';
-        if (!is_dir($config_path)) {
-            mkdir($config_path);
+        $config_path = $this->getDofPath();
+        if ($config_path) {
+            $config_path .= DIRECTORY_SEPARATOR . 'DofDatabase';
+            if (!is_dir($config_path)) {
+                mkdir($config_path);
+            }
         }
         return $config_path;
     }

@@ -47,66 +47,68 @@ class DownloadController extends AbstractSettingsController
                     $this->settings->load();
                 // no break;
                 case 'download':
-                    ini_set('set_time_limit', 0);
+                    if ($config_path = $this->settings->getDofConfigPath()) {
+                        ini_set('set_time_limit', 0);
 
-                    $zip_file = $this->filesystem->tempnam($this->filesystem->getTempDir(), 'dof_config');
-                    if (copy('http://configtool.vpuniverse.com/api.php?query=getconfig&apikey=' . $this->settings->getLcpApiKey(), $zip_file) && filesize($zip_file)) {
-                        $config_path = $this->settings->getDofConfigPath();
-                        try {
-                            $previous_branch = 'download';
-                            if ($this->settings->isVersionControl()) {
-                                $workingCopy = $this->getGitWorkingCopy($config_path);
-                                $branches = $workingCopy->getBranches();
-                                if (!in_array('download', $branches->all())) {
-                                    $workingCopy->checkoutNewBranch('download');
-                                } else {
-                                    $previous_branch = $this->getCurrentBranch($workingCopy);
-                                    $workingCopy->checkout('download');
-                                }
-                            }
+                        $zip_file = $this->filesystem->tempnam($this->filesystem->getTempDir(), 'dof_config');
+                        if (copy('http://configtool.vpuniverse.com/api.php?query=getconfig&apikey=' . $this->settings->getLcpApiKey(), $zip_file) && filesize($zip_file)) {
 
-                            $zip = new \ZipArchive();
-                            if (true == $zip->open($zip_file)) {
-                                $zip->extractTo($config_path);
-                                $zip->close();
-                                $version = 0;
-
-                                foreach (scandir($config_path) as $file) {
-                                    if (preg_match(DirectOutputConfig::FILE_PATERN, $file, $matches)) {
-                                        $directOutputConfig = new DirectOutputConfig($config_path . DIRECTORY_SEPARATOR . $file);
-                                        $directOutputConfig->load();
-                                        $version = $directOutputConfig->getVersion();
-                                        break;
+                            try {
+                                $previous_branch = 'download';
+                                if ($this->settings->isVersionControl()) {
+                                    $workingCopy = $this->getGitWorkingCopy($config_path);
+                                    $branches = $workingCopy->getBranches();
+                                    if (!in_array('download', $branches->all())) {
+                                        $workingCopy->checkoutNewBranch('download');
+                                    } else {
+                                        $previous_branch = $this->getCurrentBranch($workingCopy);
+                                        $workingCopy->checkout('download');
                                     }
                                 }
-                                $this->addFlash('success', 'Successfully downloaded and extracted configuration files version ' . $version . ' to ' . $config_path . '.');
 
-                                if ($this->settings->isVersionControl() && $workingCopy->hasChanges()) {
-                                    try {
-                                        $workingCopy->add('*.ini');
-                                        $workingCopy->add('*.xml');
-                                        $workingCopy->add('*.png');
-                                        $workingCopy->commit('Version ' . $version . ' | downloaded from configtool.vpuniverse.com');
-                                        $changes = nl2br($workingCopy->run('show'));
-                                        if ('download' !== $previous_branch) {
-                                            $workingCopy->checkout($previous_branch);
+                                $zip = new \ZipArchive();
+                                if (true == $zip->open($zip_file)) {
+                                    $zip->extractTo($config_path);
+                                    $zip->close();
+                                    $version = 0;
+
+                                    foreach (scandir($config_path) as $file) {
+                                        if (preg_match(DirectOutputConfig::FILE_PATERN, $file, $matches)) {
+                                            $directOutputConfig = new DirectOutputConfig($config_path . DIRECTORY_SEPARATOR . $file);
+                                            $directOutputConfig->load();
+                                            $version = $directOutputConfig->getVersion();
+                                            break;
                                         }
-                                    } catch (GitException $e) {
-                                        $this->addFlash('warning', $e->getMessage());
                                     }
+                                    $this->addFlash('success', 'Successfully downloaded and extracted configuration files version ' . $version . ' to ' . $config_path . '.');
+
+                                    if ($this->settings->isVersionControl() && $workingCopy->hasChanges()) {
+                                        try {
+                                            $workingCopy->add('*.ini');
+                                            $workingCopy->add('*.xml');
+                                            $workingCopy->add('*.png');
+                                            $workingCopy->commit('Version ' . $version . ' | downloaded from configtool.vpuniverse.com');
+                                            $changes = nl2br($workingCopy->run('show'));
+                                            if ('download' !== $previous_branch) {
+                                                $workingCopy->checkout($previous_branch);
+                                            }
+                                        } catch (GitException $e) {
+                                            $this->addFlash('warning', $e->getMessage());
+                                        }
+                                    }
+                                } else {
+                                    $this->addFlash('warning', 'Failed to extract downloaded files! Please verify that the target directory is writable.');
                                 }
-                            } else {
-                                $this->addFlash('warning', 'Failed to extract downloaded files! Please verify that the target directory is writable.');
+                            } catch (GitException $e) {
+                                $this->addFlash('warning', $e->getMessage());
+                            } catch (\Exception $e) {
+                                $this->addFlash('warning', file_get_contents($zip_file));
                             }
-                        } catch (GitException $e) {
-                            $this->addFlash('warning', $e->getMessage());
-                        } catch (\Exception $e) {
-                            $this->addFlash('warning', file_get_contents($zip_file));
+                        } else {
+                            $this->addFlash('warning', 'Download failed!');
                         }
-                    } else {
-                        $this->addFlash('warning', 'Download failed!');
+                        $this->filesystem->remove($zip_file);
                     }
-                    $this->filesystem->remove($zip_file);
                     break;
             }
         }
