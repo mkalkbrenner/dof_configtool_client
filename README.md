@@ -251,6 +251,19 @@ In case you have a small shaker motor you might want to reach the maximum by boo
 Since you have different effect levels within the same game, `adjust_intensity` uses a factor instead of absolute
 numbers to keep these intensity ratio.
 
+##### `pulse`
+
+This tweak allows you to pulse a constant effect in a configurable frequency on specific ports of your output
+controller. So `pulse[28] = 100` will pulse all the signals on port _28_ with a frequency of _1/100ms=10Hz_. The value
+must has to be between _1_ and _500_ms.
+
+The effect is not just a simple on/off but more like a zigzag curve.
+
+###### Use-cases
+
+Some shaker motors just create a high frequent vibration which is totally different from a shaker effect in a real
+pinball machine. Using this tweak the shaker might behaves more like realistic, especially smaller ones.
+
 ##### `merge`
 
 This tweak merges two ports. In fact it appends the entire content of the second port to the first port. So
@@ -430,6 +443,9 @@ turn_on[19] = f14,rs
 turn_off[20] = rs
 ; Boost the intensity of the shaker motor on device #51 port #28 by factor 1.5.
 adjust_intensity[28] = 1.5
+; Pulse the shaker motor on device #51 port #28 with 1/50ms = 20Hz.
+pulse[28] = 50
+
 [taf]
 ; Reduce the intensity of the shaker motor on device #51 port #28 by factor 0.7
 ; only for taf.

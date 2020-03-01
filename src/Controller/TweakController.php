@@ -104,13 +104,13 @@ class TweakController extends AbstractSettingsController
 
         $form = $this->createFormBuilder($tweaks)
             ->add('daySettings', AceEditorType::class, [
-                'label' => 'Day Settings',
-                 'required' => false,
-            ] + $defaults)
+                    'label' => 'Day Settings',
+                    'required' => false,
+                ] + $defaults)
             ->add('nightSettings', AceEditorType::class, [
-                'label' => 'Night Settings',
-                'required' => false,
-            ] + $defaults)
+                    'label' => 'Night Settings',
+                    'required' => false,
+                ] + $defaults)
             ->add('synonymSettings', AceEditorType::class, [
                     'label' => 'Synonym ROMs',
                     'required' => false,
@@ -379,6 +379,26 @@ class TweakController extends AbstractSettingsController
                                                     $triggers = explode('/', $game[$port]);
                                                     foreach ($triggers as &$trigger) {
                                                         $trigger = preg_replace('/([SWE]\d+)$/', '$1 ' . trim($setting), $trigger);
+                                                    }
+                                                    unset($trigger);
+                                                    $game[$port] = implode('/', $triggers);
+                                                }
+                                                break;
+
+                                            case 'pulse':
+                                                if (0 !== $game[$port]) {
+                                                    $duration = (int) trim($setting);
+                                                    if ($duration < 1) {
+                                                        $duration = 1;
+                                                    }
+                                                    if ($duration > 500) {
+                                                        $duration = 500;
+                                                    }
+                                                    $triggers = explode('/', $game[$port]);
+                                                    foreach ($triggers as &$trigger) {
+                                                        if (preg_match('/([SWE]\d+.*)/', $trigger, $matches)) {
+                                                            $trigger = $matches[1] . ' Blink bpw99 bnp' . $duration . ' f' . ((int) $duration/2);
+                                                        }
                                                     }
                                                     unset($trigger);
                                                     $game[$port] = implode('/', $triggers);
