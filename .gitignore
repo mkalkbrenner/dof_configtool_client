@@ -28,7 +28,10 @@ settings.ini
 *:Zone.Identifier:$DATA
 /build/Output/
 /public/dev.txt
-/bin/
 /ini/tweaks/
 /composer.phar
 /.env
+/bin/console
+/bin/phpunit
+/bin/PortableGit
+/bin/bsdiff_win_exe

@@ -66,7 +66,7 @@ class TweakController extends AbstractSettingsController
         $dir = explode(DIRECTORY_SEPARATOR, __DIR__);
         array_pop($dir);
         array_pop($dir);
-        $console = implode(DIRECTORY_SEPARATOR, $dir) . DIRECTORY_SEPARATOR . 'bin' . DIRECTORY_SEPARATOR . 'console ';
+        $console = implode(DIRECTORY_SEPARATOR, $dir) . DIRECTORY_SEPARATOR . 'bin' . DIRECTORY_SEPARATOR . 'console.bat ';
         $cmd = $console . 'dof:download-and-tweak';
 
         return $this->render('tweak/index.html.twig', [
