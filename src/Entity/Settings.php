@@ -130,6 +130,7 @@ class Settings
 
     public function getDofConfigPath(): ?string
     {
+        $config_path = '';
         $path = $this->getDofPath();
         if ($path && is_dir($path)) {
             $config_path = $path . DIRECTORY_SEPARATOR . 'Config';
@@ -248,7 +249,13 @@ class Settings
 
     public function getTablesPath(): ?string
     {
-        return !empty($this->tablesPath) ? $this->tablesPath : $this->getVisualPinballPath() . DIRECTORY_SEPARATOR . 'Tables';
+        if (!empty($this->tablesPath)) {
+            return $this->tablesPath;
+        }
+        elseif ($visual_pinball_path = $this->getVisualPinballPath()) {
+            return $visual_pinball_path . DIRECTORY_SEPARATOR . 'Tables';
+        }
+        return null;
     }
 
     /**
