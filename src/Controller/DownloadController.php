@@ -31,8 +31,19 @@ class DownloadController extends AbstractSettingsController
             $changes = $this->doDownload($names);
         }
 
+        $dir = explode(DIRECTORY_SEPARATOR, __DIR__);
+        array_pop($dir);
+        array_pop($dir);
+        $console = implode(DIRECTORY_SEPARATOR, $dir) . DIRECTORY_SEPARATOR . 'bin' . DIRECTORY_SEPARATOR . 'console.bat ';
+        $cmd = [
+            'database and your individual ini files' => $console . 'dof:download',
+            'your individual ini files' => $console . 'dof:download ini',
+            'just the database' => $console . 'dof:download db',
+        ];
+
         return $this->render('download/index.html.twig', [
             'download_form' => $form->createView(),
+            'cmd' => $cmd,
             'git_diff' => $changes,
         ]);
     }

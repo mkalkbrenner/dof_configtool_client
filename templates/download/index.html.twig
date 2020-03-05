@@ -10,6 +10,16 @@
     {{ form_widget(download_form) }}
     {{ form_end(download_form) }}
 
+    {% if cmd %}
+        <hr>
+        <h3>Command lines to download and your config files from your prefered frontend:</h3>
+        <ul>
+            {% for label, command in cmd %}
+                <li><strong>{{ label }}</strong>:<pre><kbd>{{ command|raw }}</kbd></pre></li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
     {% if git_diff|default %}
         <hr>
         {% include 'git_diff.html.twig' %}
