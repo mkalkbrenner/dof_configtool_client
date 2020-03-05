@@ -1,4 +1,4 @@
-Set Version number in DOFConfigtoolClient.iss and index.php
+Set Version number in DOFConfigtoolClient.iss, console.php and index.php
 
 Unix:
 ```

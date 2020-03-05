@@ -1,2 +1,2 @@
 @echo off
-..\..\php\php console %1 %2 %3 %4
+%~dp0..\..\php\php %~dp0..\public\console.php %1 %2 %3 %4 %5 %6 %7 %8 %9
