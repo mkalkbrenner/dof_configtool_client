@@ -49,6 +49,10 @@ class TextEditController extends AbstractSettingsController
             $formBuilder->add('globalconfigb2sserverxml_', SubmitType::class, ['label' => 'Edit']);
         }
 
+        if ($this->settings->getPinballYPath()) {
+            $formBuilder->add('mainjs_', SubmitType::class, ['label' => 'Edit']);
+        }
+
         $form = $formBuilder
             ->add('dmddeviceini_', SubmitType::class, ['label' => 'Edit'])
             ->add('b2stablesettingsxml_', SubmitType::class, ['label' => 'Edit'])
@@ -137,6 +141,13 @@ class TextEditController extends AbstractSettingsController
                         'directory' => $this->settings->getVPinMamePath(),
                         'file' => 'DmdDevice.ini',
                         'mode' => 'ace/mode/properties',
+                    ]);
+
+                case 'mainjs':
+                    return $this->redirectToRoute('textedit_editor', [
+                        'directory' => $this->settings->getPinballYPath() . DIRECTORY_SEPARATOR . 'Scripts',
+                        'file' => 'main.js',
+                        'mode' => 'ace/mode/javascript',
                     ]);
 
                 case 'b2stablesettingsxml':

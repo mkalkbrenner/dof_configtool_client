@@ -33,6 +33,10 @@
         <tr><td>Cabinet.xml</td><td>{{ form_widget(textedit_form.cabinetxml_) }}</td></tr>
         <tr><td>GlobalConfig_B2SServer.xml</td><td>{{ form_widget(textedit_form.globalconfigb2sserverxml_) }}</td></tr>
     {% endif %}
+    {% if textedit_form.mainjs_ %}
+        <tr><th colspan="2"><hr>PinballY<hr></th></tr>
+        <tr><td>main.js</td><td>{{ form_widget(textedit_form.mainjs_) }}</td></tr>
+    {% endif %}
     </table>
     {{ form_end(textedit_form) }}
 
