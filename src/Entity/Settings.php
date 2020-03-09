@@ -166,7 +166,8 @@ class Settings
     public function getPinballYVPXDatabaseFile(): ?string
     {
         $path = $this->getPinballYDatabasePath();
-        return $path ? $path . DIRECTORY_SEPARATOR . 'Visual Pinball X' . DIRECTORY_SEPARATOR . 'Visual Pinball X.xml' : null;
+        $path = $path ? $path . DIRECTORY_SEPARATOR . 'Visual Pinball X' . DIRECTORY_SEPARATOR . 'Visual Pinball X.xml' : null;
+        return ($path && file_exists($path)) ? $path : null;
     }
 
     public function getPinUpSystemPath(): ?string

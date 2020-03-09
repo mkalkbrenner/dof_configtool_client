@@ -57,8 +57,7 @@ class TablesController extends AbstractSettingsController
         $instcard =
             'pup';
 
-        if ($this->settings->getPinballYPath()) {
-            $pinballYDatabaseFile = $this->settings->getPinballYVPXDatabaseFile();
+        if ($pinballYDatabaseFile = $this->settings->getPinballYVPXDatabaseFile()) {
             $pinballYMenu = new PinballYMenu();
             $pinballYMenu->setFile($pinballYDatabaseFile)->load();
             if ($pinballYMenuEntry = $pinballYMenu->getMenuEntry($table_name)) {
@@ -82,6 +81,8 @@ class TablesController extends AbstractSettingsController
                 $year = $pinballYMenuEntry->getYear() ?? 'unknown';
                 $roms = Utility::getRomsForTable($description, $this->settings);
             }
+        } else {
+            $this->addFlash('danger', 'This "all in one" page requires PinballY\'s database at the moment to detect the ROM candidates. Alternatives are under development. But you can already use the dedicated pages for backglasses, PUPPacks, registry editor, ...');
         }
 
         $tableMapping = $this->settings->getTableMapping();
