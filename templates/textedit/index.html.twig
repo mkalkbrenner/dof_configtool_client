@@ -7,8 +7,9 @@
     {{ form_start(textedit_form) }}
     {{ form_errors(textedit_form) }}
     <table>
-        <tr><th colspan="2"><hr>DMD<hr></th></tr>
+        <tr><th colspan="2"><hr>VPinMAME and DMD<hr></th></tr>
         <tr><td>DmdDevice.ini (freezy's dll)</td><td>{{ form_widget(textedit_form.dmddeviceini_) }}</td></tr>
+        <tr><td>VPMAlias.txt</td><td>{{ form_widget(textedit_form.vpmaliastxt_) }}</td></tr>
         <tr><th colspan="2"><hr>B2S<hr></th></tr>
         <tr><td>B2STableSettings.xml</td><td>{{ form_widget(textedit_form.b2stablesettingsxml_) }}</td></tr>
         <tr><td>ScreenRes.txt</td><td>{{ form_widget(textedit_form.screenrestxt_) }}</td></tr>

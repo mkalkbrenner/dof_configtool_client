@@ -25,8 +25,13 @@ class Utility
             $old_lines = explode("\r\n", $old_files[$file]);
             $new_lines = explode("\r\n", $content);
             foreach($old_lines as $number => $line) {
+                $old_cells = explode(',', $line);
+                $game_name = $old_cells[0];
+                if (array_key_exists($game_name, $synonyms)) {
+                    $old_cells = [0 => $game_name] + array_fill(1, count($old_cells) - 1, '0');
+                    $line = '';
+                }
                 if ($line != ($new_lines[$number] ?? '')) {
-                    $old_cells = explode(',', $line);
                     $new_cells = explode(',', $new_lines[$number] ?? '');
                     $num_cells = count($old_cells);
                     $diff_cells = [$old_cells[0]];
@@ -37,7 +42,6 @@ class Utility
                     $toy = '';
                     $data = '';
 
-                    $game_name = $diff_cells[0];
                     $real_port = 0;
                     foreach ($diff_cells as $port => $dof_string) {
                         $dof_string = str_replace(['<ins>', '<del>'], ['<ins class="bg-success">', '<del class="bg-danger">'], $dof_string);

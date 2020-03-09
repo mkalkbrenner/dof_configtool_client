@@ -114,6 +114,7 @@ class TweakController extends AbstractSettingsController
             ->add('synonymSettings', AceEditorType::class, [
                     'label' => 'Synonym ROMs',
                     'required' => false,
+                    'help' => 'Add ROMs here that should share the same DOF configuration. This is not required for "alias" ROMs which are declared in VPMAlias.txt!',
                 ] + $defaults)
             ->add('save', SubmitType::class, ['label' => 'Save settings'])
             ->getForm();
@@ -162,7 +163,7 @@ class TweakController extends AbstractSettingsController
     {
         $tweaks = $this->getTweaks();
         list($files, $modded_files) = $this->modFiles($cycle);
-        $diffs = Utility::getDiffTables($files, $modded_files, $this->settings, $tweaks->getSynonymSettingsParsed());
+        $diffs = Utility::getDiffTables($files, $modded_files, $this->settings, $tweaks->getSynonymSettingsParsed() + $this->settings->getAliasRoms());
 
         $formBuilder = $this->createFormBuilder()
             ->add('cancel', SubmitType::class, ['label' => 'Cancel']);
@@ -237,7 +238,7 @@ class TweakController extends AbstractSettingsController
 
         foreach ($mods as $file => $per_game_mods) {
             $directOutputConfig = new DirectOutputConfig($file);
-            $contents = $directOutputConfig->load()->createSynonymGames($tweaks->getSynonymSettingsParsed())->getContent();
+            $contents = $directOutputConfig->load()->createSynonymGames($tweaks->getSynonymSettingsParsed() + $this->settings->getAliasRoms())->getContent();
             if ($contents) {
                 $files[$file] = $contents;
                 $colors[$file] = $directOutputConfig->getColors();

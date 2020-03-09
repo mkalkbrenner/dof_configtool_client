@@ -54,6 +54,7 @@ class TextEditController extends AbstractSettingsController
         }
 
         $form = $formBuilder
+            ->add('vpmaliastxt_', SubmitType::class, ['label' => 'Edit'])
             ->add('dmddeviceini_', SubmitType::class, ['label' => 'Edit'])
             ->add('b2stablesettingsxml_', SubmitType::class, ['label' => 'Edit'])
             ->add('screenrestxt_', SubmitType::class, ['label' => 'Edit'])
@@ -136,18 +137,26 @@ class TextEditController extends AbstractSettingsController
                         'source' => 'day',
                     ]);
 
-                case 'dmddeviceini':
-                    return $this->redirectToRoute('textedit_editor', [
-                        'directory' => $this->settings->getVPinMamePath(),
-                        'file' => 'DmdDevice.ini',
-                        'mode' => 'ace/mode/properties',
-                    ]);
-
                 case 'mainjs':
                     return $this->redirectToRoute('textedit_editor', [
                         'directory' => $this->settings->getPinballYPath() . DIRECTORY_SEPARATOR . 'Scripts',
                         'file' => 'main.js',
                         'mode' => 'ace/mode/javascript',
+                    ]);
+
+                case 'vpmaliastxt':
+                    return $this->redirectToRoute('textedit_editor', [
+                        'directory' => $this->settings->getVPinMamePath(),
+                        'file' => 'VPMAlias.txt',
+                        'mode' => 'ace/mode/text',
+                        'help' => base64_encode('Format per line: alias,rom'),
+                    ]);
+
+                case 'dmddeviceini':
+                    return $this->redirectToRoute('textedit_editor', [
+                        'directory' => $this->settings->getVPinMamePath(),
+                        'file' => 'DmdDevice.ini',
+                        'mode' => 'ace/mode/properties',
                     ]);
 
                 case 'b2stablesettingsxml':
@@ -192,6 +201,7 @@ class TextEditController extends AbstractSettingsController
         $mode = $request->query->get('mode');
         $cycle = $request->query->get('cycle');
         $source = $request->query->get('source');
+        $help = $request->query->get('help');
         $previous_branch = '';
         $workingCopy = null;
         $branch = $source ?? $cycle;
@@ -236,6 +246,7 @@ class TextEditController extends AbstractSettingsController
         $form = $this->createFormBuilder($textFile)
             ->add('text', AceEditorType::class, [
                 'label' => $textFile->getPath(),
+                'help' => $help ? base64_decode($help) : null,
                 'required' => false,
             ] + $defaults)
             ->add('cancel', SubmitType::class, ['label' => 'Cancel'])

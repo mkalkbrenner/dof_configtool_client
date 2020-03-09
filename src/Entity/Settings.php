@@ -204,6 +204,23 @@ class Settings
         return $roms;
     }
 
+    public function getAliasRoms(): array
+    {
+        $roms = [];
+        if ($path = $this->getVPinMamePath()) {
+            if (($handle = fopen($path . DIRECTORY_SEPARATOR . 'VPMAlias.txt', 'r')) !== false) {
+                while (($data = fgetcsv($handle, 0, ',')) !== false) {
+                    $rom = array_pop($data);
+                    foreach ($data as $alias) {
+                        $roms[$alias] = $rom;
+                    }
+                }
+                fclose($handle);
+            }
+        }
+        return $roms;
+    }
+
     public function getAltcolorPath(): ?string
     {
         $altcolor_dir = null;
