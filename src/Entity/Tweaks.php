@@ -70,9 +70,9 @@ class Tweaks
         return null;
     }
 
-    public function setDaySettings(string $settings): self
+    public function setDaySettings(?string $settings): self
     {
-        $this->daySettings = $settings;
+        $this->daySettings = $settings ?? "\r\n";
 
         return $this;
     }
@@ -98,9 +98,9 @@ class Tweaks
         return null;
     }
 
-    public function setNightSettings(string $settings): self
+    public function setNightSettings(?string $settings): self
     {
-        $this->nightSettings = $settings;
+        $this->nightSettings = $setting ?? "\r\n";
 
         return $this;
     }
@@ -128,9 +128,9 @@ class Tweaks
         return Utility::parseIniString($this->synonymSettings);
     }
 
-    public function setSynonymSettings(string $synonymSettings): self
+    public function setSynonymSettings(?string $synonymSettings): self
     {
-        $this->synonymSettings = $synonymSettings;
+        $this->synonymSettings = $synonymSettings ?? "\r\n";
 
         return $this;
     }
