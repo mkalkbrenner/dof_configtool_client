@@ -58,6 +58,7 @@ class TextEditController extends AbstractSettingsController
             ->add('dmddeviceini_', SubmitType::class, ['label' => 'Edit'])
             ->add('b2stablesettingsxml_', SubmitType::class, ['label' => 'Edit'])
             ->add('screenrestxt_', SubmitType::class, ['label' => 'Edit'])
+            ->add('globalpluginvbs_', SubmitType::class, ['label' => 'Edit'])
             ->getForm();
 
         $form->handleRequest($request);
@@ -172,6 +173,14 @@ class TextEditController extends AbstractSettingsController
                         'file' => 'ScreenRes.txt',
                         'mode' => 'ace/mode/text',
                     ]);
+
+                case 'globalpluginvbs':
+                    return $this->redirectToRoute('textedit_editor', [
+                        'directory' => $this->settings->getVisualPinballPath() . DIRECTORY_SEPARATOR . 'Scripts',
+                        'file' => 'GlobalPlugIn.vbs',
+                        'mode' => 'ace/mode/vbscript',
+                        'help' => $this->settings->isVersionControl() ? base64_encode('Script is not under version control!') : null,
+                    ]);
             }
         }
 
@@ -202,6 +211,8 @@ class TextEditController extends AbstractSettingsController
         $cycle = $request->query->get('cycle');
         $source = $request->query->get('source');
         $help = $request->query->get('help');
+        $hash = $request->query->get('hash');
+        $selected_rom = $request->query->get('selected_rom');
         $previous_branch = '';
         $workingCopy = null;
         $branch = $source ?? $cycle;
@@ -264,10 +275,12 @@ class TextEditController extends AbstractSettingsController
             $name = $form->getClickedButton()->getConfig()->getName();
             switch ($name) {
                 case 'save':
-                    if ($cycle && $this->settings->isVersionControl()) {
+                    if (($cycle || $hash) && $this->settings->isVersionControl()) {
                         try {
                             $workingCopy = $this->getGitWorkingCopy($directory);
-                            $workingCopy->checkout($cycle);
+                            if ($cycle) {
+                                $workingCopy->checkout($cycle);
+                            }
                         } catch (GitException $e) {
                             $this->addFlash('warning', $e->getMessage());
                         }
@@ -276,18 +289,22 @@ class TextEditController extends AbstractSettingsController
                     $textFile->persist();
 
                     try {
-                        if ($cycle && $this->settings->isVersionControl() && $workingCopy->hasChanges()) {
+                        if (($cycle || $hash) && $this->settings->isVersionControl() && $workingCopy->hasChanges()) {
                             $version = 0;
-                            $history = preg_split('/\r\n?|\n/', $workingCopy->log('--pretty=format:"%s"', '-1'));
-                            if ($history) {
-                                $latest = array_shift($history);
-                                if (preg_match('/Version (\d+) \|/', $latest, $matches)) {
-                                    $version = $matches[1];
+                            if ($cycle) {
+                                $history = preg_split('/\r\n?|\n/', $workingCopy->log('--pretty=format:"%s"', '-1'));
+                                if ($history) {
+                                    $latest = array_shift($history);
+                                    if (preg_match('/Version (\d+) \|/', $latest, $matches)) {
+                                        $version = $matches[1];
+                                    }
                                 }
                             }
-
                             $workingCopy->add($file);
-                            $workingCopy->commit('Version ' . $version . ' | edited ' . $file);
+                            $status = $workingCopy->run('status', ['-s', '-uno']);
+                            if (!empty($status)) {
+                                $workingCopy->commit($file, ['m' => 'Version ' . $version . ' | edited ' . $file]);
+                            }
                             $changes = nl2br($workingCopy->run('show'));
 
                             if ($previous_branch && $cycle !== $previous_branch) {
@@ -298,10 +315,17 @@ class TextEditController extends AbstractSettingsController
                         $this->addFlash('warning', $e->getMessage());
                     }
 
+                    if ($hash && $selected_rom) {
+                        return $this->redirectToRoute('table', ['hash' => $hash, 'selected_rom' => $selected_rom]);
+                    }
+
                     $session->set('git_diff', $changes);
                     return $this->redirectToRoute('textedit');
 
                 case 'cancel':
+                    if ($hash && $selected_rom) {
+                        return $this->redirectToRoute('table', ['hash' => $hash, 'selected_rom' => $selected_rom]);
+                    }
                     return $this->redirectToRoute('textedit');
             }
         }

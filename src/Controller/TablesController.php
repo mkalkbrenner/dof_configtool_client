@@ -14,6 +14,7 @@ use App\Entity\VPinMameRegEntry;
 use App\Form\Type\B2STableSettingDisabledType;
 use App\Form\Type\B2STableSettingType;
 use App\Form\Type\VPinMameRegEntryType;
+use GitWrapper\GitException;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
@@ -245,6 +246,14 @@ class TablesController extends AbstractSettingsController
                 ]);
         }
 
+        $formBuilder->add('play', SubmitType::class, ['label' => 'Play']);
+        $formBuilder->add('edit_table', SubmitType::class, ['label' => 'Edit Table']);
+        $formBuilder->add('export_pov', SubmitType::class, ['label' => 'Export POV']);
+        $formBuilder->add('extract_script', SubmitType::class, ['label' => 'Extract Script']);
+        if (file_exists($this->settings->getTablesPath() . DIRECTORY_SEPARATOR . $table_name . '.vbs')) {
+            $formBuilder->add('edit_script', SubmitType::class, ['label' => 'Edit Script']);
+        }
+
         $form = $formBuilder->getForm();
         $form->handleRequest($request);
 
@@ -253,10 +262,65 @@ class TablesController extends AbstractSettingsController
             $name = $form->getClickedButton()->getConfig()->getName();
             $data = $form->getData();
             $filesystem = $this->getFilesystem();
-
             switch ($name) {
                 case 'select_rom':
                     return $this->redirectToRoute('table', ['hash' => $hash, 'selected_rom' => $data['rom'] ?? '_']);
+
+                case 'play':
+                    $this->startVisualPinball($table_name);
+                    break;
+
+                case 'edit_table':
+                    $this->startVisualPinball($table_name, 'Edit');
+                    break;
+
+                case 'export_pov':
+                    if ($this->settings->isVersionControl()) {
+                        $workingCopy = $this->getGitWorkingCopy($this->settings->getTablesPath(), ['*.pov', '*.vbs']);
+                    }
+                    $this->startVisualPinball($table_name, 'Pov');
+                    if ($this->settings->isVersionControl() && $workingCopy->hasChanges()) {
+
+                        try {
+                            $workingCopy->add($table_name . '.pov');
+                            $status = $workingCopy->run('status', ['-s', '-uno']);
+                            if (!empty($status)) {
+                                $workingCopy->commit($table_name . '.pov', ['m' => 'exported from ' . $table_name]);
+                            }
+                        } catch (GitException $e) {
+                            $this->addFlash('danger', nl2br($e->getMessage()));
+                        }
+                    }
+                    break;
+
+                case 'extract_script':
+                    if ($this->settings->isVersionControl()) {
+                        $workingCopy = $this->getGitWorkingCopy($this->settings->getTablesPath(), ['*.pov', '*.vbs']);
+                    }
+                    $this->startVisualPinball($table_name, 'ExtractVBS');
+                    if ($this->settings->isVersionControl() && $workingCopy->hasChanges()) {
+
+                        try {
+                            $workingCopy->add($table_name . '.vbs');
+                            $status = $workingCopy->run('status', ['-s', '-uno']);
+                            if (!empty($status)) {
+                                $workingCopy->commit($table_name . '.vbs', ['m' => 'extracted from ' . $table_name]);
+                            }
+                        } catch (GitException $e) {
+                            $this->addFlash('danger', nl2br($e->getMessage()));
+                        }
+                    }
+                    return $this->redirectToRoute('table', ['hash' => $hash, 'selected_rom' => $selected_rom]);
+
+                case 'edit_script':
+                    return $this->redirectToRoute('textedit_editor', [
+                        'directory' => $this->settings->getTablesPath(),
+                        'file' => $table_name . '.vbs',
+                        'mode' => 'ace/mode/vbscript',
+                        'help' => $this->settings->isVersionControl() ? base64_encode('Script is under version control.') : null,
+                        'hash' => $hash,
+                        'selected_rom' => $data['rom'] ?? '_',
+                    ]);
 
                 case 'save':
                     $this->saveBackglass($table_name, $data['backglass']);
@@ -370,6 +434,20 @@ class TablesController extends AbstractSettingsController
                     }
                 }
             }
+        }
+    }
+
+    protected function startVisualPinball(string $table, string $command = 'Play') {
+        $table_argument = escapeshellarg($this->settings->getTablesPath() . DIRECTORY_SEPARATOR . $table . '.vpx');
+        $command = $this->settings->getVisualPinballExe() . ' -' . $command . ' ' . $table_argument;
+        ob_start();
+        $stdout = $command . "\r\n" . passthru($command);
+        $errout = ob_get_clean();
+        if ($stdout) {
+            $this->addFlash($errout ? 'message' : 'success', nl2br($stdout));
+        }
+        if ($errout) {
+            $this->addFlash('warning', nl2br($errout));
         }
     }
 }

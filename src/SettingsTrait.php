@@ -59,7 +59,7 @@ trait SettingsTrait
         return $this->cache;
     }
 
-    protected function getGitWorkingCopy(string $path): GitWorkingCopy
+    protected function getGitWorkingCopy(string $path, array $patterns = ['*.ini', '*.xml', '*.txt']): GitWorkingCopy
     {
         $gitWrapper = new GitWrapper($this->settings->getGitBinary());
 
@@ -69,9 +69,9 @@ trait SettingsTrait
             $workingCopy->config('user.email', $this->settings->getGitEmail());
             $workingCopy->config('user.name', $this->settings->getGitUser());
             try {
-                $workingCopy->add('*.ini');
-                $workingCopy->add('*.xml');
-                $workingCopy->add('*.txt');
+                foreach ($patterns as $pattern) {
+                    $workingCopy->add($pattern);
+                }
             } catch (GitException $e) {
                 // nop
             }

@@ -153,6 +153,11 @@ class Settings
         return $this->visualPinballPath;
     }
 
+    public function getVisualPinballExe(): ?string
+    {
+        return escapeshellarg($this->visualPinballPath . DIRECTORY_SEPARATOR . 'VPinballX.exe');
+    }
+
     public function getPinballYPath(): ?string
     {
         return $this->pinballYPath;

@@ -34,7 +34,9 @@
         <tr><td>Cabinet.xml</td><td>{{ form_widget(textedit_form.cabinetxml_) }}</td></tr>
         <tr><td>GlobalConfig_B2SServer.xml</td><td>{{ form_widget(textedit_form.globalconfigb2sserverxml_) }}</td></tr>
     {% endif %}
-    {% if textedit_form.mainjs_ %}
+    <tr><th colspan="2"><hr>Visual Pinball<hr></th></tr>
+    <tr><td>GlobalPlugIn.vbs</td><td>{{ form_widget(textedit_form.globalpluginvbs_) }}</td></tr>
+    {% if textedit_form.mainjs_ is defined %}
         <tr><th colspan="2"><hr>PinballY<hr></th></tr>
         <tr><td>main.js</td><td>{{ form_widget(textedit_form.mainjs_) }}</td></tr>
     {% endif %}
