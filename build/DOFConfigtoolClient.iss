@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "DOF Configtool Client"
-#define MyAppVersion "0.6.1-dev.3"
+#define MyAppVersion "0.6.1"
 #define MyAppPublisher "MK47"
 #define MyAppURL "https://github.com/mkalkbrenner/dof_configtool_client"
 #define MyAppExeName "DOFConfigtoolClient.exe"
