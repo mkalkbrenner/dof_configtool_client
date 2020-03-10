@@ -416,6 +416,15 @@ class TablesController extends AbstractSettingsController
             }
         }
 
+        if ($this->settings->isVersionControl()) {
+            try {
+                $workingCopy = $this->getGitWorkingCopy($this->settings->getDofConfigPath());
+                $branch = $this->getCurrentBranch($workingCopy);
+            } catch (GitException $e) {
+                $this->addFlash('warning', $e->getMessage());
+            }
+        }
+
         return $this->render('/tables/table.html.twig', [
             'table_form' => $form->createView(),
             'wheel_image' => isset($pinballYMedia) ? base64_encode($pinballYMedia->getWheelImage()) : null,
@@ -428,6 +437,8 @@ class TablesController extends AbstractSettingsController
             'romfiles' => $this->settings->getRoms(),
             'altcolor' => $this->settings->getAltcolorRoms(),
             'altsound' => $this->settings->getAltsoundRoms(),
+            'dof_rows' => (count($roms) === 1) ? Utility::getDofTableRows($alias ?? $roms[0], $this->settings) : [],
+            'cycle' => $branch ?? 'download',
         ]);
     }
 
