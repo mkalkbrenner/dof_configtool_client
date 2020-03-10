@@ -46,6 +46,7 @@ class TablesController extends AbstractSettingsController
         list($tables, $backglassChoices) = Utility::getExistingTablesAndBackglassChoices($this->settings);
         $table_name = $tables[$hash];
         $roms = [];
+        $alias =
         $added =
         $last_played =
             null;
@@ -57,6 +58,23 @@ class TablesController extends AbstractSettingsController
         $dmd =
         $instcard =
             'pup';
+        $script = $this->settings->getTablesPath() . DIRECTORY_SEPARATOR . $table_name . '.vbs';
+        $script_extracted = file_exists($script);
+
+        if ($script_extracted) {
+            $script_content = file_get_contents($script);
+            if (preg_match('/cGameName\s*=\s*[\'"]([^\'"]+)[\'"]/i', $script_content, $matches)) {
+                $rom = $matches[1];
+                if (!file_exists($this->settings->getRomsPath() . DIRECTORY_SEPARATOR . $rom . '.zip')) {
+                    $aliases = $this->settings->getAliasRoms();
+                    if (isset($aliases[$rom])) {
+                        $alias = $rom;
+                        $rom = $aliases[$rom];
+                    }
+                }
+                $roms = [$rom];
+            }
+        }
 
         if ($pinballYDatabaseFile = $this->settings->getPinballYVPXDatabaseFile()) {
             $pinballYMenu = new PinballYMenu();
@@ -80,10 +98,10 @@ class TablesController extends AbstractSettingsController
                 $description = $pinballYMenuEntry->getDescription();
                 $manufacturer = $pinballYMenuEntry->getManufacturer() ?? 'unknown';
                 $year = $pinballYMenuEntry->getYear() ?? 'unknown';
-                $roms = Utility::getRomsForTable($description, $this->settings);
+                $roms = $roms ?: Utility::getRomsForTable($description, $this->settings);
             }
-        } else {
-            $this->addFlash('danger', 'This "all in one" page requires PinballY\'s database at the moment to detect the ROM candidates. Alternatives are under development. But you can already use the dedicated pages for backglasses, PUPPacks, registry editor, ...');
+        } elseif (!$roms) {
+            $this->addFlash('danger', 'This "all in one" page uses PinballY\'s database to detect the ROM candidates. Alternatively you can extract the table script and the ROM would be looked up in it.');
         }
 
         $tableMapping = $this->settings->getTableMapping();
@@ -170,6 +188,15 @@ class TablesController extends AbstractSettingsController
                     'required' => false,
                 ]);
                 $pupPack = true;
+            }
+            elseif ($alias && (isset($pupPacks[$alias]) || isset($pupPacks['_' . $alias]))) {
+                $formBuilder->add('pup_pack', CheckboxType::class, [
+                    'data' => isset($pupPacks[$alias]),
+                    'label' => false,
+                    'required' => false,
+                ]);
+                $pupPack = true;
+                $disabled_puppack = '_' . $alias;
             } else {
                 $formBuilder->add('pup_pack', TextType::class, [
                     'disabled' => true,
@@ -209,6 +236,14 @@ class TablesController extends AbstractSettingsController
                     'data' => $b2sTableSettings->getTableSetting($roms[0])->trackChanges(true),
                     'label' => false,
                 ]);
+            if ($alias) {
+                $formBuilder
+                    ->add('alias', TextType::class, [
+                        'disabled' => true,
+                        'data' => $alias,
+                        'label' => false,
+                    ]);
+            }
         } else {
             $formBuilder
                 ->add('pup_pack', TextType::class, [
@@ -250,7 +285,7 @@ class TablesController extends AbstractSettingsController
         $formBuilder->add('edit_table', SubmitType::class, ['label' => 'Edit Table']);
         $formBuilder->add('export_pov', SubmitType::class, ['label' => 'Export POV']);
         $formBuilder->add('extract_script', SubmitType::class, ['label' => 'Extract Script']);
-        if (file_exists($this->settings->getTablesPath() . DIRECTORY_SEPARATOR . $table_name . '.vbs')) {
+        if ($script_extracted) {
             $formBuilder->add('edit_script', SubmitType::class, ['label' => 'Edit Script']);
         }
 
@@ -348,10 +383,11 @@ class TablesController extends AbstractSettingsController
                         $path = $this->settings->getPinUpPacksPath() . DIRECTORY_SEPARATOR;
                         if (isset($pupPacks[$disabled_puppack]) && !empty($data['pup_pack'])) {
                             // Activate PUPPack.
-                            if ($filesystem->exists($path . '_' . $roms[0])) {
+                            $rom = ltrim($disabled_puppack, '_');
+                            if ($filesystem->exists($path . $disabled_puppack)) {
                                 try {
-                                    $filesystem->rename($path . '_' . $roms[0], $path . $roms[0], true);
-                                    $this->addFlash('success', 'Renamed PUP Pack _' . $roms[0] . ' to ' . $roms[0]);
+                                    $filesystem->rename($path . $disabled_puppack, $path . $rom, true);
+                                    $this->addFlash('success', 'Renamed PUP Pack ' . $disabled_puppack . ' to ' . $rom);
                                 } catch (\Exception $e) {
                                 }
                             }
@@ -361,6 +397,15 @@ class TablesController extends AbstractSettingsController
                                 try {
                                     $filesystem->rename($path . $roms[0], $path . '_' . $roms[0], true);
                                     $this->addFlash('success', 'Renamed PUP Pack' . $roms[0] . ' to _' . $roms[0]);
+                                } catch (\Exception $e) {
+                                }
+                            }
+                        } elseif ($alias && isset($pupPacks[$alias]) && empty($data['pup_pack'])) {
+                            // Deactivate PUPPack.
+                            if ($filesystem->exists($path .$alias)) {
+                                try {
+                                    $filesystem->rename($path . $alias, $path . '_' . $alias, true);
+                                    $this->addFlash('success', 'Renamed PUP Pack' . $alias . ' to _' . $alias);
                                 } catch (\Exception $e) {
                                 }
                             }
