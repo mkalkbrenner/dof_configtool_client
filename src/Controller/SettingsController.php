@@ -33,6 +33,9 @@ class SettingsController extends AbstractSettingsController
             ->add('gitBinary', ElFinderType::class, ['label' => 'Git Binary', 'instance' => 'form', 'enable' => true, 'required' => false])
             ->add('gitUser', TextType::class, ['label' => 'Git User', 'required' => false])
             ->add('gitEmail', TextType::class, ['label' => 'Git Email', 'required' => false])
+            ->add('remoteAccess', CheckboxType::class, ['label' => 'Enable remote access', 'required' => false])
+            ->add('ip', TextType::class, ['label' => 'IP address for remote access', 'required' => false])
+            ->add('port', TextType::class, ['label' => 'Port for remote access', 'required' => false])
             ->add('debug', CheckboxType::class, ['label' => 'Debug Mode', 'required' => false, 'help' => 'Handle with care! Don\'t enable the debug mode unless mk47 advices you to do so ;-)']);
 
         $rgbToys = $this->settings->getRgbToys();
@@ -211,6 +214,9 @@ class SettingsController extends AbstractSettingsController
                 case 'save':
                     try {
                         $this->settings->persist();
+                        foreach ($this->settings->getFlashes() as $flash) {
+                            $this->addFlash($flash[0], $flash[1]);
+                        }
                     } catch (\Exception $e) {
                         $this->addFlash('warning', $e->getMessage());
                         break;

@@ -3,9 +3,39 @@
 {% block title %}Tables{% endblock %}
 
 {% block body %}
-    <ol>
-    {% for hash,table in tables %}
-        <li><a href="{{ path('table', {'hash': hash, 'selected_rom': '_'}) }}">{{ table }}</a></li>
-    {% endfor %}
-    </ol>
+<div class="container">
+    <div class="row">
+        <div class="col-6">
+            <hr>
+            {% if pinbally %}<b>Configured in PinballY</b><br>{% endif %}
+            {% for letter in range('A', 'Z') %}
+                <a href="#old_{{ letter }}">{{ letter }}</a>
+            {% endfor %}
+            <hr>
+            <ol>
+                {% set last_letter = '' %}
+                {% for hash,table in old_tables %}
+                    {% set letter = table|first %}
+                    <li{% if letter != last_letter %} id="old_{{ letter }}" {% set last_letter = letter %}{% endif %}><a href="{{ path('table', {'hash': hash, 'selected_rom': '_'}) }}">{{ table }}</a></li>
+                {% endfor %}
+            </ol>
+        </div>
+        {% if pinbally %}
+            <div class="col-6">
+                <hr>
+                <b>New Tables</b><br>
+                {% for letter in range('A', 'Z') %}
+                    <a href="#new_{{ letter }}">{{ letter }}</a>
+                {% endfor %}
+                <hr>
+                <ol>
+                    {% set last_letter = '' %}
+                    {% for hash,table in new_tables %}
+                        {% set letter = table|first %}
+                        <li{% if letter != last_letter %} id="new_{{ letter }}" {% set last_letter = letter %}{% endif %}><a href="{{ path('table', {'hash': hash, 'selected_rom': '_'}) }}">{{ table }}</a></li>
+                    {% endfor %}
+                </ol>
+            </div>
+        {% endif %}
+    </div>
 {% endblock %}

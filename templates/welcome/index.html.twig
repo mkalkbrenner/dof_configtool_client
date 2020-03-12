@@ -4,7 +4,20 @@
 
 {% block body %}
     <h1>DOF Configtool Client {{ constant('DOFCTC_VERSION') }}</h1>
+    <hr>
     <p>Started as download and tweak client for the DOF Configtool, becomes a kind of "Swiss Army Knife" for Virtual Pins</p>
+    {% if remote %}
+        <p>
+            Adress to access the DOF Configtool Client from another device in your network: <a href="http://{{ remote }}">http://{{ remote }}</a>
+        </p>
+    {% endif %}
+    <p>
+        Current DOF settings in use: <strong><em>{{ branch|default('-') }}</em></strong>
+    </p>
+    <p>
+        Current version: <strong><em>{{ log|default('-') }}</em></strong>
+    </p>
+    <hr>
     <img src="{{ asset('images/Vpinball_cover.png') }}">
     <img src="{{ asset('images/DirectOutputR3_Small.png') }}">
     <img src="{{ asset('images/ProgIcon.png') }}">

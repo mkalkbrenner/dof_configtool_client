@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use GitWrapper\GitException;
 use Symfony\Component\Routing\Annotation\Route;
 
 class WelcomeController extends AbstractSettingsController
@@ -15,7 +16,22 @@ class WelcomeController extends AbstractSettingsController
             $this->filesystem->remove($this->filesystem->getTempDir());
         }
 
+        $branch = 'download';
+        $log = 'unknown';
+        if ($this->settings->isVersionControl()) {
+            try {
+                $workingCopy = $this->getGitWorkingCopy($this->settings->getDofConfigPath());
+                $log = $workingCopy->log('--pretty=format:"%s | %ad"', '--date=rfc2822', '-1');
+                $branch = $this->getCurrentBranch($workingCopy);
+            } catch (GitException $e) {
+                $this->addFlash('warning', $e->getMessage());
+            }
+        }
+
         return $this->render('welcome/index.html.twig', [
+            'remote' => $this->settings->isRemoteAccess() ? $this->settings->getIp() . ':' . $this->settings->getPort() : null,
+            'branch' => $branch,
+            'log' => $log,
         ]);
     }
 

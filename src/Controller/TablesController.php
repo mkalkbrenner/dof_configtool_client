@@ -31,10 +31,34 @@ class TablesController extends AbstractSettingsController
      */
     public function index(Request $request)
     {
+        $pinballYMenu = null;
+        if ($pinballYDatabaseFile = $this->settings->getPinballYVPXDatabaseFile()) {
+            $pinballYMenu = new PinballYMenu();
+            $pinballYMenu->setFile($pinballYDatabaseFile)->load();
+        }
+
         list($tables, $backglassChoices) = Utility::getExistingTablesAndBackglassChoices($this->settings);
         asort($tables, SORT_NATURAL | SORT_FLAG_CASE);
+
+        $old_tables = [];
+        $new_tables = [];
+
+        if ($pinballYMenu) {
+            foreach ($tables as $hash => $table) {
+                if ($pinballYMenuEntry = $pinballYMenu->getMenuEntry($table)) {
+                    $old_tables[$hash] = $table;
+                } else {
+                    $new_tables[$hash] = $table;
+                }
+            }
+        } else {
+            $old_tables = $tables;
+        }
+
         return $this->render('tables/index.html.twig', [
-            'tables' => $tables,
+            'old_tables' => $old_tables,
+            'new_tables' => $new_tables,
+            'pinbally' => is_object($pinballYMenu),
         ]);
     }
 

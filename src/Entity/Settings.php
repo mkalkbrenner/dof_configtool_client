@@ -80,7 +80,15 @@ class Settings
 
     private $debug = false;
 
+    private $remoteAccess = false;
+
+    private $ip = '127.0.0.1';
+
+    private $port = 8093;
+
     private $ini;
+
+    private $flashes = [];
 
     public function __construct()
     {
@@ -443,6 +451,60 @@ class Settings
         return $this;
     }
 
+    /**
+     * @return bool
+     */
+    public function isRemoteAccess(): bool
+    {
+        return $this->remoteAccess;
+    }
+
+    /**
+     * @param bool $remoteAccess
+     * @return Settings
+     */
+    public function setRemoteAccess(bool $remoteAccess): self
+    {
+        $this->remoteAccess = $remoteAccess;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getIp()
+    {
+        return $this->ip;
+    }
+
+    /**
+     * @param string $ip
+     * @return Settings
+     */
+    public function setIp(string $ip): self
+    {
+        $this->ip = $ip;
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getPort(): int
+    {
+        return $this->port;
+    }
+
+    /**
+     * @param int $port
+     * @return Settings
+     */
+    public function setPort(int $port)
+    {
+        $this->port = $port;
+        return $this;
+    }
+
     public function getRgbToys() : ?array
     {
         return [
@@ -535,6 +597,27 @@ class Settings
         return $this;
     }
 
+    /**
+     * @return array
+     */
+    public function getFlashes(): array
+    {
+        $flashes = $this->flashes;
+        $this->flashes = [];
+        return $flashes;
+    }
+
+    /**
+     * @param string $severity
+     * @param string $message
+     * @return Settings
+     */
+    public function addFlash(string $severity, string $message): self
+    {
+        $this->flashes[] = [$severity, $message];
+        return $this;
+    }
+
     public function load(): self
     {
         if (file_exists($this->ini)) {
@@ -551,6 +634,9 @@ class Settings
             $this->setGitEmail($settings['git']['email'] ?? $this->getGitEmail());
             $this->setBsPatchBinary(!empty($settings['bsdiff']['bspatch_binary']) ? $settings['bsdiff']['bspatch_binary'] : $this->getBsPatchBinary());
             $this->setPortAssignments($settings['portassignments'] ?? []);
+            $this->setRemoteAccess((bool) ($settings['remote']['access'] ?? false));
+            $this->setIp($settings['remote']['ip'] ?? $this->getIp());
+            $this->setPort($settings['remote']['port'] ?? $this->getPort());
         } else {
             // 0.1.x backward compatibility
             $old = ($_SERVER['PROGRAM_DATA'] ?? (__DIR__ . '/../../ini')) . DIRECTORY_SEPARATOR . 'download.ini';
@@ -585,7 +671,11 @@ class Settings
             'user = "' . addslashes(trim($this->getGitUser(), '" ')) . '"' . "\r\n" .
             'email = "' . addslashes(trim($this->getGitEmail(), '" ')) . '"' . "\r\n" .
             "[bsdiff]\r\n" .
-            'bspatch_binary = "' . addslashes(trim($this->getBsPatchBinary(), '" ')) . '"' . "\r\n";
+            'bspatch_binary = "' . addslashes(trim($this->getBsPatchBinary(), '" ')) . '"' . "\r\n" .
+            "[remote]\r\n" .
+            'access = ' . (int) $this->isRemoteAccess() . "\r\n" .
+            'ip = "' . addslashes(trim($this->getIp())) . '"' . "\r\n" .
+            'port = "' . (int) trim($this->getPort()) . '"' . "\r\n";
 
         if ($portAssignments = $this->getPortAssignments()) {
             $content .= "[portassignments]\r\n";
@@ -608,6 +698,17 @@ class Settings
             file_put_contents(self::DEV_TXT, DOFCTC_VERSION);
         } else {
             @unlink(self::DEV_TXT);
+        }
+
+        $remote_ip = $this->isRemoteAccess() ? trim($this->getIp()) : '127.0.0.1';
+        $remote_port = $this->isRemoteAccess() ? (int) trim($this->getPort()) : 0;
+        $settings_json = __DIR__ . '/../../../settings.json';
+        $json = json_decode(file_get_contents($settings_json));
+        if ($json->web_server->listen_on[0] !== $remote_ip || $json->web_server->listen_on[1] !== $remote_port) {
+            $json->web_server->listen_on[0] = $remote_ip;
+            $json->web_server->listen_on[1] = $remote_port;
+            file_put_contents($settings_json, json_encode($json,JSON_PRETTY_PRINT));
+            $this->addFlash('warning', 'The remote access settings changed. Restart the DOF Configtool Client to activate these settings!');
         }
 
         return $this;
