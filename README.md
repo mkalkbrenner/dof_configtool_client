@@ -1,9 +1,12 @@
 # DOF Configtool Client
 
-This is (mainly) a client for downloading your config files from [http://configtool.vpuniverse.com] and for applying
+This is (mainly) a client for downloading your config files from http://configtool.vpuniverse.com and for applying
 additional tweaks to them. In addition it contains some tools to administer the Visual Pinball system itself.
 
 The latest version could always be downloaded from https://github.com/mkalkbrenner/dof_configtool_client/releases
+
+Some, but not all features are demonstrated in short video clips at
+[DOF Configtool Client YouTube Channel](https://www.youtube.com/playlist?list=PLhdNz_h1Ek1-pi6V_kmB_sGvXXyeBLuBC]).
 
 ## Motivation
 
@@ -26,15 +29,15 @@ But whenever you need to make an individual adjustment for _all_ tables for a sp
 this tool might become useful﻿ 😉
 
 In addition to the available tweaks described below you can think of various other tweaks, for example inverting an
-effect or anything else described at [http://directoutput.github.io/DirectOutput/inifiles.html].
-Just open an issue at [https://github.com/mkalkbrenner/dof_configtool_client/issues] if you have an idea or require
+effect or anything else described at http://directoutput.github.io/DirectOutput/inifiles.html.
+Just open an issue at https://github.com/mkalkbrenner/dof_configtool_client/issues if you have an idea or require
 something special.
 
 The client is written in PHP because of the fact that the configtool itself is written in PHP.
 That will hopefully ease an adoption of (some) features by the DOF configtool itself in the future.
 The client itself very light wight. But due to the fact that PHP is uncommon for most Windows users, there two variants
 to install the client: As a light wight PHP application as usual requiring a working PHP installation or as an
-all-in-one package based on [https://github.com/cztomczak/phpdesktop](php-desktop).
+all-in-one package based on [php-desktop](https://github.com/cztomczak/phpdesktop).
 
 Another advantage of this PHP based wev application approach is that you can use the tool remotely, for example using
 your laptop and your preferred browser.
@@ -52,7 +55,7 @@ If you use this software, you do it **on your own risk!**
 * Select `Settings` from the top menu.
 
 * Complete your `Settings`:
-  * You'll find your `LCP_APIKEY` on the start page after login into [http://configtool.vpuniverse.com]
+  * You'll find your `LCP_APIKEY` on the start page after login into http://configtool.vpuniverse.com
 
   * As `DOF path` you have to provide the directory where DOF is installed. In most cases this should be
     `C:\DirectOutput\config`. **_Note:_** you have to ensure that this directory is writable. In case you get an error
@@ -607,18 +610,19 @@ In addition, the tool suggests backglasses for table.
 
 ### Leveraged components and their licences
 
-* [https://symfony.com] MIT
-* [https://github.com/sagebind/windows-registry] Apache 2.0
-* [https://github.com/erusev/parsedown] MIT
-* [https://github.com/iphis/fine-diff] MIT
-* [https://github.com/cpliakas/git-wrapper] MIT
-* [https://getbootstrap.com] MIT
-* [https://jquery.com] MIT
-* [https://popper.js.org/] MIT
-* [https://www.npmjs.com/package/bs-custom-file-input] MIT
-* [https://ace.c9.io/] BSD
-* [https://github.com/cztomczak/phpdesktop] BSD 3-clause license
-* [http://www.daemonology.net/bsdiff/] BSD Protection License
-* [https://git-scm.com/] GPLv2
+* https://symfony.com - MIT
+* https://github.com/sagebind/windows-registry - Apache 2.0
+* https://github.com/erusev/parsedown - MIT
+* https://github.com/iphis/fine-diff - MIT
+* https://github.com/cpliakas/git-wrapper - MIT
+* https://getbootstrap.com - MIT
+* https://jquery.com - MIT
+* https://popper.js.org/ - MIT
+* https://www.npmjs.com/package/bs-custom-file-input - MIT
+* https://ace.c9.io/ - BSD
+* https://github.com/ace-diff/ace-diff - MIT
+* https://github.com/cztomczak/phpdesktop - BSD 3-clause license
+* http://www.daemonology.net/bsdiff/ - BSD Protection License
+* https://git-scm.com/ - GPLv2
 
 The _DOF Configtool Client_ source code is licenced under GPLv3.
