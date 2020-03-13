@@ -77,13 +77,16 @@ class TablesController extends AbstractSettingsController
         $description =
         $manufacturer =
         $year =
+        $ipdbid =
             'PinballY required!';
         $topper =
         $dmd =
         $instcard =
             'pup';
         $script = $this->settings->getTablesPath() . DIRECTORY_SEPARATOR . $table_name . '.vbs';
+
         $script_extracted = file_exists($script);
+        $configured_tables = [];
 
         if ($script_extracted) {
             $script_content = file_get_contents($script);
@@ -122,7 +125,32 @@ class TablesController extends AbstractSettingsController
                 $description = $pinballYMenuEntry->getDescription();
                 $manufacturer = $pinballYMenuEntry->getManufacturer() ?? 'unknown';
                 $year = $pinballYMenuEntry->getYear() ?? 'unknown';
+                $ipdbid = '<a href="https://www.ipdb.org/machine.cgi?id=' . $pinballYMenuEntry->getIpdbid() . '" target="_blank">IPD No. ' . $pinballYMenuEntry->getIpdbid() . '</a>' ?? 'unknown';
                 $roms = $roms ?: Utility::getRomsForTable($description, $this->settings);
+            } elseif ($configured_tables = $pinballYMenu->getTables()) {
+                asort($configured_tables, SORT_NATURAL);
+                $candidates = [];
+                foreach ($configured_tables as $configured_table_name) {
+                    $distance = levenshtein(substr($configured_table_name, 0, 10), substr($table_name, 0, 10));
+                    if ($distance <= 2) {
+                        $candidates[$configured_table_name] = $distance;
+                    } else {
+                        $menuEntry = $pinballYMenu->getMenuEntry($configured_table_name);
+                        $distance = levenshtein(substr($menuEntry->getDescription(), 0, 10), substr($table_name, 0, 10));
+                        if ($distance <= 2) {
+                            $candidates[$configured_table_name] = $distance;
+                        }
+                    }
+                }
+
+                $configured_tables = array_combine($configured_tables, $configured_tables);
+                if ($candidates) {
+                    asort($candidates, SORT_NUMERIC);
+                    $configured_tables = [
+                        'Suggested' => array_combine(array_keys($candidates), array_keys($candidates)),
+                        'All' => $configured_tables
+                    ];
+                }
             }
         } elseif (!$roms) {
             $this->addFlash('danger', 'This "all in one" page uses PinballY\'s database to detect the ROM candidates. Alternatively you can extract the table script and the ROM would be looked up in it.');
@@ -132,7 +160,9 @@ class TablesController extends AbstractSettingsController
         $rom_choices = [];
         $vPinMameRegEntries = new VPinMameRegEntries();
         foreach ($roms as $rom) {
-            $rom_choices[$rom . ' >>> DOF: ' .  $tableMapping[$rom]] = $rom;
+            if (isset($tableMapping[$rom])) {
+                $rom_choices[$rom . ' >>> DOF: ' .  $tableMapping[$rom]] = $rom;
+            }
         }
 
         if ('_' !== $selected_rom) {
@@ -159,11 +189,6 @@ class TablesController extends AbstractSettingsController
         $pupPacks = Utility::getExistingPupPacks($this->settings, $roms);
 
         $formBuilder = $this->createFormBuilder()
-            ->add('table_name', TextType::class, [
-                'disabled' => true,
-                'data' => $description,
-                'label' => false,
-            ])
             ->add('manufacturer', TextType::class, [
                 'disabled' => true,
                 'data' => $manufacturer,
@@ -195,6 +220,31 @@ class TablesController extends AbstractSettingsController
                 'label' => false,
             ])
             ->add('save', SubmitType::class, ['label' => 'Save']);
+
+        if ($configured_tables) {
+            $formBuilder
+                ->add('table_name', ChoiceType::class, [
+                    'choices' => array_merge(["Don't copy anything" => '_'], $configured_tables),
+                    'label' => false,
+                    'help' => 'The table is not yet configured in your frontend. But maybe it is just a new version of an existing one? You can copy an existing config here.',
+                ])
+                ->add('copy_pov', CheckboxType::class, [
+                    'data' => false,
+                    'label' => 'Copy POV',
+                    'required' => false,
+                ])
+                ->add('copy_backglass', CheckboxType::class, [
+                    'data' => false,
+                    'label' => 'Copy Backglass if exists',
+                    'required' => false,
+                ]);
+        } else {
+            $formBuilder->add('table_name', TextType::class, [
+                'disabled' => true,
+                'data' => $description,
+                'label' => false,
+            ]);
+        }
 
         if (count($roms) > 1) {
             $formBuilder->add('select_rom', SubmitType::class, ['label' => 'Select ROM']);
@@ -311,6 +361,7 @@ class TablesController extends AbstractSettingsController
         $formBuilder->add('extract_script', SubmitType::class, ['label' => 'Extract Script']);
         if ($script_extracted) {
             $formBuilder->add('edit_script', SubmitType::class, ['label' => 'Edit Script']);
+            $formBuilder->add('compare_script', SubmitType::class, ['label' => 'Compare Script']);
         }
 
         $form = $formBuilder->getForm();
@@ -334,22 +385,7 @@ class TablesController extends AbstractSettingsController
                     break;
 
                 case 'export_pov':
-                    if ($this->settings->isVersionControl()) {
-                        $workingCopy = $this->getGitWorkingCopy($this->settings->getTablesPath(), ['*.pov', '*.vbs']);
-                    }
-                    $this->startVisualPinball($table_name, 'Pov');
-                    if ($this->settings->isVersionControl() && $workingCopy->hasChanges()) {
-
-                        try {
-                            $workingCopy->add($table_name . '.pov');
-                            $status = $workingCopy->run('status', ['-s', '-uno']);
-                            if (!empty($status)) {
-                                $workingCopy->commit($table_name . '.pov', ['m' => 'exported from ' . $table_name]);
-                            }
-                        } catch (GitException $e) {
-                            $this->addFlash('danger', nl2br($e->getMessage()));
-                        }
-                    }
+                    $this->extractPOV($table_name);
                     break;
 
                 case 'extract_script':
@@ -381,7 +417,47 @@ class TablesController extends AbstractSettingsController
                         'selected_rom' => $data['rom'] ?? '_',
                     ]);
 
+                case 'compare_script':
+                    return $this->redirectToRoute('textedit_select_diff', [
+                        'directory' => $this->settings->getTablesPath(),
+                        'file' => $table_name . '.vbs',
+                        'mode' => 'ace/mode/vbscript',
+                        'help' => $this->settings->isVersionControl() ? base64_encode('Script is under version control.') : null,
+                        'hash' => $hash,
+                        'selected_rom' => $data['rom'] ?? '_',
+                    ]);
+
                 case 'save':
+                    if ($configured_tables && '_' !== $data['table_name']) {
+                        if ($existingPinballYMenuEntry = $pinballYMenu->getMenuEntry($data['table_name'])) {
+                            $newPinballYMenuEntry = clone $existingPinballYMenuEntry;
+                            $newPinballYMenuEntry->setName($table_name);
+                            $pinballYMenu->addMenuEntry($newPinballYMenuEntry)->persist();
+                            $this->addFlash('success', 'Copied PinballY menu entry from ' . $data['table_name'] . ' to ' . $table_name);
+                        }
+
+                        if (!empty($data['copy_pov'])) {
+                            $filesystem = $this->getFilesystem();
+                            $table_path = $this->settings->getTablesPath() . DIRECTORY_SEPARATOR;
+                            $pov = $data['table_name'] . '.pov';
+                            if (!$filesystem->exists($table_path . $pov)) {
+                                $this->extractPOV($data['table_name']);
+                            }
+                            if ($filesystem->exists($table_path . $pov)) {
+                                $target_pov = $table_name . '.pov';
+                                try {
+                                    $filesystem->copy($table_path . $pov, $table_path . $target_pov);
+                                    $this->addFlash('success', 'Copied ' . $pov . ' to ' . $target_pov);
+                                } catch (\Exception $e) {
+                                }
+                            }
+                        }
+
+                        if (!empty($data['copy_backglass']) && !empty($backglassChoices[$data['table_name']])) {
+                            $data['backglass'] = $backglassChoices[$data['table_name']];
+                        }
+                    }
+
                     $this->saveBackglass($table_name, $data['backglass']);
 
                     if (isset($pinballYGameStat)) {
@@ -436,7 +512,8 @@ class TablesController extends AbstractSettingsController
                         }
                     }
 
-                    break;
+                    // The form needs to be rebuilt!
+                    return $this->redirectToRoute('table', ['hash' => $hash, 'selected_rom' => $selected_rom]);
             }
         }
 
@@ -463,7 +540,27 @@ class TablesController extends AbstractSettingsController
             'altsound' => $this->settings->getAltsoundRoms(),
             'dof_rows' => (count($roms) === 1) ? Utility::getDofTableRows($alias ?? $roms[0], $this->settings) : [],
             'cycle' => $branch ?? 'download',
+            'ipdbid' => $ipdbid,
         ]);
+    }
+
+    protected function extractPOV(string $table_name) {
+        if ($this->settings->isVersionControl()) {
+            $workingCopy = $this->getGitWorkingCopy($this->settings->getTablesPath(), ['*.pov', '*.vbs']);
+        }
+        $this->startVisualPinball($table_name, 'Pov');
+        if ($this->settings->isVersionControl() && $workingCopy->hasChanges()) {
+
+            try {
+                $workingCopy->add($table_name . '.pov');
+                $status = $workingCopy->run('status', ['-s', '-uno']);
+                if (!empty($status)) {
+                    $workingCopy->commit($table_name . '.pov', ['m' => 'exported from ' . $table_name]);
+                }
+            } catch (GitException $e) {
+                $this->addFlash('danger', nl2br($e->getMessage()));
+            }
+        }
     }
 
     protected function saveBackglass($table, $backglass_file) {

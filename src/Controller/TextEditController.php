@@ -2,10 +2,13 @@
 
 namespace App\Controller;
 
+use App\Entity\TextDiffFile;
 use App\Entity\TextFile;
+use App\Form\Type\AceDiffType;
 use GitWrapper\GitException;
 use Norzechowicz\AceEditorBundle\Form\Extension\AceEditor\Type\AceEditorType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Routing\Annotation\Route;
@@ -331,6 +334,298 @@ class TextEditController extends AbstractSettingsController
         }
 
         return $this->render('textedit/edit.html.twig', [
+            'textedit_form' => $form->createView(),
+            'file' => $file,
+            'git_diff' => nl2br($changes),
+            'cycle' => $cycle,
+        ]);
+    }
+
+    /**
+     * @Route("/textedit/select_diff", name="textedit_select_diff")
+     */
+    public function select_diff(Request $request, SessionInterface $session)
+    {
+        $directory = $request->query->get('directory');
+        if (!$directory) {
+            $this->addFlash('danger', 'The settings are incomplete or the directory could not be found.');
+            return $this->redirectToRoute('textedit');
+        }
+        $file = $request->query->get('file');
+        $mode = $request->query->get('mode');
+        $cycle = $request->query->get('cycle');
+        $source = $request->query->get('source');
+        $help = $request->query->get('help');
+        $hash = $request->query->get('hash');
+        $selected_rom = $request->query->get('selected_rom');
+        $previous_branch = '';
+        $workingCopy = null;
+
+        if (($cycle || $hash) && $this->settings->isVersionControl()) {
+            try {
+                $workingCopy = $this->getGitWorkingCopy($directory);
+                $workingCopy->getWrapper();
+                $history = preg_split('/\r\n?|\n/', $workingCopy->getWrapper()->git('log --pretty=format:"%H_##_%s | %ad" --date=rfc2822 -50 -- ' . escapeshellarg($file), $directory));
+                if ($history) {
+                    $latest = array_shift($history);
+                    list(, $current) = explode('_##_', trim($latest, '"'));
+                }
+                $branch = $this->getCurrentBranch($workingCopy);
+            } catch (GitException $e) {
+                $this->addFlash('warning', $e->getMessage());
+            }
+        }
+
+            #dump($history);
+            $textFile = new TextFile($directory, $file);
+            $textFile->load();
+
+        $defaults = [
+            'mode' => $mode,
+            'theme' => 'ace/theme/monokai',
+            'width' => '100%',
+            'height' => 600,
+            'font_size' => 12,
+            'tab_size' => null,
+            'read_only' => null,
+            'use_soft_tabs' => null,
+            'use_wrap_mode' => true,
+            'show_print_margin' => null,
+            'show_invisibles' => null,
+            'highlight_active_line' => true,
+            'options_enable_basic_autocompletion' => false,
+            'options_enable_live_autocompletion' => false,
+            'options_enable_snippets' => false,
+            'keyboard_handler' => null
+        ];
+
+        $form = $this->createFormBuilder($textFile)
+            ->add('text', AceEditorType::class, [
+                    'label' => $textFile->getPath(),
+                    'help' => $help ? base64_decode($help) : null,
+                    'required' => false,
+                ] + $defaults)
+            ->add('cancel', SubmitType::class, ['label' => 'Cancel'])
+            ->add('save', SubmitType::class, ['label' => 'Save'])
+            ->getForm();
+
+        $form->handleRequest($request);
+
+        $changes = '';
+        if ($form->isSubmitted() && $form->isValid()) {
+            /** @var TextFile $textFile */
+            $textFile = $form->getData();
+
+            /** @var \Symfony\Component\Form\Form $form */
+            $name = $form->getClickedButton()->getConfig()->getName();
+            switch ($name) {
+                case 'save':
+                    if (($cycle || $hash) && $this->settings->isVersionControl()) {
+                        try {
+                            $workingCopy = $this->getGitWorkingCopy($directory);
+                            if ($cycle) {
+                                $workingCopy->checkout($cycle);
+                            }
+                        } catch (GitException $e) {
+                            $this->addFlash('warning', $e->getMessage());
+                        }
+                    }
+
+                    $textFile->persist();
+
+                    try {
+                        if (($cycle || $hash) && $this->settings->isVersionControl() && $workingCopy->hasChanges()) {
+                            $version = 0;
+                            if ($cycle) {
+                                $history = preg_split('/\r\n?|\n/', $workingCopy->log('--pretty=format:"%s"', '-1'));
+                                if ($history) {
+                                    $latest = array_shift($history);
+                                    if (preg_match('/Version (\d+) \|/', $latest, $matches)) {
+                                        $version = $matches[1];
+                                    }
+                                }
+                            }
+                            $workingCopy->add($file);
+                            $status = $workingCopy->run('status', ['-s', '-uno']);
+                            if (!empty($status)) {
+                                $workingCopy->commit($file, ['m' => 'Version ' . $version . ' | edited ' . $file]);
+                            }
+                            $changes = nl2br($workingCopy->run('show'));
+
+                            if ($previous_branch && $cycle !== $previous_branch) {
+                                $workingCopy->checkout($previous_branch);
+                            }
+                        }
+                    } catch (GitException $e) {
+                        $this->addFlash('warning', $e->getMessage());
+                    }
+
+                    if ($hash && $selected_rom) {
+                        return $this->redirectToRoute('table', ['hash' => $hash, 'selected_rom' => $selected_rom]);
+                    }
+
+                    $session->set('git_diff', $changes);
+                    return $this->redirectToRoute('textedit');
+
+                case 'cancel':
+                    if ($hash && $selected_rom) {
+                        return $this->redirectToRoute('table', ['hash' => $hash, 'selected_rom' => $selected_rom]);
+                    }
+                    return $this->redirectToRoute('textedit');
+            }
+        }
+
+        return $this->render('textedit/edit.html.twig', [
+            'textedit_form' => $form->createView(),
+            'file' => $file,
+            'git_diff' => nl2br($changes),
+            'cycle' => $cycle,
+        ]);
+    }
+
+        /**
+         * @Route("/textedit/diff", name="textedit_diff")
+         */
+        public function diff(Request $request, SessionInterface $session)
+    {
+        $directory = $request->query->get('directory');
+        if (!$directory) {
+            $this->addFlash('danger', 'The settings are incomplete or the directory could not be found.');
+            return $this->redirectToRoute('textedit');
+        }
+        $file = $request->query->get('file');
+        $file2 = $request->query->get('file2');
+        $mode = $request->query->get('mode');
+        $cycle = $request->query->get('cycle');
+        $source = $request->query->get('source');
+        $help = $request->query->get('help');
+        $hash = $request->query->get('hash');
+        $selected_rom = $request->query->get('selected_rom');
+        $previous_branch = '';
+        $workingCopy = null;
+        $branch = $source ?? $cycle;
+
+        try {
+            if ($cycle && $this->settings->isVersionControl()) {
+                $workingCopy = $this->getGitWorkingCopy($directory);
+                $previous_branch = $this->getCurrentBranch($workingCopy);
+                $workingCopy->checkout($branch);
+            }
+
+            $textFile = new TextDiffFile($directory, $file);
+            $textFile->load();
+
+            $textFile->setLeft('sdfdsfsdf');
+
+            if ($previous_branch && $branch !== $previous_branch) {
+                $workingCopy->checkout($previous_branch);
+            }
+        } catch (GitException $e) {
+            $this->addFlash('warning', $e->getMessage());
+            return $this->redirectToRoute('textedit');
+        }
+
+        $defaults = [
+            'mode' => $mode,
+            'theme' => 'ace/theme/monokai',
+            'width' => '100%',
+            'height' => 600,
+            'font_size' => 12,
+            'tab_size' => null,
+            'read_only' => null,
+            'use_soft_tabs' => null,
+            'use_wrap_mode' => true,
+            'show_print_margin' => null,
+            'show_invisibles' => null,
+            'highlight_active_line' => true,
+            'options_enable_basic_autocompletion' => false,
+            'options_enable_live_autocompletion' => false,
+            'options_enable_snippets' => false,
+            'keyboard_handler' => null
+        ];
+
+        $form = $this->createFormBuilder($textFile)
+            ->add('left', TextareaType::class, [
+                    'label' => $textFile->getPath(),
+                    'help' => $help ? base64_decode($help) : null,
+                    'required' => false,
+                ])
+            ->add('right', AceDiffType::class, [
+                    'label' => $textFile->getPath(),
+                    'help' => $help ? base64_decode($help) : null,
+                    'required' => false,
+                ] + $defaults)
+            ->add('cancel', SubmitType::class, ['label' => 'Cancel'])
+            ->add('save', SubmitType::class, ['label' => 'Save'])
+            ->getForm();
+
+        $form->handleRequest($request);
+
+        $changes = '';
+        if ($form->isSubmitted() && $form->isValid()) {
+            /** @var TextFile $textFile */
+            $textFile = $form->getData();
+
+            /** @var \Symfony\Component\Form\Form $form */
+            $name = $form->getClickedButton()->getConfig()->getName();
+            switch ($name) {
+                case 'save':
+                    if (($cycle || $hash) && $this->settings->isVersionControl()) {
+                        try {
+                            $workingCopy = $this->getGitWorkingCopy($directory);
+                            if ($cycle) {
+                                $workingCopy->checkout($cycle);
+                            }
+                        } catch (GitException $e) {
+                            $this->addFlash('warning', $e->getMessage());
+                        }
+                    }
+
+                    $textFile->persist();
+
+                    try {
+                        if (($cycle || $hash) && $this->settings->isVersionControl() && $workingCopy->hasChanges()) {
+                            $version = 0;
+                            if ($cycle) {
+                                $history = preg_split('/\r\n?|\n/', $workingCopy->log('--pretty=format:"%s"', '-1'));
+                                if ($history) {
+                                    $latest = array_shift($history);
+                                    if (preg_match('/Version (\d+) \|/', $latest, $matches)) {
+                                        $version = $matches[1];
+                                    }
+                                }
+                            }
+                            $workingCopy->add($file);
+                            $status = $workingCopy->run('status', ['-s', '-uno']);
+                            if (!empty($status)) {
+                                $workingCopy->commit($file, ['m' => 'Version ' . $version . ' | edited ' . $file]);
+                            }
+                            $changes = nl2br($workingCopy->run('show'));
+
+                            if ($previous_branch && $cycle !== $previous_branch) {
+                                $workingCopy->checkout($previous_branch);
+                            }
+                        }
+                    } catch (GitException $e) {
+                        $this->addFlash('warning', $e->getMessage());
+                    }
+
+                    if ($hash && $selected_rom) {
+                        return $this->redirectToRoute('table', ['hash' => $hash, 'selected_rom' => $selected_rom]);
+                    }
+
+                    $session->set('git_diff', $changes);
+                    return $this->redirectToRoute('textedit');
+
+                case 'cancel':
+                    if ($hash && $selected_rom) {
+                        return $this->redirectToRoute('table', ['hash' => $hash, 'selected_rom' => $selected_rom]);
+                    }
+                    return $this->redirectToRoute('textedit');
+            }
+        }
+
+        return $this->render('textedit/diff.html.twig', [
             'textedit_form' => $form->createView(),
             'file' => $file,
             'git_diff' => nl2br($changes),
