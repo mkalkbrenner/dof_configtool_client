@@ -4,7 +4,6 @@ namespace App\Entity;
 
 use App\Validator\Exists;
 use App\Validator\Writable;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Validator\Constraints as Assert;
 
 class Settings

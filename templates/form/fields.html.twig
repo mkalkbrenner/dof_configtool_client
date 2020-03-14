@@ -1,0 +1,53 @@
+{% block ace_diff_widget %}
+    {% spaceless %}
+    <textarea {{ block('widget_attributes') }}>{{ value }}</textarea>
+
+
+    <div id="{{ id }}_ace_diff" {% for attrname, attrvalue in wrapper_attr %}{% if attrname == 'title' %}{{ attrname }}="{{ attrvalue|trans({}, translation_domain) }}" {% else %}{{ attrname }}="{{ attrvalue }}" {% endif %}{% endfor %}></div>
+    {{ include_ace_editor() }}
+    <script src="/js/ace-diff.min.js"></script>
+    <link href="/css/ace-diff.min.css" rel="stylesheet">
+    <script type="text/javascript">
+    (function () {
+        var textarea_left = document.getElementById('form_left');
+        textarea_left.style.visibility = 'hidden';
+
+        var textarea_right = document.getElementById('{{ id }}');
+        textarea_right.style.visibility = 'hidden';
+
+        var aceDiffer = new AceDiff({
+            element: '#{{ id }}_ace_diff',
+            mode: '{{ mode }}',
+            theme: '{{ theme }}',
+            diffGranularity: 'specific', // 'broad'
+            showDiffs: true,
+            showConnectors: true,
+            maxDiffs: 5000,
+            left: {
+                content: textarea_left.value,
+                editable: false,
+                copyLinkEnabled: true,
+            },
+            right: {
+                content: textarea_right.value ,
+                editable: true,
+                copyLinkEnabled: true
+            },
+            classes: {
+                diff: 'acediff__diffLine',
+                connector: 'acediff__connector',
+                //newCodeConnectorLinkContent: '&#8594;',
+                //deletedCodeConnectorLinkContent: '&#8592;',
+            },
+        });
+
+        var session = aceDiffer.getEditors().right.getSession();
+
+        session.on('change', function(){
+            textarea_right.value = session.getValue();
+        });
+
+    }());
+    </script>
+    {% endspaceless %}
+{% endblock %}

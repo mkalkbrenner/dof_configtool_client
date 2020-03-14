@@ -1,0 +1,13 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit{% endblock %}
+
+{% block body %}
+    <h2>Select one file to compare <br><kbd>{{ file }}</kbd><br>against</h2>
+    {{ form_start(select_diff_form) }}
+    {{ form_errors(select_diff_form) }}
+    {{ form_end(select_diff_form) }}
+
+    <hr>
+
+{% endblock %}

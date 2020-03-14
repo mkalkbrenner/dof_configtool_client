@@ -5,7 +5,7 @@
 {% block body %}
     <h2>{{ file }} <i>{{ cycle }}</i></h2>
     {{ form_start(textedit_form) }}
-    {{ form_label(textedit_form.text) }}
+    <kbd>{{ form_label(textedit_form.text) }}</kbd>
     {{ form_help(textedit_form.text) }}
     {{ form_errors(textedit_form) }}
     {{ form_widget(textedit_form.text) }}

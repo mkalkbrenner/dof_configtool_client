@@ -12,15 +12,16 @@
             <div class="col-8">
                 <table width="100%">
                     <tr><th colspan="2" style="text-align: center"><hr>Table<hr></th></tr>
-                    <tr><td>Table</td><td>{{ form_widget(table_form.table_name) }}</td></tr>
+                    <tr><td>Table</td><td>{{ form_help(table_form.table_name) }}{{ form_widget(table_form.table_name) }} {% if table_form.copy_pov is defined %}{{ form_widget(table_form.copy_pov) }}{% endif %} {% if table_form.copy_backglass is defined %}{{ form_widget(table_form.copy_backglass) }}{% endif %}</td></tr>
                     <tr><td>Manufacturer</td><td>{{ form_widget(table_form.manufacturer) }}</td></tr>
                     <tr><td>Year</td><td>{{ form_widget(table_form.year) }}</td></tr>
+                    <tr><td><img src="/images/ipdb.ico"></td><td>{{ ipdbid|raw }}</td></tr>
                     <tr><td>Added</td><td>{{ form_widget(table_form.added) }}</td></tr>
                     <tr><td>Last Played</td><td>{{ form_widget(table_form.last_played) }}</td></tr>
                     <tr><td>Table File</td><td>{{ form_widget(table_form.table_file) }}</td></tr>
                     <tr><td>ROM</td><td>{{ form_widget(table_form.rom) }}{% if table_form.select_rom is defined %}{{ form_widget(table_form.select_rom) }}{% endif %}</td></tr>
                     {%  if table_form.alias is defined %}<tr><td>Alias ROM</td><td>{{ form_widget(table_form.alias) }}</td></tr>{% endif %}
-                    <tr><td colspan="2" style="text-align: right"><hr>{{ form_widget(table_form.play) }} | {{ form_widget(table_form.edit_table) }} {{ form_widget(table_form.export_pov) }} {{ form_widget(table_form.extract_script) }}{%  if table_form.edit_script is defined %} {{ form_widget(table_form.edit_script) }}{% endif %}</tr>
+                    <tr><td colspan="2" style="text-align: right"><hr>{{ form_widget(table_form.play) }} | {{ form_widget(table_form.edit_table) }} {{ form_widget(table_form.export_pov) }} {{ form_widget(table_form.extract_script) }}{%  if table_form.edit_script is defined %} {{ form_widget(table_form.edit_script) }}{% endif %}{%  if table_form.compare_script is defined %} {{ form_widget(table_form.compare_script) }}{% endif %}</tr>
                     <tr><th colspan="2" style="text-align: center"><hr>Screens<hr></th></tr>
                     <tr><td>Topper</td><td>{{ form_widget(table_form.topper) }}</td></tr>
                     <tr><td>Backglass</td><td>{{ form_widget(table_form.backglass) }}</td></tr>

@@ -47,7 +47,7 @@ class PinballYMenuEntry
     public function __construct(string $name, \SimpleXMLElement $element)
     {
         $this->name = $name;
-        $this->ipdbid = (string) $element->ipdbid;
+        $this->ipdbid = (int) $element->ipdbid;
         $this->description = (string) $element->description;
         $this->type = (string) $element->type;
         $this->manufacturer = (string) $element->manufacturer;
@@ -198,5 +198,18 @@ class PinballYMenuEntry
     {
         $this->rom = $rom;
         return $this;
+    }
+
+    public function toXML() {
+        return
+            "\t" . '<game name="' . htmlspecialchars($this->getName()) . '">' . "\r\n" .
+            "\t\t" . '<ipdbid>' . $this->getIpdbid() . '</ipdbid>' . "\r\n" .
+            "\t\t" . '<description>' . htmlspecialchars($this->getDescription()) . '</description>' . "\r\n" .
+            "\t\t" . '<type>' . htmlspecialchars($this->getType()) . '</type>' . "\r\n" .
+            "\t\t" . '<rom>' . htmlspecialchars($this->getRom()) . '</rom>' . "\r\n" .
+            "\t\t" . '<manufacturer>' . htmlspecialchars($this->getManufacturer()) . '</manufacturer>' . "\r\n" .
+            "\t\t" . '<year>' . $this->getYear() . '</year>' . "\r\n" .
+            "\t\t" . '<rating>' . $this->getRating() . '</rating>' . "\r\n" .
+            "\t" . '</game>' . "\r\n";
     }
 }

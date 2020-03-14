@@ -1,0 +1,32 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Diff{% endblock %}
+
+{% block body %}
+    <h2>{{ file }} <i>{{ cycle }}</i></h2>
+<div class="container">
+    {{ form_start(textedit_form) }}
+    {{ form_errors(textedit_form) }}
+    <div class="row">
+        <div class="col-6">
+            <kbd>{{ form_label(textedit_form.left) }}</kbd>
+            {{ form_help(textedit_form.left) }}
+        </div>
+        <div class="col-6">
+            <kbd>{{ form_label(textedit_form.right) }}</kbd>
+            {{ form_help(textedit_form.right) }}
+        </div>
+    </div>
+    <div class="col-12" style="height: 800px">
+        {{ form_widget(textedit_form.left) }}
+        {{ form_widget(textedit_form.right) }}
+    </div>
+    {{ form_end(textedit_form) }}
+</div>
+    <hr>
+
+    {% if git_diff|default %}
+        {% include 'git_diff.html.twig' %}
+    {% endif %}
+
+{% endblock %}
