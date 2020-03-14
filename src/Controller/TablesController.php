@@ -129,14 +129,15 @@ class TablesController extends AbstractSettingsController
                 $roms = $roms ?: Utility::getRomsForTable($description, $this->settings);
             } elseif ($configured_tables = $pinballYMenu->getTables()) {
                 asort($configured_tables, SORT_NATURAL);
+                $lower_table_name = mb_strtolower(substr($table_name, 0, 10));
                 $candidates = [];
                 foreach ($configured_tables as $configured_table_name) {
-                    $distance = levenshtein(substr($configured_table_name, 0, 10), substr($table_name, 0, 10));
+                    $distance = levenshtein(mb_strtolower(substr($configured_table_name, 0, 10)), $lower_table_name);
                     if ($distance <= 2) {
                         $candidates[$configured_table_name] = $distance;
                     } else {
                         $menuEntry = $pinballYMenu->getMenuEntry($configured_table_name);
-                        $distance = levenshtein(substr($menuEntry->getDescription(), 0, 10), substr($table_name, 0, 10));
+                        $distance = levenshtein(mb_strtolower(substr($menuEntry->getDescription(), 0, 10)), $lower_table_name);
                         if ($distance <= 2) {
                             $candidates[$configured_table_name] = $distance;
                         }

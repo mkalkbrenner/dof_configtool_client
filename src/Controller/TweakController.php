@@ -85,7 +85,7 @@ class TweakController extends AbstractSettingsController
 
         $defaults = [
             'mode' => 'ace/mode/properties',
-            'theme' => 'ace/theme/monokai',
+            'theme' => null,
             'width' => '100%',
             'height' => 300,
             'font_size' => 12,

@@ -219,11 +219,15 @@ class Utility
             }
         }
 
+        $lower_table = mb_strtolower($table);
+        $lower_table_without_manufacturer = mb_strtolower($table_without_manufacturer);
+
         if (!$roms) {
             $candidates = [];
             foreach ($tableMapping as $rom => $table_mapping_name) {
-                $distance_table = levenshtein($table_mapping_name, $table);
-                $distance_table_without_manufacturer = levenshtein($table_mapping_name, $table_without_manufacturer);
+                $lower_table_mapping_name = mb_strtolower($table_mapping_name);
+                $distance_table = levenshtein($lower_table_mapping_name, $lower_table);
+                $distance_table_without_manufacturer = levenshtein($lower_table_mapping_name, $lower_table_without_manufacturer);
                 $distance = $distance_table < $distance_table_without_manufacturer ? $distance_table : $distance_table_without_manufacturer;
                 if ($distance < 5) {
                     $candidates[$rom] = $distance;
@@ -234,9 +238,11 @@ class Utility
         }
 
         if (!$roms) {
+            $lower_table = substr($lower_table, 0, 6);
             $candidates = [];
             foreach ($tableMapping as $rom => $table_mapping_name) {
-                $distance = levenshtein(substr($table_mapping_name, 0, 6), substr($table, 0, 6));
+                $lower_table_mapping_name = mb_strtolower(substr($table_mapping_name, 0, 6));
+                $distance = levenshtein($lower_table_mapping_name, $lower_table);
                 if ($distance <= 2) {
                     $candidates[$rom] = $distance;
                 }

@@ -55,7 +55,7 @@ final class AceDiffType extends AbstractType
             'height' => 250,
             'font_size' => 12,
             'mode' => 'ace/mode/html',
-            'theme' => 'ace/theme/monokai',
+            'theme' => null,
             'tab_size' => null,
             'read_only' => null,
             'use_soft_tabs' => null,

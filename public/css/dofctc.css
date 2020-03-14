@@ -1,0 +1,7 @@
+.container {
+    max-width: 100%;
+}
+
+label {
+    display: inline;
+}

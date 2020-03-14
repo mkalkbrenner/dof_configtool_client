@@ -8,7 +8,7 @@
     <p>Started as download and tweak client for the DOF Configtool, becomes a kind of "Swiss Army Knife" for Virtual Pins</p>
     {% if remote %}
         <p>
-            Adress to access the DOF Configtool Client from another device in your network: <a href="http://{{ remote }}" target="_blank">http://{{ remote }}</a>
+            Address to access the DOF Configtool Client from another device in your network: <a href="http://{{ remote }}" target="_blank">http://{{ remote }}</a>
         </p>
     {% endif %}
     <p>
@@ -16,6 +16,10 @@
     </p>
     <p>
         Current version: <strong><em>{{ log|default('-') }}</em></strong>
+    </p>
+    <h2>Questions or Feature Requests?</h2>
+    <p>
+        Any kinds of questions, bug reports, and feature requests could be asked in the support forum: <a href="https://vpinball.com/forums/forum/front-end-supportpinballx-hyperpin/dof-configtool-client/" target="_blank">https://vpinball.com/forums/forum/front-end-supportpinballx-hyperpin/dof-configtool-client/</a>
     </p>
     <hr>
     <img src="{{ asset('images/Vpinball_cover.png') }}">
