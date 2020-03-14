@@ -438,6 +438,7 @@ class TextEditController extends AbstractSettingsController
                 'source' => $source,
                 'hash' => $hash,
                 'selected_rom' => $selected_rom,
+                'help' => $help,
             ]);
         }
 
@@ -526,13 +527,11 @@ class TextEditController extends AbstractSettingsController
 
         $form = $this->createFormBuilder($textFile)
             ->add('left', TextareaType::class, [
-                    'label' => $textFile->getPath(),
-                    'help' => $help ? base64_decode($help) : null,
+                    'label' => $left_revision ?? $left_file,
                     'required' => false,
                 ])
             ->add('right', AceDiffType::class, [
                     'label' => $textFile->getPath(),
-                    'help' => $help ? base64_decode($help) : null,
                     'required' => false,
                 ] + $defaults)
             ->add('cancel', SubmitType::class, ['label' => 'Cancel'])
