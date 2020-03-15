@@ -100,7 +100,7 @@ class Tweaks
 
     public function setNightSettings(?string $settings): self
     {
-        $this->nightSettings = $setting ?? "\r\n";
+        $this->nightSettings = $settings ?? "\r\n";
 
         return $this;
     }
