@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Component\Utility;
 use App\Entity\B2STableSetting;
 use App\Entity\B2STableSettings;
+use App\Entity\DirectOutputConfig;
 use App\Entity\PinballYGameStats;
 use App\Entity\PinballYMedia;
 use App\Entity\PinballYMenu;
@@ -539,7 +540,7 @@ class TablesController extends AbstractSettingsController
             'romfiles' => $this->settings->getRoms(),
             'altcolor' => $this->settings->getAltcolorRoms(),
             'altsound' => $this->settings->getAltsoundRoms(),
-            'dof_rows' => (count($roms) === 1) ? Utility::getDofTableRows($alias ?? $roms[0], $this->settings) : [],
+            'dof_rows' => (count($roms) === 1) ? $this->getDofTableRows($alias ?? $roms[0]) : [],
             'cycle' => $branch ?? 'download',
             'ipdbid' => $ipdbid,
         ]);
@@ -628,4 +629,89 @@ class TablesController extends AbstractSettingsController
             $this->addFlash('warning', nl2br($errout));
         }
     }
+
+    protected function getDofTableRows(string $rom): array
+    {
+        $rows = [];
+        $files = [];
+        if ($dof_config_path = $this->settings->getDofConfigPath()) {
+            foreach (scandir($dof_config_path) as $file) {
+                if (preg_match('/^directoutputconfig(\d+)\.ini$/i', $file, $matches)) {
+                    $file_path = $this->settings->getDofConfigPath() . DIRECTORY_SEPARATOR . $matches[0];
+                    if (!isset($mods[$file_path])) {
+                        $files[$matches[1]] = $file_path;
+                    }
+                }
+            }
+        }
+
+        $portAssignments = $this->settings->getPortAssignments();
+
+        if ($this->settings->isVersionControl()) {
+            $workingCopy = $this->getGitWorkingCopy($dof_config_path);
+        }
+        foreach ($files as $deviceId => $file) {
+            $directOutputConfig = new DirectOutputConfig($file);
+            $games_day = $games_night = [];
+            if (isset($workingCopy)) {
+                $basename = basename($file);
+                $directOutputConfig->load($workingCopy->show('download:' . $basename));
+                if ($contents = $workingCopy->show('day:' . $basename)) {
+                    $directOutputConfigDay = new DirectOutputConfig($file);
+                    $games_day = $directOutputConfigDay->load($contents)->getGames();
+                }
+                if ($contents = $workingCopy->show('night:' . $basename)) {
+                    $directOutputConfigNight = new DirectOutputConfig($file);
+                    $games_night = $directOutputConfigNight->load($contents)->getGames();
+                }
+            }
+            else {
+                $directOutputConfig->load();
+            }
+            $rgb_ports = $directOutputConfig->getRgbPorts();
+            $games = $directOutputConfig->getGames();
+            while ($rom && !isset($games[$rom])) {
+                $rom = substr($rom, 0, -1);
+            }
+
+            $colspan = ((int) !empty($games_day)) + ((int) !empty($games_day)) + ((int) (!empty($games_day) || !empty($games_day)));
+            if ($rom && !empty($games[$rom])) {
+                $rows[] = '<tr><th scope="col" colspan="' . (3 + $colspan) . '" bgcolor="#6495ed">' . $directOutputConfig->getDeviceName() . ': ' . basename($file) . '</th>';
+
+                foreach ($games[$rom] as $port => $dof_string) {
+                    $row = '<tr>';
+                    if (!in_array($port,$rgb_ports[$rom] ?? [])) {
+                        $row .= '<th scope="row" bgcolor="' . (in_array($port + 1, $rgb_ports[$rom] ?? []) ? 'red' : 'white') . '">' . ($port ?: 'Port') . '</th>';
+                        if ($port) {
+                            $row .= '<th  scope="row"' . (in_array($port + 1, $rgb_ports[$rom] ?? []) ? ' rowspan="3"' : '') . '>' . ($portAssignments[$deviceId][$port] ?? '') . '</th>';
+                            $row .= '<td' . (in_array($port + 1, $rgb_ports[$rom] ?? []) ? ' rowspan="3"' : '') . '>' . $dof_string . '</td>';
+                            if (isset($games_day[$rom][$port])) {
+                                $row .= '<td' . (in_array($port + 1, $rgb_ports[$rom] ?? []) ? ' rowspan="3"' : '') . '>' . ($dof_string === $games_day[$rom][$port] ? '<i>identical to download</i>' : '<b>' . $games_day[$rom][$port] . '</b>') . '</td>';
+                            }
+                            if (isset($games_night[$rom][$port])) {
+                                $row .= '<td' . (in_array($port + 1, $rgb_ports[$rom] ?? []) ? ' rowspan="3"' : '') . '>' . ($dof_string === $games_night[$rom][$port] ? '<i>identical to download</i>' : '<b>' . $games_night[$rom][$port] . '</b>') . '</td>';
+                            }
+                            $row .= '<td' . (in_array($port + 1, $rgb_ports[$rom] ?? []) ? ' rowspan="3"' : '') . '></td>';
+                        } else {
+                            $row .= '<th scope="row">Description</th>';
+                            $row .= '<th scope="row">' . $dof_string . ' (download)</th>';
+                            if (isset($games_day[$rom][$port])) {
+                                $row .= '<th scope="row">' . $games_day[$rom][$port] . ' (day)</th>';
+                            }
+                            if (isset($games_night[$rom][$port])) {
+                                $row .= '<th scope="row">' . $games_night[$rom][$port] . ' (night)</th>';
+                            }
+                            $row .= '<th scope="row">overwrite</th>';
+                        }
+                    } else {
+                        $row .= '<th scope="row" bgcolor="' . (in_array($port + 1, $rgb_ports[$rom]) ? 'green' : 'blue') . '">' . $port . '</th>';
+                    }
+
+                    $rows[] = $row . '</tr>';
+                }
+            }
+        }
+        return $rows;
+    }
+
 }

@@ -263,9 +263,9 @@ class DirectOutputConfig
         return $this;
     }
 
-    public function load(): self
+    public function load(?string $contents = null): self
     {
-        if ($contents = file_get_contents($this->file)) {
+        if ($contents || ($contents = file_get_contents($this->file))) {
             // Normalize line endings.
             $this->content = preg_replace('/\R/', "\r\n", $contents);
             list($this->head, $this->config) = explode('[Config DOF]', $this->content);

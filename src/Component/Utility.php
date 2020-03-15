@@ -70,56 +70,6 @@ class Utility
         return $diffs;
     }
 
-    public static function getDofTableRows(string $rom, Settings $settings): array
-    {
-        $rows = [];
-        $files = [];
-        if ($dof_config_path = $settings->getDofConfigPath()) {
-            foreach (scandir($dof_config_path) as $file) {
-                if (preg_match('/^directoutputconfig(\d+)\.ini$/i', $file, $matches)) {
-                    $file_path = $settings->getDofConfigPath() . DIRECTORY_SEPARATOR . $matches[0];
-                    if (!isset($mods[$file_path])) {
-                        $files[$matches[1]] = $file_path;
-                    }
-                }
-            }
-        }
-
-        $portAssignments = $settings->getPortAssignments();
-
-        foreach ($files as $deviceId => $file) {
-            $directOutputConfig = new DirectOutputConfig($file);
-            $directOutputConfig->load();
-            $rgb_ports = $directOutputConfig->getRgbPorts();
-            $games = $directOutputConfig->getGames();
-            while ($rom && !isset($games[$rom])) {
-                $rom = substr($rom, 0, -1);
-            }
-
-            if ($rom && !empty($games[$rom])) {
-                $rows[] = '<tr><th scope="col" colspan="3" bgcolor="#6495ed">' . $directOutputConfig->getDeviceName() . ': ' . basename($file) . '</th>';
-                foreach ($games[$rom] as $port => $dof_string) {
-                    $row = '<tr>';
-                    if (!in_array($port,$rgb_ports[$rom] ?? [])) {
-                        $row .= '<th scope="row" bgcolor="' . (in_array($port + 1, $rgb_ports[$rom] ?? []) ? 'red' : 'white') . '">' . ($port ?: 'Port') . '</th>';
-                        if ($port) {
-                            $row .= '<th  scope="row"' . (in_array($port + 1, $rgb_ports[$rom] ?? []) ? ' rowspan="3"' : '') . '>' . ($portAssignments[$deviceId][$port] ?? '') . '</th>';
-                            $row .= '<td' . (in_array($port + 1, $rgb_ports[$rom] ?? []) ? ' rowspan="3"' : '') . '>' . $dof_string . '</td>';
-                        } else {
-                            $row .= '<th scope="row">Description</th>';
-                            $row .= '<th scope="row">' . $dof_string . '</th>';
-                        }
-                    } else {
-                        $row .= '<th scope="row" bgcolor="' . (in_array($port + 1, $rgb_ports[$rom]) ? 'green' : 'blue') . '">' . $port . '</th>';
-                    }
-
-                    $rows[] = $row . '</tr>';
-                }
-            }
-        }
-        return $rows;
-    }
-
     public static function getExistingTablesAndBackglassChoices(Settings $settings): array
     {
         $tables = [];
