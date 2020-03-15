@@ -98,26 +98,22 @@ class Utility
 
             if ($rom && !empty($games[$rom])) {
                 $rows[] = '<tr><th scope="col" colspan="3" bgcolor="#6495ed">' . $directOutputConfig->getDeviceName() . ': ' . basename($file) . '</th>';
-                $real_port = 0;
                 foreach ($games[$rom] as $port => $dof_string) {
-                    $row = '<tr><th scope="row"' . (in_array($real_port + 1, $rgb_ports[$rom] ?? []) ? ' bgcolor="red">' : '>') . ($real_port ?: 'Port') . '</th>';
-                    $rgb_rows = '';
-
-                    $device_real_port = $real_port++;
-                    $rowspan = 1;
-                    while (in_array($real_port, $rgb_ports[$rom] ?? [])) {
-                        ++$rowspan;
-                        $rgb_rows .= '<tr><th scope="row" bgcolor="' . (2 == $rowspan ? 'green' : 'blue') . '">' . $real_port++ . '</th></tr>';
-                    }
-
-                    if ($port) {
-                        $row .= '<th  scope="row"' . ($rowspan > 1 ? ' rowspan="' . $rowspan . '"' : '') . '>' . ($portAssignments[$deviceId][$device_real_port] ?? '') . '</th>';
-                        $row .= '<td' . ($rowspan > 1 ? ' rowspan="' . $rowspan . '"' : '') . '>' . $dof_string . '</td>';
+                    $row = '<tr>';
+                    if (!in_array($port,$rgb_ports[$rom] ?? [])) {
+                        $row .= '<th scope="row" bgcolor="' . (in_array($port + 1, $rgb_ports[$rom] ?? []) ? 'red' : 'white') . '">' . ($port ?: 'Port') . '</th>';
+                        if ($port) {
+                            $row .= '<th  scope="row"' . (in_array($port + 1, $rgb_ports[$rom] ?? []) ? ' rowspan="3"' : '') . '>' . ($portAssignments[$deviceId][$port] ?? '') . '</th>';
+                            $row .= '<td' . (in_array($port + 1, $rgb_ports[$rom] ?? []) ? ' rowspan="3"' : '') . '>' . $dof_string . '</td>';
+                        } else {
+                            $row .= '<th scope="row">Description</th>';
+                            $row .= '<th scope="row">' . $dof_string . '</th>';
+                        }
                     } else {
-                        $row .= '<th scope="row">Description</th>';
-                        $row .= '<th scope="row">' . $dof_string . '</th>';
+                        $row .= '<th scope="row" bgcolor="' . (in_array($port + 1, $rgb_ports[$rom]) ? 'green' : 'blue') . '">' . $port . '</th>';
                     }
-                    $rows[] = $row . '</tr>' . $rgb_rows;
+
+                    $rows[] = $row . '</tr>';
                 }
             }
         }
