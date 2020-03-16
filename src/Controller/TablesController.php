@@ -543,6 +543,7 @@ class TablesController extends AbstractSettingsController
             'dof_rows' => (count($roms) === 1) ? $this->getDofTableRows($alias ?? $roms[0]) : [],
             'cycle' => $branch ?? 'download',
             'ipdbid' => $ipdbid,
+            'description' => $description ?? null,
         ]);
     }
 
