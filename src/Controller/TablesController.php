@@ -91,7 +91,7 @@ class TablesController extends AbstractSettingsController
 
         if ($script_extracted) {
             $script_content = file_get_contents($script);
-            if (preg_match('/cGameName\s*=\s*[\'"]([^\'"]+)[\'"]/i', $script_content, $matches)) {
+            if (preg_match('/^[^\']*Const\s+cGameName\s*=\s*[\'"]([^\'"]+)[\'"]/i', $script_content, $matches)) {
                 $rom = $matches[1];
                 if (!file_exists($this->settings->getRomsPath() . DIRECTORY_SEPARATOR . $rom . '.zip')) {
                     $aliases = $this->settings->getAliasRoms();
