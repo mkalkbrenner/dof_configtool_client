@@ -629,7 +629,7 @@ class TablesController extends AbstractSettingsController
                     }
                 }
                 if (!$filesystem->exists($table_path . $target_backglass_file)) {
-                    if (strpos($backglass_file, '_') !== 0 && $filesystem->exists($table_path . $filesystem->exists($table_path . str_replace('.directb2s', '.vpx', $target_backglass_file)))) {
+                    if (strpos($backglass_file, '_') !== 0 && $filesystem->exists($table_path . $backglass_file) && $filesystem->exists($table_path . str_replace('.directb2s', '.vpx', $target_backglass_file))) {
                         try {
                             $filesystem->copy($table_path . $backglass_file, $table_path . $target_backglass_file);
                             $this->addFlash('success', 'Copied ' . $backglass_file . ' to ' . $target_backglass_file);
