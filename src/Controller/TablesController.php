@@ -15,18 +15,22 @@ use App\Entity\VPinMameRegEntry;
 use App\Form\Type\B2STableSettingDisabledType;
 use App\Form\Type\B2STableSettingType;
 use App\Form\Type\VPinMameRegEntryType;
+use App\TweaksTrait;
 use GitWrapper\GitException;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Windows\Registry\KeyNotFoundException;
 
 class TablesController extends AbstractSettingsController
 {
+    use TweaksTrait;
+
     /**
      * @Route("/tables", name="tables")
      */
@@ -366,6 +370,12 @@ class TablesController extends AbstractSettingsController
             $formBuilder->add('compare_script', SubmitType::class, ['label' => 'Compare Script']);
         }
 
+        $dofTable = [];
+        if (count($roms) === 1) {
+            $daySettingsParsed = $this->getTweaks()->getDaySettingsParsed();
+            $dofTable = $this->getDofTableRows($alias ?? $roms[0], $formBuilder, $daySettingsParsed);
+        }
+
         $form = $formBuilder->getForm();
         $form->handleRequest($request);
 
@@ -514,6 +524,44 @@ class TablesController extends AbstractSettingsController
                         }
                     }
 
+                    $dof_overwrites = [];
+                    $save_dof = false;
+                    foreach ($data as $dof_key => $dof_value) {
+                        if (strpos($dof_key, 'dof_') === 0) {
+                            list (, $dof_deviceId, $dof_rom, $dof_port) = explode('_', $dof_key);
+                            $dof_value = trim($dof_value);
+                            if (strlen($dof_value) > 0) {
+                                $dof_overwrites['directoutputconfig' . $dof_deviceId . '.ini']['section:' . $dof_rom]['string_overwrite'][$dof_port] = $dof_value;
+                            }
+                        }
+                    }
+                    foreach ($dof_overwrites as $file => $sections) {
+                        foreach ($sections as $section => $tweaks) {
+                            $stored_string_overwrites = $daySettingsParsed[$file][$section]['string_overwrite'] ?? [];
+                            if (array_diff_assoc($tweaks['string_overwrite'], $stored_string_overwrites) || array_diff_assoc($stored_string_overwrites, $tweaks['string_overwrite'])) {
+                                $daySettingsParsed[$file][$section]['string_overwrite'] = $tweaks['string_overwrite'];
+                                $save_dof = true;
+                            }
+                        }
+                    }
+                    if ($save_dof) {
+                        $tweaks = $this->getTweaks();
+                        $tweaks->setDaySettingsParsed($daySettingsParsed);
+                        try {
+                            $tweaks->persist();
+                            if ($this->settings->isVersionControl()) {
+                                $workingCopy = $this->getGitWorkingCopy($tweaks->getDirectory());
+                                if ($workingCopy->hasChanges()) {
+                                    $workingCopy->add('*.ini');
+                                    $workingCopy->commit('Saved string_overwrites for ' . $selected_rom);
+                                }
+                            }
+                            return $this->redirectToRoute('tweak_confirm', ['cycle' => 'day', 'hash' => $hash, 'selected_rom' => $selected_rom]);
+                        } catch (\Exception $e) {
+                            $this->addFlash('warning', $e->getMessage());
+                        }
+                    }
+
                     // The form needs to be rebuilt!
                     return $this->redirectToRoute('table', ['hash' => $hash, 'selected_rom' => $selected_rom]);
             }
@@ -540,7 +588,7 @@ class TablesController extends AbstractSettingsController
             'romfiles' => $this->settings->getRoms(),
             'altcolor' => $this->settings->getAltcolorRoms(),
             'altsound' => $this->settings->getAltsoundRoms(),
-            'dof_rows' => (count($roms) === 1) ? $this->getDofTableRows($alias ?? $roms[0]) : [],
+            'dof_rows' => $dofTable,
             'cycle' => $branch ?? 'download',
             'ipdbid' => $ipdbid,
             'description' => $description ?? null,
@@ -631,7 +679,7 @@ class TablesController extends AbstractSettingsController
         }
     }
 
-    protected function getDofTableRows(string $rom): array
+    protected function getDofTableRows(string $rom, FormBuilderInterface $formBuilder, array $daySettingsParsed): array
     {
         $rows = [];
         $files = [];
@@ -675,12 +723,14 @@ class TablesController extends AbstractSettingsController
                 $rom = substr($rom, 0, -1);
             }
 
-            $colspan = ((int) !empty($games_day)) + ((int) !empty($games_day)) + ((int) (!empty($games_day) || !empty($games_day)));
+            $colspan = ((int) !empty($games_day)) + ((int) !empty($games_night)) + ((int) (!empty($games_day) || !empty($games_night)));
             if ($rom && !empty($games[$rom])) {
-                $rows[] = '<tr><th scope="col" colspan="' . (3 + $colspan) . '" bgcolor="#6495ed">' . $directOutputConfig->getDeviceName() . ': ' . basename($file) . '</th>';
+                $basename = basename($file);
+                $rows[] = '<tr><th scope="col" colspan="' . (3 + $colspan) . '" bgcolor="#6495ed">' . $directOutputConfig->getDeviceName() . ': ' . $basename . '</th>';
 
                 foreach ($games[$rom] as $port => $dof_string) {
-                    $row = '<tr>';
+                    $row = '';
+                    $key = 'dof_' . $deviceId . '_' . $rom . '_' . $port;
                     if (!in_array($port,$rgb_ports[$rom] ?? [])) {
                         $row .= '<th scope="row" bgcolor="' . (in_array($port + 1, $rgb_ports[$rom] ?? []) ? 'red' : 'white') . '">' . ($port ?: 'Port') . '</th>';
                         if ($port) {
@@ -692,7 +742,12 @@ class TablesController extends AbstractSettingsController
                             if (isset($games_night[$rom][$port])) {
                                 $row .= '<td' . (in_array($port + 1, $rgb_ports[$rom] ?? []) ? ' rowspan="3"' : '') . '>' . ($dof_string === $games_night[$rom][$port] ? '<i>identical to download</i>' : '<b>' . $games_night[$rom][$port] . '</b>') . '</td>';
                             }
-                            $row .= '<td' . (in_array($port + 1, $rgb_ports[$rom] ?? []) ? ' rowspan="3"' : '') . '></td>';
+                            $row .= '<td' . (in_array($port + 1, $rgb_ports[$rom] ?? []) ? ' rowspan="3"' : '') . '>';
+                            $formBuilder->add($key, TextType::class, [
+                                'label' => false,
+                                'data' => $daySettingsParsed['directoutputconfig' . $deviceId . '.ini']['section:' . $rom]['string_overwrite'][$port] ?? '',
+                                'required' => false,
+                            ]);
                         } else {
                             $row .= '<th scope="row">Description</th>';
                             $row .= '<th scope="row">' . $dof_string . ' (download)</th>';
@@ -702,13 +757,13 @@ class TablesController extends AbstractSettingsController
                             if (isset($games_night[$rom][$port])) {
                                 $row .= '<th scope="row">' . $games_night[$rom][$port] . ' (night)</th>';
                             }
-                            $row .= '<th scope="row">overwrite</th>';
+                            $row .= '<th scope="row" width="25%">overwrite (only for day mode)</th>';
                         }
                     } else {
                         $row .= '<th scope="row" bgcolor="' . (in_array($port + 1, $rgb_ports[$rom]) ? 'green' : 'blue') . '">' . $port . '</th>';
                     }
 
-                    $rows[] = $row . '</tr>';
+                    $rows[$key] = $row;
                 }
             }
         }

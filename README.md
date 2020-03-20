@@ -235,6 +235,10 @@ are great for simulating bumbers their noice might be too much for other effects
 top left in _Monster Bash_. But instead of turning off that contactor entirely for that table you can mount small
 contactors "in parallel" in your cabinet but attaching them to separate outputs. Now you can decide to use the heavy or
 the small one depeneding on your game.
+
+###### Warning!
+
+Don't apply `turn_off` to an RGB port! Use `rgb_brightness[...] = 00` instead!
  
 ##### `adjust_intensity`
 

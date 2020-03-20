@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Component\Utility;
 use App\Entity\DirectOutputConfig;
 use App\Entity\Tweaks;
+use App\TweaksTrait;
 use GitWrapper\GitException;
 use Norzechowicz\AceEditorBundle\Form\Extension\AceEditor\Type\AceEditorType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
@@ -15,20 +16,7 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class TweakController extends AbstractSettingsController
 {
-    /** @var Tweaks */
-    protected $tweaks;
-
-    /**
-     * @return Tweaks
-     */
-    public function getTweaks(): Tweaks
-    {
-        if (!$this->tweaks) {
-            $this->tweaks = new Tweaks();
-            $this->tweaks->load();
-        }
-        return $this->tweaks;
-    }
+    use TweaksTrait;
 
     /**
      * @Route("/tweak", name="tweak")
@@ -172,7 +160,11 @@ class TweakController extends AbstractSettingsController
         }
         $form = $formBuilder
             ->add('files', HiddenType::class, ['data' => base64_encode(serialize($modded_files))])
-            ->setAction($this->generateUrl('tweak_do', ['cycle' => $cycle]))
+            ->setAction($this->generateUrl('tweak_do', [
+                'cycle' => $cycle,
+                'hash' => $request->query->get('hash'),
+                'selected_rom' => $request->query->get('selected_rom'),
+            ]))
             ->getForm();
 
         return $this->render('tweak/confirm.html.twig', [
@@ -208,18 +200,17 @@ class TweakController extends AbstractSettingsController
         $files = [];
         $rgb_ports = [];
         $colors = [];
-        $file = '';
         $settings_parsed = $tweaks->getSettingsParsed($cycle) ?? [];
-        foreach ($settings_parsed as $section => $adjustments) {
-            if (strpos($section, '.ini')) {
-                $file = $this->settings->getDofConfigPath() . DIRECTORY_SEPARATOR . $section;
-                if (file_exists($file)) {
-                    $mods[$file] = [0 => $adjustments];
-                } else {
-                    $file = '';
+        foreach ($settings_parsed as $file => $adjustments) {
+            $file = $this->settings->getDofConfigPath() . DIRECTORY_SEPARATOR . $file;
+            if (file_exists($file)) {
+                foreach ($adjustments as $command => $adjustment) {
+                    if (strpos($command, 'section:') === 0) {
+                        $mods[$file][substr($command, 8)] = $adjustment;
+                    } else {
+                        $mods[$file][0][$command] = $adjustment;
+                    }
                 }
-            } elseif ($file) {
-                $mods[$file][$section] = $adjustments;
             }
         }
 
@@ -555,6 +546,9 @@ class TweakController extends AbstractSettingsController
      */
     public function tweak(Request $request, SessionInterface $session, string $cycle)
     {
+        $hash = $request->query->get('hash');
+        $selected_rom = $request->query->get('selected_rom');
+
         $form = $this->createFormBuilder()
             ->add('cancel', SubmitType::class, ['label' => 'Cancel'])
             ->add('save', SubmitType::class, ['label' => 'Save'])
@@ -576,6 +570,9 @@ class TweakController extends AbstractSettingsController
         }
         $session->set('git_diff', $changes);
 
+        if ($hash && $selected_rom) {
+            return $this->redirectToRoute('table', ['hash' => $hash, 'selected_rom' => $selected_rom]);
+        }
         return $this->redirectToRoute('tweak');
     }
 
@@ -587,10 +584,10 @@ class TweakController extends AbstractSettingsController
             try {
                 $workingCopy = $this->getGitWorkingCopy($this->settings->getDofConfigPath());
                 $branches = $workingCopy->getBranches();
+                $previous_branch = $this->getCurrentBranch($workingCopy);
                 if (!in_array($cycle, $branches->all())) {
                     $workingCopy->checkoutNewBranch($cycle);
                 } else {
-                    $previous_branch = $this->getCurrentBranch($workingCopy);
                     $workingCopy->checkout($cycle);
                 }
             } catch (GitException $e) {

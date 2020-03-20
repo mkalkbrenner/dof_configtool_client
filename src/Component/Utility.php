@@ -239,4 +239,34 @@ class Utility
         }
         return $parsed;
     }
+
+    public static function parseTweaksIniString(string $string, ?bool $strip_comments = TRUE): array
+    {
+        $parsed = [];
+        $id = '';
+        $split = preg_split('/(\[directoutputconfig\d+\.ini])/im', $string, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
+        foreach ($split as $part) {
+            if (strpos($part, '[directoutputconfig') === 0) {
+                $id = trim($part, '[]');
+                continue;
+            }
+            if ($id) {
+                $ini = parse_ini_string($part, TRUE);
+                if ($strip_comments) {
+                    $ini = array_filter($ini, static function ($key) {
+                        $key = trim($key);
+                        return strpos($key, '#') !== 0;
+                    }, ARRAY_FILTER_USE_KEY);
+                }
+                foreach ($ini as $key => $value) {
+                    if (strpos($part, '[' . $key . ']') !== false) {
+                        $ini['section:' . $key] = $ini[$key];
+                        unset($ini[$key]);
+                    }
+                }
+                $parsed[$id] = $ini;
+            }
+        }
+        return $parsed;
+    }
 }

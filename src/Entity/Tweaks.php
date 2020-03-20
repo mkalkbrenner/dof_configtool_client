@@ -65,7 +65,7 @@ class Tweaks
     public function getDaySettingsParsed(): ?array
     {
         if ($this->daySettings) {
-            return Utility::parseIniString($this->daySettings);
+            return Utility::parseTweaksIniString($this->daySettings);
         }
         return null;
     }
@@ -75,6 +75,32 @@ class Tweaks
         $this->daySettings = $settings ?? "\r\n";
 
         return $this;
+    }
+
+    public function setDaySettingsParsed(array $settings): self
+    {
+        $this->daySettings =  $this->serializeSettingsParsed($settings);
+
+        return $this;
+    }
+
+    private function serializeSettingsParsed(array $settings): string
+    {
+        $string = "\r\n";
+        foreach ($settings as $file => $configs) {
+            $string .= '[' . $file . "]\r\n";
+            foreach ($configs as $command => $ports) {
+                if (strpos($command, 'section:') === 0) {
+                    $string .= $this->serializeSettingsParsed([substr($command, 8) => $ports]);
+                } else {
+                    foreach ($ports as $port => $setting) {
+                        $string .= $command . '[' . $port . '] = ' . $setting . "\r\n";
+                    }
+                }
+            }
+            $string .= "\r\n";
+        }
+        return $string;
     }
 
     /**
@@ -93,7 +119,7 @@ class Tweaks
     public function getNightSettingsParsed(): ?array
     {
         if ($this->nightSettings) {
-            return Utility::parseIniString($this->nightSettings);
+            return Utility::parseTweaksIniString($this->nightSettings);
         }
         return null;
     }

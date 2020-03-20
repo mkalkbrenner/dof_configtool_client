@@ -88,9 +88,9 @@ class DayNightController extends AbstractSettingsController
                 }
             } catch (GitException $e) {
                 $this->addFlash('warning', $e->getMessage());
-                // We need to redirect to build a new form based on the new branch.
-                return $this->redirectToRoute('day_night');
             }
+            // We need to redirect to build a new form based on the new branch.
+            return $this->redirectToRoute('day_night');
         }
 
         return $this->render('day_night/index.html.twig', [
