@@ -94,17 +94,22 @@ class TablesController extends AbstractSettingsController
         $configured_tables = [];
 
         if ($script_extracted) {
-            $script_content = file_get_contents($script);
-            if (preg_match('/^[^\']*Const\s+cGameName\s*=\s*[\'"]([^\'"]+)[\'"]/i', $script_content, $matches)) {
-                $rom = $matches[1];
-                if (!file_exists($this->settings->getRomsPath() . DIRECTORY_SEPARATOR . $rom . '.zip')) {
-                    $aliases = $this->settings->getAliasRoms();
-                    if (isset($aliases[$rom])) {
-                        $alias = $rom;
-                        $rom = $aliases[$rom];
+            // Don't use file_get_contents() because preg has issues with detecting the beginning of a line with some table scripts.
+            if ($handle = fopen($script, "r")) {
+                while (($line = fgets($handle)) !== false) {
+                    if (preg_match('/^[^\']*Const\s+cGameName\s*=\s*[\'"]([^\'"]+)[\'"]/i', $line, $matches)) {
+                        $rom = $matches[1];
+                        if (!file_exists($this->settings->getRomsPath() . DIRECTORY_SEPARATOR . $rom . '.zip')) {
+                            $aliases = $this->settings->getAliasRoms();
+                            if (isset($aliases[$rom])) {
+                                $alias = $rom;
+                                $rom = $aliases[$rom];
+                            }
+                        }
+                        $roms = [$rom];
                     }
                 }
-                $roms = [$rom];
+                fclose($handle);
             }
         }
 
