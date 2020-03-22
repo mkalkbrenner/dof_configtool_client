@@ -78,6 +78,7 @@ class TablesController extends AbstractSettingsController
         $alias =
         $added =
         $last_played =
+        $fastflips =
             null;
         $description =
         $manufacturer =
@@ -97,7 +98,7 @@ class TablesController extends AbstractSettingsController
             // Don't use file_get_contents() because preg has issues with detecting the beginning of a line with some table scripts.
             if ($handle = fopen($script, "r")) {
                 while (($line = fgets($handle)) !== false) {
-                    if (preg_match('/^[^\']*Const\s+cGameName\s*=\s*[\'"]([^\'"]+)[\'"]/i', $line, $matches)) {
+                    if (preg_match('/^[^\']*cGameName\s*=\s*[\'"]([^\'"]+)[\'"]/i', $line, $matches)) {
                         $rom = $matches[1];
                         if (!file_exists($this->settings->getRomsPath() . DIRECTORY_SEPARATOR . $rom . '.zip')) {
                             $aliases = $this->settings->getAliasRoms();
@@ -108,9 +109,21 @@ class TablesController extends AbstractSettingsController
                         }
                         $roms = [$rom];
                     }
+                    if (preg_match('/^[^\']*InitVpmFFlipsSAM/i', $line)) {
+                        $fastflips = 'InitVpmFFlipsSAM';
+                    }
+                    if (!$fastflips && preg_match('/^[^\']*UseSolenoids\s*=\s*2/i', $line)) {
+                       $fastflips = 'UseSolenoids = 2';
+                    }
+                    if ($roms && $fastflips) {
+                        break;
+                    }
                 }
                 fclose($handle);
             }
+        } else {
+            $fastflips = 'Unable to detect, extract script first!';
+            $this->addFlash('warning', 'The table script is not extracted. Detections like ROMs or Fast Flips are disabled or use weaker fallbacks. Click "Extract Script".');
         }
 
         if ($pinballYDatabaseFile = $this->settings->getPinballYVPXDatabaseFile()) {
@@ -223,6 +236,11 @@ class TablesController extends AbstractSettingsController
             ->add('last_played', TextType::class, [
                 'disabled' => true,
                 'data' => $last_played ?? 'never',
+                'label' => false,
+            ])
+            ->add('fastflips', TextType::class, [
+                'disabled' => true,
+                'data' => $fastflips ?? 'no',
                 'label' => false,
             ])
             ->add('entries', CollectionType::class, [
