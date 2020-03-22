@@ -43,68 +43,76 @@
             </div>
             <div class="col-4">
                 <table class="table" width="100%">
-                    {%  if wheel_image %}<tr><td style="position: relative; text-align: center; color: white;"><div class="image-label">Wheel</div><img src="{{ path('binary', {'file': wheel_image}) }}" width="100%"></td></tr>{% endif %}
-                    {%  if backglass_image %}<tr><td style="position: relative; text-align: center; color: white;"><div class="image-label">Backglass</div><img src="{{ path('binary', {'file': backglass_image}) }}" width="100%"></td></tr>{% endif %}
-                    {%  if dmd_image %}<tr><td style="position: relative; text-align: center; color: white;"><div class="image-label">DMD</div><img src="{{ path('binary', {'file': dmd_image}) }}" width="100%"></td></tr>{% endif %}
-                    {%  if table_image %}<tr><td style="position: relative; text-align: center; color: white;"><div class="image-label">Playfield</div><img src="{{ path('binary', {'file': table_image}) }}" width="100%"></td></tr>{% endif %}
-                    {%  if instruction_image %}<tr><td style="position: relative; text-align: center; color: white;"><div class="image-label">Instruction Card</div><img src="{{ path('binary', {'file': instruction_image}) }}" width="100%"></td></tr>{% endif %}
+                    {% if wheel_image %}<tr><td style="position: relative; text-align: center; color: white;"><div class="image-label">Wheel</div><img src="{{ path('binary', {'file': wheel_image}) }}" width="100%"></td></tr>{% endif %}
+                    {% if backglass_image %}<tr><td style="position: relative; text-align: center; color: white;"><div class="image-label">Backglass</div><img src="{{ path('binary', {'file': backglass_image}) }}" width="100%"></td></tr>{% endif %}
+                    {% if dmd_image %}<tr><td style="position: relative; text-align: center; color: white;"><div class="image-label">DMD</div><img src="{{ path('binary', {'file': dmd_image}) }}" width="100%"></td></tr>{% endif %}
+                    {% if table_image %}<tr><td style="position: relative; text-align: center; color: white;"><div class="image-label">Playfield</div><img src="{{ path('binary', {'file': table_image}) }}" width="100%"></td></tr>{% endif %}
+                    {% if instruction_image %}<tr><td style="position: relative; text-align: center; color: white;"><div class="image-label">Instruction Card</div><img src="{{ path('binary', {'file': instruction_image}) }}" width="100%"></td></tr>{% endif %}
+                    {% if pinballrebel_manufacturer %}<tr><td><a href="http://www.pinballrebel.com/pinball/cards/{{ pinballrebel_manufacturer }}.htm" target="_blank">Visit Inkochnito's Pinball Cards</a></td></tr>{% endif %}
                 </table>
 
             </div>
         </div>
         <div class="row">
             <div class="col-12">
-                <hr><center><b>VPinMAME Registry</b></center><hr>
-                <table class="table">
-                    <thead>
-                    <th style="background-color: #bd2130">ROM zip file not found.</th>
-                    <th style="background-color: #e0a800">Alt sound directory for ROM exists.</th>
-                    <th style="background-color: #9fcdff">Alt color directory for ROM exists.</th>
-                    <th style="background-color: #34ce57">Default values for new ROMs.</th>
-                    </thead>
-                </table>
-                <table class="table table-striped" width="100%">
-                    <tr>
-                        <th>ROM \ Key</th>
-                        <th>Cabinet Mode</th>
-                        <th>Ignore ROM CRC errors</th>
-                        <th>Use Sound</th>
-                        <th>Alt Sound Mode</th>
-                        <th>Use Samples</th>
-                        <th>ddraw</th>
-                        <th>Colorize DMD</th>
-                        <th>Use external DMD (dll)</th>
-                        <th>Show DMD/Display window</th>
-                        <th>VP&lt;-&gt;VPM Synclevel<br>(0 => script yieldtime)</th>
-                    </tr>
-                    {% set romcounter = 0 %}
-                    {% for entry in table_form.entries %}
+                <hr>
+                <details>
+                    <summary><b>VPinMAME Registry</b> (click sot show/hide)</summary>
+                    <hr>
+                    <table class="table">
+                        <thead>
+                        <th style="background-color: #bd2130">ROM zip file not found.</th>
+                        <th style="background-color: #e0a800">Alt sound directory for ROM exists.</th>
+                        <th style="background-color: #9fcdff">Alt color directory for ROM exists.</th>
+                        <th style="background-color: #34ce57">Default values for new ROMs.</th>
+                        </thead>
+                    </table>
+                    <table class="table table-striped" width="100%">
                         <tr>
-                            <td{% if roms[romcounter] not in romfiles and 'default' != roms[romcounter] %} style="background-color: #bd2130"{% endif %}><b>{{ form_label(entry, roms[romcounter]) }}</b>{{ form_widget(entry.rom) }}<div style="display: none">{{ form_widget(entry.table) }}</div></td>
-                            <td>{{ form_widget(entry.cabinet_mode) }}</td>
-                            <td>{{ form_widget(entry.ignore_rom_crc) }}</td>
-                            <td>{{ form_widget(entry.sound) }}</td>
-                            <td{% if roms[romcounter] in altsound %} style="background-color: #e0a800"{% endif %}>{{ form_widget(entry.sound_mode) }}</td>
-                            <td>{{ form_widget(entry.samples) }}</td>
-                            <td>{{ form_widget(entry.ddraw) }}</td>
-                            <td{% if roms[romcounter] in altcolor %} style="background-color: #9fcdff"{% endif %}>{{ form_widget(entry.dmd_colorize) }}</td>
-                            <td>{{ form_widget(entry.showpindmd) }}</td>
-                            <td>{{ form_widget(entry.showwindmd) }}</td>
-                            <td>{{ form_widget(entry.synclevel) }}</td>
+                            <th>ROM \ Key</th>
+                            <th>Cabinet Mode</th>
+                            <th>Ignore ROM CRC errors</th>
+                            <th>Use Sound</th>
+                            <th>Alt Sound Mode</th>
+                            <th>Use Samples</th>
+                            <th>ddraw</th>
+                            <th>Colorize DMD</th>
+                            <th>Use external DMD (dll)</th>
+                            <th>Show DMD/Display window</th>
+                            <th>VP&lt;-&gt;VPM Synclevel<br>(0 => script yieldtime)</th>
                         </tr>
-                        {% set romcounter = romcounter + 1 %}
-                    {% endfor %}
-                </table>
+                        {% set romcounter = 0 %}
+                        {% for entry in table_form.entries %}
+                            <tr>
+                                <td{% if roms[romcounter] not in romfiles and 'default' != roms[romcounter] %} style="background-color: #bd2130"{% endif %}><b>{{ form_label(entry, roms[romcounter]) }}</b>{{ form_widget(entry.rom) }}<div style="display: none">{{ form_widget(entry.table) }}</div></td>
+                                <td>{{ form_widget(entry.cabinet_mode) }}</td>
+                                <td>{{ form_widget(entry.ignore_rom_crc) }}</td>
+                                <td>{{ form_widget(entry.sound) }}</td>
+                                <td{% if roms[romcounter] in altsound %} style="background-color: #e0a800"{% endif %}>{{ form_widget(entry.sound_mode) }}</td>
+                                <td>{{ form_widget(entry.samples) }}</td>
+                                <td>{{ form_widget(entry.ddraw) }}</td>
+                                <td{% if roms[romcounter] in altcolor %} style="background-color: #9fcdff"{% endif %}>{{ form_widget(entry.dmd_colorize) }}</td>
+                                <td>{{ form_widget(entry.showpindmd) }}</td>
+                                <td>{{ form_widget(entry.showwindmd) }}</td>
+                                <td>{{ form_widget(entry.synclevel) }}</td>
+                            </tr>
+                            {% set romcounter = romcounter + 1 %}
+                        {% endfor %}
+                    </table>
+                </details>
             </div>
         </div>
         <div class="row">
             <div class="col-12">
-                <hr><center><b>Current DOF settings in use: <em>{{ cycle }}</em></b></center><hr>
-                <table class="table table-striped" width="100%">
-                    {% for key,row in dof_rows %}
-                    <tr>{{ row|raw }}{% if attribute(table_form, key) is defined %}{{ form_widget(attribute(table_form, key)) }}{% endif %}</td></tr>
-                    {% endfor %}
-                </table>
+                <hr>
+                <details>
+                    <summary><b>Current DOF settings in use: <em>{{ cycle }}</em></b> (click sot show/hide)</summary><hr>
+                    <table class="table table-striped" width="100%">
+                        {% for key,row in dof_rows %}
+                        <tr>{{ row|raw }}{% if attribute(table_form, key) is defined %}{{ form_widget(attribute(table_form, key)) }}{% endif %}</td></tr>
+                        {% endfor %}
+                    </table>
+                </details>
             </div>
         </div>
     </div>

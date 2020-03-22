@@ -98,7 +98,7 @@ class TablesController extends AbstractSettingsController
             // Don't use file_get_contents() because preg has issues with detecting the beginning of a line with some table scripts.
             if ($handle = fopen($script, "r")) {
                 while (($line = fgets($handle)) !== false) {
-                    if (preg_match('/^[^\']*cGameName\s*=\s*[\'"]([^\'"]+)[\'"]/i', $line, $matches)) {
+                    if (preg_match('/^[^\']*\bcGameName\s*=\s*[\'"]([^\'"]+)[\'"]/i', $line, $matches)) {
                         $rom = $matches[1];
                         if (!file_exists($this->settings->getRomsPath() . DIRECTORY_SEPARATOR . $rom . '.zip')) {
                             $aliases = $this->settings->getAliasRoms();
@@ -109,10 +109,10 @@ class TablesController extends AbstractSettingsController
                         }
                         $roms = [$rom];
                     }
-                    if (preg_match('/^[^\']*InitVpmFFlipsSAM/i', $line)) {
+                    if (preg_match('/^[^\']*\bInitVpmFFlipsSAM/i', $line)) {
                         $fastflips = 'InitVpmFFlipsSAM';
                     }
-                    if (!$fastflips && preg_match('/^[^\']*UseSolenoids\s*=\s*2/i', $line)) {
+                    if (!$fastflips && preg_match('/^[^\']*\bUseSolenoids\s*=\s*2/i', $line)) {
                        $fastflips = 'UseSolenoids = 2';
                     }
                     if ($roms && $fastflips) {
@@ -599,6 +599,37 @@ class TablesController extends AbstractSettingsController
             }
         }
 
+        $instruction_image = isset($pinballYMedia) ? base64_encode($pinballYMedia->getInstructionCardImage()) : null;
+        $pinballrebel_manufacturer = '';
+        if ($manufacturer) {
+            switch ($manufacturer) {
+                case'Data East':
+                case 'Game Plan':
+                case'Spooky Pinball':
+                    $pinballrebel_manufacturer = str_replace(' ', '_', $manufacturer);
+                    break;
+
+                case 'Bally':
+                case 'Midway':
+                    $pinballrebel_manufacturer = 'bally';
+                    break;
+
+                case 'Alvin G':
+                case 'Bell Games':
+                case 'Chicago Coin':
+                    $pinballrebel_manufacturer = str_replace(' ', '_', strtolower($manufacturer));
+                    break;
+
+                case 'Atari':
+                case 'Capcom':
+                    $pinballrebel_manufacturer = strtolower($manufacturer);
+                    break;
+
+                default:
+                    $pinballrebel_manufacturer = $manufacturer;
+            }
+        }
+
         return $this->render('/tables/table.html.twig', [
             'table_form' => $form->createView(),
             'wheel_image' => isset($pinballYMedia) ? base64_encode($pinballYMedia->getWheelImage()) : null,
@@ -606,7 +637,7 @@ class TablesController extends AbstractSettingsController
             'dmd_image' => isset($pinballYMedia) ? base64_encode($pinballYMedia->getDmdImage()) : null,
             'topper_image' => isset($pinballYMedia) ? base64_encode($pinballYMedia->getTopperImage()) : null,
             'table_image' => isset($pinballYMedia) ? base64_encode($pinballYMedia->getTableImage()) : null,
-            'instruction_image' => isset($pinballYMedia) ? base64_encode($pinballYMedia->getInstructionCardImage()) : null,
+            'instruction_image' => $instruction_image,
             'roms' => $roms,
             'romfiles' => $this->settings->getRoms(),
             'altcolor' => $this->settings->getAltcolorRoms(),
@@ -615,6 +646,7 @@ class TablesController extends AbstractSettingsController
             'cycle' => $branch ?? 'download',
             'ipdbid' => $ipdbid,
             'description' => $description ?? null,
+            'pinballrebel_manufacturer' => urlencode($pinballrebel_manufacturer),
         ]);
     }
 
