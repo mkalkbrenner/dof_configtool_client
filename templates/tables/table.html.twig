@@ -39,6 +39,9 @@
                     <tr><td>LEDs Skip Frames</td><td>{{ form_widget(table_form.b2s_table_setting.LEDsSkipFrames) }}</td></tr>
                     <tr><td>Start As EXE</td><td>{{ form_widget(table_form.b2s_table_setting.StartAsEXE) }}</td></tr>
                     <tr><td>Start Background</td><td>{{ form_widget(table_form.b2s_table_setting.StartBackground) }}</td></tr>
+                    <tr><td colspan="2" style="text-align: center"><hr><b>DMDDevice (freezy's DLL)</b> {{ form_help(table_form.dmddevice_virtualdmd) }}<hr></td></tr>
+                    <tr><td>Show virtual DMD</td><td>{{ form_widget(table_form.dmddevice_virtualdmd) }}</td></tr>
+                    <tr><td>Show alphanumeric displays</td><td>{{ form_widget(table_form.dmddevice_alphanumeric) }}</td></tr>
                 </table>
             </div>
             <div class="col-4">
@@ -57,7 +60,7 @@
             <div class="col-12">
                 <hr>
                 <details>
-                    <summary><b>VPinMAME Registry</b> (click sot show/hide)</summary>
+                    <summary><b>VPinMAME Registry</b> (click to show/hide)</summary>
                     <hr>
                     <table class="table">
                         <thead>
@@ -106,7 +109,7 @@
             <div class="col-12">
                 <hr>
                 <details>
-                    <summary><b>Current DOF settings in use: <em>{{ cycle }}</em></b> (click sot show/hide)</summary><hr>
+                    <summary><b>Current DOF settings in use: <em>{{ cycle }}</em></b> (click to show/hide)</summary><hr>
                     <table class="table table-striped" width="100%">
                         {% for key,row in dof_rows %}
                         <tr>{{ row|raw }}{% if attribute(table_form, key) is defined %}{{ form_widget(attribute(table_form, key)) }}{% endif %}</td></tr>

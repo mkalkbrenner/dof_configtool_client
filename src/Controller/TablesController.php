@@ -6,6 +6,7 @@ use App\Component\Utility;
 use App\Entity\B2STableSetting;
 use App\Entity\B2STableSettings;
 use App\Entity\DirectOutputConfig;
+use App\Entity\DmdDevice;
 use App\Entity\PinballYGameStats;
 use App\Entity\PinballYMedia;
 use App\Entity\PinballYMenu;
@@ -210,6 +211,9 @@ class TablesController extends AbstractSettingsController
         $screenRes = new ScreenRes();
         $screenRes->setPath($this->settings->getTablesPath())->load();
 
+        $dmdDevice = new DmdDevice();
+        $dmdDeviceSettings = $dmdDevice->setPath($this->settings->getVPinMamePath())->trackChanges()->load()->getSettingsParsed();
+
         $pupPacks = Utility::getExistingPupPacks($this->settings, $roms);
 
         $formBuilder = $this->createFormBuilder()
@@ -338,6 +342,20 @@ class TablesController extends AbstractSettingsController
                 ->add('b2s_table_setting', B2STableSettingType::class, [
                     'data' => $b2sTableSettings->getTableSetting($roms[0])->trackChanges(true),
                     'label' => false,
+                ])
+                ->add('dmddevice_virtualdmd', CheckboxType::class, [
+                    'data' => $dmdDevice->isEnabled($alias ?? $roms[0], 'virtualdmd'),
+                    'label' => false,
+                    'help' => 'Has no effect unless "showpindmd" is activated in the corresponding VPinMAME registry entry!',
+                    'required' => false,
+                    'disabled' => true,
+                ])
+                ->add('dmddevice_alphanumeric', CheckboxType::class, [
+                    'data' => $dmdDevice->isEnabled($alias ?? $roms[0], 'alphanumeric'),
+                    'label' => false,
+                    'help' => 'Has no effect unless "showpindmd" is activated in the corresponding VPinMAME registry entry!',
+                    'required' => false,
+                    'disabled' => true,
                 ]);
             if ($alias) {
                 $formBuilder
@@ -734,7 +752,7 @@ class TablesController extends AbstractSettingsController
         }
     }
 
-    protected function getDofTableRows(string $rom, FormBuilderInterface $formBuilder, array $daySettingsParsed): array
+    protected function getDofTableRows(string $rom, FormBuilderInterface $formBuilder, ?array $daySettingsParsed): array
     {
         $rows = [];
         $files = [];
