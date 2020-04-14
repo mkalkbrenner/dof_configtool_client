@@ -4,7 +4,7 @@ namespace App\Entity;
 
 class DirectOutputConfig
 {
-    const FILE_PATERN = '/directoutputconfig(\d+)\.ini$/i';
+    const FILE_PATERN = '/directoutputconfig(\d*)\.ini$/i';
 
     /**
      * @var int
@@ -58,7 +58,7 @@ class DirectOutputConfig
 
     public function __construct(string $file)
     {
-        $this->file = $file;
+        $this->file = str_replace('directoutputconfig0.', 'directoutputconfig.', $file);
         preg_match(self::FILE_PATERN, $file, $matches);
         $this->deviceId = (int) $matches[1];
     }

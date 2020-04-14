@@ -758,7 +758,7 @@ class TablesController extends AbstractSettingsController
         $files = [];
         if ($dof_config_path = $this->settings->getDofConfigPath()) {
             foreach (scandir($dof_config_path) as $file) {
-                if (preg_match('/^directoutputconfig(\d+)\.ini$/i', $file, $matches)) {
+                if (preg_match(DirectOutputConfig::FILE_PATERN, $file, $matches)) {
                     $file_path = $this->settings->getDofConfigPath() . DIRECTORY_SEPARATOR . $matches[0];
                     if (!isset($mods[$file_path])) {
                         $files[$matches[1]] = $file_path;
@@ -778,13 +778,23 @@ class TablesController extends AbstractSettingsController
             if (isset($workingCopy)) {
                 $basename = basename($file);
                 $directOutputConfig->load($workingCopy->show('download:' . $basename));
-                if ($contents = $workingCopy->show('day:' . $basename)) {
-                    $directOutputConfigDay = new DirectOutputConfig($file);
-                    $games_day = $directOutputConfigDay->load($contents)->getGames();
+
+                try {
+                    if ($contents = $workingCopy->show('day:' . $basename)) {
+                        $directOutputConfigDay = new DirectOutputConfig($file);
+                        $games_day = $directOutputConfigDay->load($contents)->getGames();
+                    }
+                } catch (GitException $e) {
+                    // An exception might occur for new or not yet tweaked files.
                 }
-                if ($contents = $workingCopy->show('night:' . $basename)) {
-                    $directOutputConfigNight = new DirectOutputConfig($file);
-                    $games_night = $directOutputConfigNight->load($contents)->getGames();
+
+                try {
+                    if ($contents = $workingCopy->show('night:' . $basename)) {
+                        $directOutputConfigNight = new DirectOutputConfig($file);
+                        $games_night = $directOutputConfigNight->load($contents)->getGames();
+                    }
+                } catch (GitException $e) {
+                    // An exception might occur for new or not yet tweaked files.
                 }
             }
             else {

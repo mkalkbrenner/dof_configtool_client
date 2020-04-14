@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Component\Utility;
+use App\Entity\DirectOutputConfig;
 use GitWrapper\GitException;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\Request;
@@ -66,7 +67,7 @@ class DayNightController extends AbstractSettingsController
 
                     $workingCopy->checkout('download');
                     foreach (scandir($this->settings->getDofConfigPath()) as $file) {
-                        if (preg_match('/^directoutputconfig\d+\.ini$/i', $file, $matches)) {
+                        if (preg_match(DirectOutputConfig::FILE_PATERN, $file, $matches)) {
                             $file_path = $this->settings->getDofConfigPath() . DIRECTORY_SEPARATOR . $matches[0];
                             $download_files[$file_path] = file_get_contents($file_path);
                         }
@@ -74,7 +75,7 @@ class DayNightController extends AbstractSettingsController
 
                     $workingCopy->checkout($branch);
                     foreach (scandir($this->settings->getDofConfigPath()) as $file) {
-                        if (preg_match('/^directoutputconfig\d+\.ini$/i', $file, $matches)) {
+                        if (preg_match(DirectOutputConfig::FILE_PATERN, $file, $matches)) {
                             $file_path = $this->settings->getDofConfigPath() . DIRECTORY_SEPARATOR . $matches[0];
                             $branch_files[$file_path] = file_get_contents($file_path);
                         }

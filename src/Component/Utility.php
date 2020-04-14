@@ -19,8 +19,8 @@ class Utility
             $directOutputConfig->load()->createSynonymGames($synonyms);
             $rgb_ports = $directOutputConfig->getRgbPorts();
             $devicdeId = 0;
-            if (preg_match('/directoutputconfig(\d+)\.ini$/i', $file, $matches)) {
-                $deviceId = $matches[1];
+            if (preg_match(DirectOutputConfig::FILE_PATERN, $file, $matches)) {
+                $deviceId = $matches[1] ?: 0;
             }
             $old_lines = explode("\r\n", $old_files[$file]);
             $new_lines = explode("\r\n", $content);
@@ -244,7 +244,7 @@ class Utility
     {
         $parsed = [];
         $id = '';
-        $split = preg_split('/(\[directoutputconfig\d+\.ini])/im', $string, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
+        $split = preg_split('/(\[directoutputconfig\d*\.ini])/im', $string, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
         foreach ($split as $part) {
             if (strpos($part, '[directoutputconfig') === 0) {
                 $id = trim($part, '[]');

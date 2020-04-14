@@ -47,8 +47,8 @@ class SettingsController extends AbstractSettingsController
         if (is_dir($dofConfigPath) && is_readable($dofConfigPath)) {
             $choices = array_merge(['-'], $portAssignmentsDatabase[51], $portAssignmentsDatabase[30]);
             foreach (scandir($dofConfigPath) as $file) {
-               if (preg_match('/^directoutputconfig(\d+)\.ini$/i', $file, $matches)) {
-                   $deviceId = $matches[1];
+               if (preg_match(DirectOutputConfig::FILE_PATERN, $file, $matches)) {
+                   $deviceId = $matches[1] ?: 0;
                    $directOutputConfigs[$deviceId] = new DirectOutputConfig($dofConfigPath . DIRECTORY_SEPARATOR . $file);
                    $directOutputConfigs[$deviceId]->load();
                    $deviceName = $directOutputConfigs[$deviceId]->getDeviceName();

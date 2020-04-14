@@ -216,7 +216,7 @@ class TweakController extends AbstractSettingsController
 
         if ($dof_config_path = $this->settings->getDofConfigPath()) {
             foreach (scandir($dof_config_path) as $file) {
-                if (preg_match('/^directoutputconfig\d+\.ini$/i', $file, $matches)) {
+                if (preg_match(DirectOutputConfig::FILE_PATERN, $file, $matches)) {
                     $file_path = $this->settings->getDofConfigPath() . DIRECTORY_SEPARATOR . $matches[0];
                     if (!isset($mods[$file_path])) {
                         // Add files which should not be tweaked to update them with the latest download.
