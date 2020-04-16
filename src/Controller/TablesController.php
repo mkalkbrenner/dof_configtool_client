@@ -399,6 +399,16 @@ class TablesController extends AbstractSettingsController
                 ->add('b2s_table_setting', B2STableSettingDisabledType::class, [
                     'data' => new B2STableSetting('default'),
                     'label' => false,
+                ])
+                ->add('dmddevice_virtualdmd', TextType::class, [
+                    'disabled' => true,
+                    'data' => 'Select ROM first.',
+                    'label' => false,
+                ])
+                ->add('dmddevice_alphanumeric', TextType::class, [
+                    'disabled' => true,
+                    'data' => 'Select ROM first.',
+                    'label' => false,
                 ]);
         }
 
