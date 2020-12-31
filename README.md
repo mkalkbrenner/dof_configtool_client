@@ -5,6 +5,9 @@ additional tweaks to them. In addition it contains some tools to administer the 
 
 The latest version could always be downloaded from https://github.com/mkalkbrenner/dof_configtool_client/releases
 
+__Important! If you never did before, download and install the
+[Visual C++ Redistributable for Visual Studio 2015](https://www.microsoft.com/download/details.aspx?id=48145) first!__
+
 Some, but not all features are demonstrated in short video clips at
 [DOF Configtool Client YouTube Channel](https://www.youtube.com/playlist?list=PLhdNz_h1Ek1-pi6V_kmB_sGvXXyeBLuBC).
 

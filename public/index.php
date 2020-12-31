@@ -4,7 +4,7 @@ use App\Kernel;
 use Symfony\Component\Debug\Debug;
 use Symfony\Component\HttpFoundation\Request;
 
-define('DOFCTC_VERSION', '0.6.5-beta.4');
+define('DOFCTC_VERSION', '0.6.5');
 
 require dirname(__DIR__).'/config/bootstrap.php';
 
