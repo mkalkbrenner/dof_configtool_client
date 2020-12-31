@@ -344,14 +344,15 @@ A simple example are blinking flipper buttons (FYI fading is possible.)
 
 ##### `move_drop_target`
 
-Using this tweak you can extract the triggers for a drop target from a port (usually a bumper) and attach them to a
+Using this tweak you can extract the triggers for a drop target from a port and attach them to a
 different port. So `move_drop_target[17] = 23` will remove all drop target instructions from port _17_ and attach them
 to port _23_. `move_drop_target[17] = 23,36` will remove all drop target instructions from port _17_ and attach them to
 the ports _23_ and _36_.
 
 ###### Use-cases
 
-If you mount heavy contactors at the wall of your cabinet, they sound great for bumpers. But for drop targets the sound
+For most tables the drop targets are assigned to the bumpers in the online configuartion tool. If you mount heavy
+contactors at the wall of your cabinet, they sound great for bumpers. But for drop targets the sound
 effect might be too heavy. In this case you might want to move the drop target effects to smaller contactors or
 contactors not mounted at the wall. The bumper effects themselves will not be touched and remain assigned where they
 should be.
@@ -362,13 +363,22 @@ If you use combos instead of 6 dedicated bumpers, they apply 1:1 for the new dro
 
 ##### `move_target`
 
-This tweak is the complement to `move_drop_target` and enables you to extract the triggers for a target (usually a
-bumper) from a port an attach them to a different port. So `move_target[17] = 23` will remove all target instructions
-from port _17_ and attach them to port _23_.
+Using this tweak you can extract the triggers for a (stand-up) target from a port and attach them to a
+different port. So `move_target[17] = 23` will remove all target instructions from port _17_ and attach them
+to port _23_. `move_target[17] = 23,36` will remove all drop target instructions from port _17_ and attach them to
+the ports _23_ and _36_.
 
 ###### Use-cases
 
-See the use-cases for `move_drop_target` above.
+For most tables the targets are assigned to the bumpers in the online configuartion tool. From my point of view
+this is completely wrong. A stand-up taget neither sounds like a solenoid nor the haptic feedback is similar to a solenaoid.
+Therefore it is a good idea to move the target effects to smaller contactors or
+contactors not mounted at the wall. The bumper effects themselves will not be touched and remain assigned where they
+should be.
+
+**_Note:_** These dedicated target contactors are for sure not listed in the DOF configtool itself. Once mounted to
+your controller the DOF Configtool Client introduces them. Like for bumpers you can have up to 6 dedicated targets.
+If you use combos instead of 6 dedicated bumpers, they apply 1:1 for the new drop targets.
 
 ##### `copy_drop_target` / `copy_target`
 
