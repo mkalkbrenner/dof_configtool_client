@@ -21,27 +21,31 @@
     {{ form_row(settings_form.ip) }}
     {{ form_row(settings_form.port) }}
     {{ form_row(settings_form.debug) }}
+    {% set save_button = form_widget(settings_form.save) %}
     <hr>
-    <h2>Port Assignments</h2>
-    <p>
-        The port settings are not required to download and tweak your DOF configs. But they will be required if you want
-        to create and manage your DOFLinx configuration using the DOF ConfigtoolClient (DOFLinx support is scheduled for
-        the 0.7.0 release). Once you <a href="{{ path('download') }}">downloaded</a> your "DOF Configuration" and the
-        "Database", the auto detection of port assignments should work.
-    </p>
-    <p>
-        <b>Note:</b> The auto detection is not expected to be 100% accurate. It should give you a starting point for
-        completing the configuration. Especially combos need to be verified. To configure a combo, hold down
-        <kbd>CTRL</kbd> and select multiple toys.
-    </p>
-    <p>
-        <b>Warning:</b> The configuration must not be different from your settings in the online DOF configtool!. If you
-        change something there you must apply the same changes here or run the auto detection again <em>after</em> you
-        downloaded the updated config files.
-    </p>
+    <details>
+        <summary><b>Controller Port Assignments</b> (click to show/hide)</summary>
+        <hr>
+        <p>
+            The port settings are not required to download and tweak your DOF configs. But they will be required if you want
+            to create and manage your DOFLinx configuration using the DOF ConfigtoolClient (DOFLinx support is scheduled for
+            the 0.7.0 release). Once you <a href="{{ path('download') }}">downloaded</a> your "DOF Configuration" and the
+            "Database", the auto detection of port assignments should work.
+        </p>
+        <p>
+            <b>Note:</b> The auto detection is not expected to be 100% accurate. It should give you a starting point for
+            completing the configuration. Especially combos need to be verified. To configure a combo, hold down
+            <kbd>CTRL</kbd> and select multiple toys.
+        </p>
+        <p>
+            <b>Warning:</b> The configuration must not be different from your settings in the online DOF configtool!. If you
+            change something there you must apply the same changes here or run the auto detection again <em>after</em> you
+            downloaded the updated config files.
+        </p>
+        <hr>
+        {{ form_widget(settings_form) }}
+    </details>
     <hr>
-    {{ form_widget(settings_form) }}
-    <hr>
-    {{ form_widget(settings_form) }}
+    {{ save_button|raw }}
     {{ form_end(settings_form) }}
 {% endblock %}

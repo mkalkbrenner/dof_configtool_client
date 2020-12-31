@@ -521,7 +521,9 @@ class TablesController extends AbstractSettingsController
                         }
                     }
 
-                    $this->saveBackglass($table_name, $data['backglass']);
+                    if (!empty($data['backglass'])) {
+                        $this->saveBackglass($table_name, $data['backglass']);
+                    }
 
                     if (isset($pinballYGameStat)) {
                         $pinballYGameStat->trackChanges(true)
